@@ -18,7 +18,7 @@ A discord bot created following guidance from https://discordjs.guide/.
 ```json
 {
     "clientId": "",
-	"guildId": "",
+    "guildId": "",
     "token": ""
 }
 ```
