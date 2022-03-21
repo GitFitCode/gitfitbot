@@ -12,20 +12,18 @@ A discord bot created following guidance from https://discordjs.guide/.
 ## Installing Dependencies
 - Run `pnpm i` OR `npm i` in the terminal.
 
-## Setting up config.json
-- Create `config.json`.
+## Setting up .env
+- Create a file called `.env`.
 - Structure it so:
-```json
-{
-    "clientId": "",
-    "guildId": "",
-    "token": ""
-}
+```
+CLIENT_ID=
+GUILD_ID=
+TOKEN=
 ```
 - Populate fields in config.json:
-	- `clientId` - ID of the bot's OAuth2 client.
-	- `guildID` - ID of the server where the bot is installed/to be installed.
-	- `token` - Token provided by Discord when creating a bot.
+	- `CLIENT_ID` - ID of the bot's OAuth2 client.
+	- `GUILD_ID` - ID of the server where the bot is installed/to be installed.
+	- `TOKEN` - Token provided by Discord when creating a bot.
 
 ## Deploy slash commands and run the bot
 - `pnpm deploy-commands`
