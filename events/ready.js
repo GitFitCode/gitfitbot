@@ -1,3 +1,7 @@
+/**
+ * Listen to `ready` event from discord.
+ */
+
 module.exports = {
 	name: 'ready',
 	once: true,

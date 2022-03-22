@@ -1,3 +1,9 @@
+/**
+ * Raw command that replies with a random message when triggered.
+ *
+ * To trigger, type `!gfc-guess` on the discord server.
+ */
+
 const guess = [
 	'As I see it, yes.',
 	'Ask again later.',

@@ -30,7 +30,7 @@ TOKEN=
 - `pnpm start`
 
 # Developing new slash commands
-- Create a new `.js` file in `commands` folder.
+- Create a new `.js` file in `slash-commands` folder.
 - Name it same as the slash command you'd like to use.
 - Follow the format below to create a new slash command:
 ```javascript
@@ -48,4 +48,18 @@ module.exports = {
 - `pnpm deploy-commands`
 - `pnpm start`
 
-Your newly added commands are now ready to be used on discord!
+Your newly added slash commands are now ready to be used on discord!
+
+# Developing new raw commands
+
+- Create a new `.js` file in the `raw-commands` folder.
+- Name it same as the raw command you'd like to use.
+- Follow the format below to create a new raw command:
+```javascript
+module.exports = async (message) => {
+	await message.reply(`Hey〈〈${message.author} 〉〉! I hope you're having a wonderful day!`);
+};
+```
+- `pnpm start`
+
+Your newly added raw commands are now ready to be used on discord!
