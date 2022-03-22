@@ -1,4 +1,4 @@
-A discord bot created following guidance from https://discordjs.guide/.
+A discord bot created following the guidance from https://discordjs.guide/.
 
 # Setting up the project
 
@@ -6,7 +6,7 @@ A discord bot created following guidance from https://discordjs.guide/.
 - [VSCode](https://code.visualstudio.com/)
 - [VSCode extention `ESLint`](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
 - [Nodejs v17](https://nodejs.org/en/)
-- [PnPM](https://pnpm.io/) OR [npm](https://www.npmjs.com/)
+- [PnPM](https://pnpm.io/) (preferred) OR [npm](https://www.npmjs.com/)
 - [Ensure that your bot was invited to the target server with `bot` and `applications.command` scopes enabled](https://discordjs.guide/preparations/adding-your-bot-to-servers.html).
 
 ## Installing Dependencies
@@ -23,7 +23,7 @@ BOT_COMMANDS_CHANNEL_ID=
 NOTION_TOKEN=
 GFC_RETROS_BY_MONTH_NOTION_DB_ID=
 ```
-- Populate fields in config.json:
+- Populate fields in the .env file:
   - `CLIENT_ID` - (Required) ID of the bot's OAuth2 client.
   - `GUILD_ID` - (Required) ID of the server where the bot is installed/to be installed.
   - `TOKEN` - (Required) Token provided by Discord when creating a bot.
@@ -51,8 +51,8 @@ module.exports = {
 	},
 };
 ```
-- `pnpm deploy-commands`
-- `pnpm start`
+- `pnpm deploy-commands` OR `npm run deply-commands`
+- `pnpm start` OR `npm run start`
 
 Your newly added slash commands are now ready to be used on discord!
 
@@ -66,6 +66,6 @@ module.exports = async (message) => {
 	await message.reply(`Hey〈〈${message.author} 〉〉! I hope you're having a wonderful day!`);
 };
 ```
-- `pnpm start`
+- `pnpm start` OR `npm run start`
 
 Your newly added raw commands are now ready to be used on discord!
