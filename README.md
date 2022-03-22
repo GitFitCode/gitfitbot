@@ -19,11 +19,17 @@ A discord bot created following guidance from https://discordjs.guide/.
 CLIENT_ID=
 GUILD_ID=
 TOKEN=
+BOT_COMMANDS_CHANNEL_ID=
+NOTION_TOKEN=
+GFC_RETROS_BY_MONTH_NOTION_DB_ID=
 ```
 - Populate fields in config.json:
-	- `CLIENT_ID` - ID of the bot's OAuth2 client.
-	- `GUILD_ID` - ID of the server where the bot is installed/to be installed.
-	- `TOKEN` - Token provided by Discord when creating a bot.
+  - `CLIENT_ID` - (Required) ID of the bot's OAuth2 client.
+  - `GUILD_ID` - (Required) ID of the server where the bot is installed/to be installed.
+  - `TOKEN` - (Required) Token provided by Discord when creating a bot.
+  - `BOT_COMMANDS_CHANNEL_ID` - (Optional) An isolated Discord Channel within GFC for all your #monkeytesting.
+  - `NOTION_TOKEN` - (Optional) Token provided by Notion when creating a Notion integration.
+  - `GFC_RETROS_BY_MONTH_NOTION_DB_ID` - (Optional) ID of [GFC's Retrospectives By Month Notion Database](https://www.notion.so/gitfitcode/a3a30be6c6564f6194e90aa858a75f49?v=3337964233d247ecbaa3c4f6f9b9a7ec).
 
 ## Deploy slash commands and run the bot
 - `pnpm deploy-commands`
