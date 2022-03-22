@@ -1,3 +1,9 @@
+/**
+ * Slash (i.e. custom) command that replies with Pong! when triggered.
+ *
+ * To trigger, type `/ping` on the discord server.
+ */
+
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
