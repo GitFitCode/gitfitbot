@@ -90,6 +90,6 @@ This shouldn't be required at this point but if you do find the versions to be o
   
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
   
-    nvm install 17.8.0
+    nvm install 16.9.0
   
-    nvm use 17.8.0
+    nvm use 16.9.0
