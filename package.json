@@ -6,7 +6,7 @@
   "scripts": {
     "deploy-commands": "node .\\deploy-commands.js",
     "lint": "eslint .",
-    "start": "node .",
+    "start": "bash node .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -19,10 +19,11 @@
     "dotenv": "^16.0.0"
   },
   "devDependencies": {
-    "eslint": "^8.11.0"
+    "eslint": "^8.11.0",
+    "node": "^16.6.1",
+    "npm": "^7.20.5"
   },
   "engines": {
-    "npm": ">=v8.5.5",
-    "node": ">=17.8.0"
+    "node": ">=16.6.1"
   }
 }

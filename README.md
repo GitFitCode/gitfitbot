@@ -69,3 +69,27 @@ module.exports = async (message) => {
 - `pnpm start` OR `npm run start`
 
 Your newly added raw commands are now ready to be used on discord!
+
+# Replit Development
+Since this project was created as a bash project we need to make sure to call node and npm like the following 
+  `bash node`
+  `bash npm --version`
+
+We did this because of some weird issues with the node versions that were occuring. This was based on this [post](https://replit.com/talk/learn/Easiest-way-to-get-Node-v166-and-NPM-v720-for-your-Discordjs-v13-projects/143841) was the reference. 
+
+
+# NVM
+
+This shouldn't be required at this point but if you do find the versions to be off please use nvm. 
+
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+    
+    export NVM_DIR="/config/nvm"
+  
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+  
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+  
+    nvm install 17.8.0
+  
+    nvm use 17.8.0
