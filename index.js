@@ -1,5 +1,5 @@
 require('dotenv').config();
-const fs = require('node:fs');
+const fs = require('fs');
 const { Client, Collection, Intents } = require('discord.js');
 
 /**
