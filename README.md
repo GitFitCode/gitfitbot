@@ -32,8 +32,8 @@ GFC_RETROS_BY_MONTH_NOTION_DB_ID=
   - `GFC_RETROS_BY_MONTH_NOTION_DB_ID` - (Optional) ID of [GFC's Retrospectives By Month Notion Database](https://www.notion.so/gitfitcode/a3a30be6c6564f6194e90aa858a75f49?v=3337964233d247ecbaa3c4f6f9b9a7ec).
 
 ## Deploy slash commands and run the bot
-- `pnpm deploy-commands`
-- `pnpm start`
+- `pnpm deploy-commands` OR `npm run deploy-commands`
+- `pnpm start` OR `npm run start`
 
 # Developing new slash commands
 - Create a new `.js` file in `slash-commands` folder.
