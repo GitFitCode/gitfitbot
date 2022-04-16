@@ -31,7 +31,7 @@ async function parseMessage(message) {
 			const startDate = optionsRawList[5];
 			const endDate = optionsRawList[7];
 
-			if (Date(endDate) > Date(startDate)) {
+			if (new Date(endDate).getTime() > new Date(startDate).getTime()) {
 				await scheduleEvent(message, guildScheduledEventManger, name, description, startDate, endDate);
 			}
 			else {
