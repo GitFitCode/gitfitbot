@@ -27,25 +27,29 @@ for (const file of commandFiles) {
 }
 
 /**
- * List of files corresponding to events subscribed by the bot.
+ * Listen to `ready` event from discord.
  */
-const eventsPath = path.join(__dirname, "events");
-const eventFiles = fs
-  .readdirSync(eventsPath)
-  .filter((file) => file.endsWith(".js"));
+client.once('ready', () => {
+  console.log('Ready!');
+});
 
 /**
- * Add events to `client` for subscription and listen to them in their respective execute() functions.
+ * Listen to `interactionCreate` event from discord.
  */
-for (const file of eventFiles) {
-  const filePath = path.join(eventsPath, file);
-  const event = require(filePath);
-  if (event.once) {
-    client.once(event.name, (...args) => event.execute(...args));
-  } else {
-    client.on(event.name, (...args) => event.execute(...args));
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isChatInputCommand()) return;
+
+  const command = client.commands.get(interaction.commandName);
+
+  if (!command) return;
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
   }
-}
+});
 
 /**
  * Login to Discord with our OAuth client's token.
