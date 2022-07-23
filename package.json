@@ -18,6 +18,13 @@
     "dotenv": "latest"
   },
   "devDependencies": {
-    "eslint": "latest"
+    "@commitlint/cli": "latest",
+    "@commitlint/config-conventional": "latest",
+    "eslint": "latest",
+    "husky": "latest"
+  },
+  "engines": {
+    "node": "16.x",
+    "pnpm": "7.x"
   }
 }

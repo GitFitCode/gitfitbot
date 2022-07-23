@@ -1,21 +1,31 @@
-A discord bot created following the guidance from https://discordjs.guide/.
+## Setting up the project
 
-# Setting up the project
+### What you'll need
 
-## What you'll need
 - [VSCode](https://code.visualstudio.com/)
-- [VSCode extention `ESLint`](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
-- [Nodejs v17](https://nodejs.org/en/)
-- [PnPM](https://pnpm.io/) (preferred) OR [npm](https://www.npmjs.com/)
+- [Nodejs v16 LTS](https://nodejs.org/en/)
+- [PnPM](https://pnpm.io/) (use the standalone script)
 - [Ensure that your bot was invited to the target server with `bot` and `applications.command` scopes enabled](https://discordjs.guide/preparations/adding-your-bot-to-servers.html).
 
-## Installing Dependencies
-- Run `pnpm i` OR `npm i` in the terminal.
+### Installing Dependencies
 
-## Setting up .env
+```sh
+pnpm i
+```
+
+#### Setting up husky pre-commit hooks
+
+```sh
+npx husky install
+npx husky add .husky/commit-msg 'npx commitlint --edit'
+```
+
+### Setting up .env
+
 - Create a file called `.env`.
 - Structure it so:
-```
+
+```js
 CLIENT_ID=
 GUILD_ID=
 TOKEN=
@@ -23,6 +33,7 @@ BOT_COMMANDS_CHANNEL_ID=
 NOTION_TOKEN=
 GFC_RETROS_BY_MONTH_NOTION_DB_ID=
 ```
+
 - Populate fields in the .env file:
   - `CLIENT_ID` - (Required) ID of the bot's OAuth2 client.
   - `GUILD_ID` - (Required) ID of the server where the bot is installed/to be installed.
@@ -31,14 +42,21 @@ GFC_RETROS_BY_MONTH_NOTION_DB_ID=
   - `NOTION_TOKEN` - (Optional) Token provided by Notion when creating a Notion integration.
   - `GFC_RETROS_BY_MONTH_NOTION_DB_ID` - (Optional) ID of [GFC's Retrospectives By Month Notion Database](https://www.notion.so/gitfitcode/a3a30be6c6564f6194e90aa858a75f49?v=3337964233d247ecbaa3c4f6f9b9a7ec).
 
-## Deploy slash commands and run the bot
-- `pnpm deploy-commands` OR `npm run deploy-commands`
-- `pnpm start` OR `npm run start`
+### Deploy slash commands and run the bot
 
-# Developing new slash commands
+```shell
+pnpm deploy-commands
+pnpm start
+```
+
+## Development
+
+### Slash commands
+
 - Create a new `.js` file in `slash-commands` folder.
 - Name it same as the slash command you'd like to use.
 - Follow the format below to create a new slash command:
+
 ```javascript
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
@@ -51,21 +69,14 @@ module.exports = {
 	},
 };
 ```
-- `pnpm deploy-commands` OR `npm run deply-commands`
-- `pnpm start` OR `npm run start`
+
+```shell
+pnpm deploy-commands
+pnpm start
+```
 
 Your newly added slash commands are now ready to be used on discord!
 
-# Developing new raw commands
+### Commit message
 
-- Create a new `.js` file in the `raw-commands` folder.
-- Name it same as the raw command you'd like to use.
-- Follow the format below to create a new raw command:
-```javascript
-module.exports = async (message) => {
-	await message.reply(`Hey〈〈${message.author} 〉〉! I hope you're having a wonderful day!`);
-};
-```
-- `pnpm start` OR `npm run start`
-
-Your newly added raw commands are now ready to be used on discord!
+When committing code to the repo, please follow the commit message guidelines/patterns set [here](https://github.com/conventional-changelog/commitlint#what-is-commitlint).
