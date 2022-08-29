@@ -21,7 +21,8 @@
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
     "eslint": "latest",
-    "husky": "latest"
+    "husky": "latest",
+    "ts-node": "latest"
   },
   "engines": {
     "node": "16.x",
