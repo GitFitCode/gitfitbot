@@ -1,15 +1,13 @@
 {
-  "name": "devtribe-discord-bot",
+  "name": "gfc-discord-bot",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Discord bot for GitFitCode needs written in TypeScript.",
   "scripts": {
-    "deploy-commands": "node deploy-commands.js",
     "lint": "eslint .",
-    "start": "node .",
+    "start": "ts-node src/Bot.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "GitFitCode",
   "license": "GNU GPLv3",
   "dependencies": {
     "@discordjs/rest": "latest",
@@ -20,9 +18,11 @@
   "devDependencies": {
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
+    "@types/node": "latest",
     "eslint": "latest",
     "husky": "latest",
-    "ts-node": "latest"
+    "ts-node": "latest",
+    "typescript": "latest"
   },
   "engines": {
     "node": "16.x",
