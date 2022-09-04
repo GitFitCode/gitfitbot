@@ -12,6 +12,7 @@ console.log("Bot is starting...");
 // A new instance of `Client`.
 const client = new Client({
   intents: [GatewayIntentBits.Guilds],
+  allowedMentions: { parse: ["roles"] },
 });
 
 // Register the client with the ready listener.
