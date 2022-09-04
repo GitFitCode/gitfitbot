@@ -9,7 +9,7 @@ import { SlashCommand } from "../Command";
 
 export const UserInfo: SlashCommand = {
   name: "user-info",
-  description: "Display info about yourself.",
+  description: "Displays info about yourself.",
   run: async (_client: Client, interaction: CommandInteraction) => {
     const content = `Your username: ${interaction.user.username}\nYour ID: ${interaction.user.id}`;
 
