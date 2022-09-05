@@ -8,7 +8,6 @@
     "naumovs.color-highlight",
     "kisstkondoros.vscode-gutter-preview",
     "ms-azuretools.vscode-docker",
-    "streetsidesoftware.code-spell-checker",
     "eamodio.gitlens"
   ]
 }
