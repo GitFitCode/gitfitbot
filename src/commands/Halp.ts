@@ -39,11 +39,17 @@ async function _handleThreadCreation(
   interaction: CommandInteraction
 ) {
   // "/halp close" WAS NOT CALLED IN A NON-THREAD CHANNEL
+  const author = interaction.user;
+  const authorUsername = interaction.user.username;
+  const channelID = interaction.channel?.id ?? "";
 
   // Create an entry in the notion database.
-  const pageID: string = await createNotionDBEntry(issueText);
+  const pageID: string = await createNotionDBEntry(
+    issueText,
+    authorUsername,
+    channelID
+  );
 
-  const author = interaction.user;
   const content =
     THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1 +
     "`" +
