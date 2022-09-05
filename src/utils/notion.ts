@@ -22,8 +22,6 @@ async function createNotionDBEntry(
         },
       },
     });
-    console.log(response);
-    console.log("Success! Entry added.");
     return response.id;
   } catch (error: any) {
     console.error(error.body);
@@ -42,8 +40,6 @@ async function updateNotionDBEntry(pageID: string) {
         },
       },
     });
-    console.log(response);
-    console.log("Success! Entry edited.");
   } catch (error: any) {
     console.error(error.body);
   }

@@ -38,50 +38,39 @@ async function _handleThreadCreation(
   issueText: string | number | boolean | undefined,
   interaction: CommandInteraction
 ) {
-  // Check if "/halp close" was called in a non-thread channel
-  if (issueText === "close") {
-    // "/halp close" WAS CALLED IN A NON-THREAD CHANNEL
+  // "/halp close" WAS NOT CALLED IN A NON-THREAD CHANNEL
 
-    // Send a followUp message.
-    await interaction.followUp({
-      ephemeral: true,
-      content: NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE,
-    });
-  } else {
-    // "/halp close" WAS NOT CALLED IN A NON-THREAD CHANNEL
+  // Create an entry in the notion database.
+  const pageID: string = await createNotionDBEntry(issueText);
 
-    // Create an entry in the notion database.
-    const pageID: string = await createNotionDBEntry(issueText);
+  const author = interaction.user;
+  const content =
+    THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1 +
+    "`" +
+    issueText +
+    "`" +
+    THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2 +
+    NOTION_PAGE_ID_DELIMITER +
+    pageID;
 
-    const author = interaction.user;
-    const content =
-      THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1 +
-      "`" +
-      issueText +
-      "`" +
-      THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2 +
-      NOTION_PAGE_ID_DELIMITER +
-      pageID;
+  // Send a followUp message.
+  const message = await interaction.followUp({
+    ephemeral: true,
+    content,
+    fetchReply: true,
+  });
 
-    // Send a followUp message.
-    const message = await interaction.followUp({
-      ephemeral: true,
-      content,
-      fetchReply: true,
-    });
+  // Create a thread from the reply sent by the bot.
+  const thread = await message.startThread({
+    name: String(issueText),
+    autoArchiveDuration: 60,
+    reason: "Support Ticket",
+  });
 
-    // Create a thread from the reply sent by the bot.
-    const thread = await message.startThread({
-      name: String(issueText),
-      autoArchiveDuration: 60,
-      reason: "Support Ticket",
-    });
-
-    // Send a message in the newly created thread.
-    thread.send(
-      `<@&${FIRST_RESPONDERS_ROLE_ID}> have been notified! ${author} hold tight.`
-    );
-  }
+  // Send a message in the newly created thread.
+  thread.send(
+    `<@&${FIRST_RESPONDERS_ROLE_ID}> have been notified! ${author} hold tight.`
+  );
 }
 
 /**
@@ -91,41 +80,69 @@ async function _handleThreadCreation(
  * @param channel AnyThreadChannel
  */
 async function _handleThreadClosing(
-  issueText: string | number | boolean | undefined,
   interaction: CommandInteraction<CacheType>,
   channel: AnyThreadChannel
 ) {
-  // Check if the command is invoked for closing the thread.
-  if (issueText === "close") {
-    // COMMAND INVOKED FOR CLOSING THE THREAD
+  // COMMAND INVOKED FOR CLOSING THE THREAD
 
-    // Send an appropriate followUp to the thread.
-    // Any replies have to be sent BEFORE closing/archiving a thread.
-    await interaction.followUp({
-      ephemeral: true,
-      content: THREAD_CLOSING_SUCCESSFUL_MESSAGE,
-    });
+  // Send an appropriate followUp to the thread.
+  // Any replies have to be sent BEFORE closing/archiving a thread.
+  await interaction.followUp({
+    ephemeral: true,
+    content: THREAD_CLOSING_SUCCESSFUL_MESSAGE,
+  });
 
-    // Close/Archive the thread.
-    channel.setArchived(true);
+  // Close/Archive the thread.
+  channel.setArchived(true);
 
-    // Add a ✅ emoji to the message that created this thread.
-    const starterMessage = await channel.fetchStarterMessage();
-    starterMessage?.react(CHECK_MARK_EMOJI);
+  // Add a ✅ emoji to the message that created this thread.
+  const starterMessage = await channel.fetchStarterMessage();
+  starterMessage?.react(CHECK_MARK_EMOJI);
 
-    // Update the status of the entry in the notion database.
-    const pageID = String(
-      starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX)
-    );
-    updateNotionDBEntry(pageID);
-  } else {
-    // COMMAND STILL INVOKED, BUT NOT FOR CLOSING THE THREAD
+  // Update the status of the entry in the notion database.
+  const pageID = String(
+    starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX)
+  );
+  updateNotionDBEntry(pageID);
+}
 
-    // Send an appropriate followUp to the thread.
+async function _executeRun(interaction: CommandInteraction) {
+  // Snowflake structure received from get(), destructured and renamed.
+  // https://discordjs.guide/interactions/slash-commands.html#parsing-options
+  const { value: issueText } = interaction.options.get(OPTION_NAME, true);
+
+  // Can be a text channel or public thread channel.
+  const channel = interaction.channel;
+  const isThread = channel?.isThread();
+
+  if (isThread && issueText === "close") {
+    // COMMAND INVOKED FOR CLOSING A THREAD
+
+    // TODO edit entry from notion db and dump all interactions from thread into it
+
+    // Close/archive the thread i.e. the support ticket.
+    _handleThreadClosing(interaction, channel);
+  } else if (isThread && issueText !== "close") {
+    // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A THREAD
+
+    // Send an ERROR followUp to the thread.
     await interaction.followUp({
       ephemeral: true,
       content: THREAD_CREATION_ERROR_MESSAGE,
     });
+  } else if (!isThread && issueText === "close") {
+    // COMMAND INVOKED FOR CLOSING A CHANNEL
+
+    // Send a followUp message.
+    await interaction.followUp({
+      ephemeral: true,
+      content: NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE,
+    });
+  } else {
+    // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A CHANNEL
+
+    // Create a thread to handle the support ticket request.
+    _handleThreadCreation(issueText, interaction);
   }
 }
 
@@ -141,27 +158,6 @@ export const Halp: SlashCommand = {
     },
   ],
   run: async (_client: Client, interaction: CommandInteraction) => {
-    // Snowflake structure received from get(), destructured and renamed.
-    // https://discordjs.guide/interactions/slash-commands.html#parsing-options
-    const { value: issueText } = interaction.options.get(OPTION_NAME, true);
-
-    // Can be a text channel or public thread channel.
-    const channel = interaction.channel;
-    const isThread = channel?.isThread();
-
-    // Check if the channel is a thread.
-    if (isThread) {
-      // CHANNEL IS A THREAD
-
-      // Close/archive the thread i.e. the support ticket.
-      _handleThreadClosing(issueText, interaction, channel);
-
-      // TODO edit entry from notion db and dump all interactions from thread into it
-    } else {
-      // CHANNEL IS NOT A THREAD
-
-      // Create a thread to handle the support ticket request.
-      _handleThreadCreation(issueText, interaction);
-    }
+    _executeRun(interaction);
   },
 };
