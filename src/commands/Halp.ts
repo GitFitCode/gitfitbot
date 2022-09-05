@@ -11,6 +11,7 @@ import {
   AnyThreadChannel,
   CacheType,
 } from "discord.js";
+import { createNotionDBEntry, updateNotionDBEntry } from "../utils";
 import { SlashCommand } from "../Command";
 
 const FIRST_RESPONDERS_ROLE_ID = "1015868384811962429";
@@ -20,12 +21,13 @@ const THREAD_CLOSING_SUCCESSFUL_MESSAGE =
   "OK, closing/archiving the thread. It can still be re-opened manually.";
 const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1 = "Creating a thread for ";
 const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2 =
-  ". Keep all your interactions in this thread.";
+  ". Keep all your interactions in this thread. ";
 const THREAD_CREATION_ERROR_MESSAGE =
   "Error! - Support tickets cannot be created inside threads!";
 const NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE =
   "Error! Unable to close as this is not a thread.";
 const CHECK_MARK_EMOJI = "✅";
+const NOTION_PAGE_ID_DELIMITER = "NOTION_PAGE_ID=";
 
 /**
  * Function to create a thread.
@@ -48,13 +50,18 @@ async function _handleThreadCreation(
   } else {
     // "/halp close" WAS NOT CALLED IN A NON-THREAD CHANNEL
 
+    // Create an entry in the notion database.
+    const pageID: string = await createNotionDBEntry(issueText);
+
     const author = interaction.user;
     const content =
       THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1 +
       "`" +
       issueText +
       "`" +
-      THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2;
+      THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2 +
+      NOTION_PAGE_ID_DELIMITER +
+      pageID;
 
     // Send a followUp message.
     const message = await interaction.followUp({
@@ -105,6 +112,12 @@ async function _handleThreadClosing(
     // Add a ✅ emoji to the message that created this thread.
     const starterMessage = await channel.fetchStarterMessage();
     starterMessage?.react(CHECK_MARK_EMOJI);
+
+    // Update the status of the entry in the notion database.
+    const pageID = String(
+      starterMessage?.content.split(NOTION_PAGE_ID_DELIMITER)[1]
+    );
+    updateNotionDBEntry(pageID);
   } else {
     // COMMAND STILL INVOKED, BUT NOT FOR CLOSING THE THREAD
 
@@ -139,18 +152,16 @@ export const Halp: SlashCommand = {
     // Check if the channel is a thread.
     if (isThread) {
       // CHANNEL IS A THREAD
+
+      // Close/archive the thread i.e. the support ticket.
       _handleThreadClosing(issueText, interaction, channel);
 
-      // TODO add check mark emoji when closed out
-      // TODO edit entry from notion db and dump all interactions from thread into it ONLY if the status of that entry is NOT "closed/done"
-      // TODO change the status of that entry to "closed/done"
+      // TODO edit entry from notion db and dump all interactions from thread into it
     } else {
       // CHANNEL IS NOT A THREAD
-      _handleThreadCreation(issueText, interaction);
 
-      // TODO create an entry in the notion db on new support ticket request
+      // Create a thread to handle the support ticket request.
+      _handleThreadCreation(issueText, interaction);
     }
   },
 };
-
-// TODO connect to Notion db
