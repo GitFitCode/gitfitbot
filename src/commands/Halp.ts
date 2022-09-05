@@ -26,6 +26,8 @@ import {
   // Notion DB helper functions
   createNotionDBEntry,
   updateNotionDBEntry,
+  AUTOBOT_ID,
+  NOT_THE_BOT_THREAD_FOR_CLOSING_ERROR_MESSAGE,
 } from "../utils";
 import { SlashCommand } from "../Command";
 
@@ -38,7 +40,6 @@ async function _handleThreadCreation(
   issueText: string | number | boolean | undefined,
   interaction: CommandInteraction
 ) {
-  // "/halp close" WAS NOT CALLED IN A NON-THREAD CHANNEL
   const author = interaction.user;
   const authorUsername = interaction.user.username;
   const channelID = interaction.channel?.id ?? "";
@@ -89,27 +90,50 @@ async function _handleThreadClosing(
   interaction: CommandInteraction<CacheType>,
   channel: AnyThreadChannel
 ) {
-  // COMMAND INVOKED FOR CLOSING THE THREAD
-
-  // Send an appropriate followUp to the thread.
-  // Any replies have to be sent BEFORE closing/archiving a thread.
-  await interaction.followUp({
-    ephemeral: true,
-    content: THREAD_CLOSING_SUCCESSFUL_MESSAGE,
-  });
-
-  // Close/Archive the thread.
-  channel.setArchived(true);
-
-  // Add a ✅ emoji to the message that created this thread.
   const starterMessage = await channel.fetchStarterMessage();
-  starterMessage?.react(CHECK_MARK_EMOJI);
 
-  // Update the status of the entry in the notion database.
-  const pageID = String(
-    starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX)
-  );
-  updateNotionDBEntry(pageID);
+  // Check if the thread was created by the bot.
+  if (starterMessage?.author.id === AUTOBOT_ID) {
+    // THREAD WAS CREATED BY THE BOT
+
+    // Send an appropriate followUp to the thread.
+    // Any replies have to be sent BEFORE closing/archiving a thread.
+    await interaction.followUp({
+      ephemeral: true,
+      content: THREAD_CLOSING_SUCCESSFUL_MESSAGE,
+    });
+
+    // Close/Archive the thread.
+    channel.setArchived(true);
+
+    // Add a ✅ emoji to the message that created this thread.
+    starterMessage?.react(CHECK_MARK_EMOJI);
+
+    // Get all messages in the thread. Caveats:
+    // 1. Does not fetch emojis automatically if they have not aleady been cached.
+    // 2. Does not fetch attachments automatically.
+    const messagesInThread = await channel.messages.fetch();
+
+    // For now, we only need `cleanContent` which is a formatted content string.
+    const cleanedMessages = messagesInThread.map(
+      (message) => message.cleanContent
+    );
+
+    // Update the status of the entry in the notion database.
+    const notionPageID = String(
+      starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX)
+    );
+    // cleanedMessages are ordered newest -> oldest
+    updateNotionDBEntry(notionPageID, cleanedMessages.reverse());
+  } else {
+    // THREAD WAS NOT CREATED BY THE BOT
+
+    // Send an appropriate followUp to the thread.
+    await interaction.followUp({
+      ephemeral: true,
+      content: NOT_THE_BOT_THREAD_FOR_CLOSING_ERROR_MESSAGE,
+    });
+  }
 }
 
 async function _executeRun(interaction: CommandInteraction) {
@@ -123,8 +147,6 @@ async function _executeRun(interaction: CommandInteraction) {
 
   if (isThread && issueText === "close") {
     // COMMAND INVOKED FOR CLOSING A THREAD
-
-    // TODO edit entry from notion db and dump all interactions from thread into it
 
     // Close/archive the thread i.e. the support ticket.
     _handleThreadClosing(interaction, channel);

@@ -29,12 +29,16 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
 CLIENT_ID=
 GUILD_ID=
 DISCORD_TOKEN=
+NOTION_KEY=
+NOTION_DATABASE_ID=
 ```
 
 - Populate fields in the .env file:
   - `CLIENT_ID` - (Required) ID of the bot's OAuth2 client.
   - `GUILD_ID` - (Required) ID of the server where the bot is installed/to be installed.
   - `DISCORD_TOKEN` - (Required) Token provided by Discord when creating the bot.
+  - `NOTION_KEY` - (Required) Secret key of the Notion integration.
+  - `NOTION_DATABASE_ID` - (Required) ID of the Notion database which will store all support tickets.
 
 ### Run the bot
 
