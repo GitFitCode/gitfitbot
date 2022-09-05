@@ -28,13 +28,13 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
 ```js
 CLIENT_ID=
 GUILD_ID=
-TOKEN=
+DISCORD_TOKEN=
 ```
 
 - Populate fields in the .env file:
   - `CLIENT_ID` - (Required) ID of the bot's OAuth2 client.
   - `GUILD_ID` - (Required) ID of the server where the bot is installed/to be installed.
-  - `TOKEN` - (Required) Token provided by Discord when creating the bot.
+  - `DISCORD_TOKEN` - (Required) Token provided by Discord when creating the bot.
 
 ### Run the bot
 
