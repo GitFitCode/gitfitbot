@@ -8,8 +8,7 @@ const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2 =
   ". Keep all your interactions in this thread. ";
 const THREAD_CREATION_ERROR_MESSAGE =
   "Error! - Support tickets cannot be created inside threads!";
-const NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE =
-  "Error! Unable to close as this is not a thread.";
+const NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE = "Error! Cannot close channels.";
 const CHECK_MARK_EMOJI = "✅";
 const NOTION_PAGE_ID_DELIMITER = "NOTION_PAGE_ID=";
 // https://developers.notion.com/reference/page
