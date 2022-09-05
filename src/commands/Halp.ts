@@ -11,23 +11,23 @@ import {
   AnyThreadChannel,
   CacheType,
 } from "discord.js";
-import { createNotionDBEntry, updateNotionDBEntry } from "../utils";
+import {
+  CHECK_MARK_EMOJI,
+  FIRST_RESPONDERS_ROLE_ID,
+  NOTION_PAGE_ID_DELIMITER,
+  NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE,
+  OPTION_DESCRIPTION,
+  OPTION_NAME,
+  THREAD_CLOSING_SUCCESSFUL_MESSAGE,
+  THREAD_CREATION_ERROR_MESSAGE,
+  THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1,
+  THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2,
+  THREAD_START_MESSAGE_SLICE_INDEX,
+  // Notion DB helper functions
+  createNotionDBEntry,
+  updateNotionDBEntry,
+} from "../utils";
 import { SlashCommand } from "../Command";
-
-const FIRST_RESPONDERS_ROLE_ID = "1015868384811962429";
-const OPTION_NAME = "issue";
-const OPTION_DESCRIPTION = "Opens a support ticket (thread) for `issue`.";
-const THREAD_CLOSING_SUCCESSFUL_MESSAGE =
-  "OK, closing/archiving the thread. It can still be re-opened manually.";
-const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1 = "Creating a thread for ";
-const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2 =
-  ". Keep all your interactions in this thread. ";
-const THREAD_CREATION_ERROR_MESSAGE =
-  "Error! - Support tickets cannot be created inside threads!";
-const NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE =
-  "Error! Unable to close as this is not a thread.";
-const CHECK_MARK_EMOJI = "✅";
-const NOTION_PAGE_ID_DELIMITER = "NOTION_PAGE_ID=";
 
 /**
  * Function to create a thread.
@@ -115,7 +115,7 @@ async function _handleThreadClosing(
 
     // Update the status of the entry in the notion database.
     const pageID = String(
-      starterMessage?.content.split(NOTION_PAGE_ID_DELIMITER)[1]
+      starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX)
     );
     updateNotionDBEntry(pageID);
   } else {
