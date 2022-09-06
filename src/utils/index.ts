@@ -1,2 +1,2 @@
-export * from "./constants";
-export * from "./notion";
+export * from './constants';
+export * from './notion';
