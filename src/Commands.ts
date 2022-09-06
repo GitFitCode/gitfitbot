@@ -4,8 +4,7 @@
 
 import { SlashCommand } from "./Command";
 import { Ping } from "./commands/Ping";
-import { UserInfo } from "./commands/UserInfo";
-import { Server } from "./commands/Server";
+import { Info } from "./commands/Info";
 import { Halp } from "./commands/Halp";
 
-export const Commands: SlashCommand[] = [Ping, Server, UserInfo, Halp];
+export const Commands: SlashCommand[] = [Ping, Info, Halp];
