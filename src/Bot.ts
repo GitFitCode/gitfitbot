@@ -22,3 +22,5 @@ interactionCreate(client);
 
 // Call login on client for authenticating the bot with Discord.
 client.login(process.env.DISCORD_TOKEN);
+
+let test = "";
