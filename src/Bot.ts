@@ -2,17 +2,16 @@
  * Entrypoint for the bot.
  */
 
-import { Client, GatewayIntentBits } from "discord.js";
-import interactionCreate from "./listeners/interactionCreate";
-import ready from "./listeners/ready";
-require("dotenv").config();
+import { Client, GatewayIntentBits } from 'discord.js';
+import interactionCreate from './listeners/interactionCreate';
+import ready from './listeners/ready';
 
-console.log("Bot is starting...");
+require('dotenv').config();
 
 // A new instance of `Client`.
 const client = new Client({
   intents: [GatewayIntentBits.Guilds],
-  allowedMentions: { parse: ["roles"] },
+  allowedMentions: { parse: ['roles'] },
 });
 
 // Register the client with the ready listener.
