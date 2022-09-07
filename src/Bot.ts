@@ -10,8 +10,13 @@ require('dotenv').config();
 
 // A new instance of `Client`.
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
-  allowedMentions: { parse: ['roles'] },
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
+  ],
+  allowedMentions: { parse: ['users', 'roles'] },
 });
 
 // Register the client with the ready listener.
