@@ -1,6 +1,6 @@
 {
   "name": "gfc-discord-bot",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Discord bot for GitFitCode needs written in TypeScript.",
   "scripts": {
     "pre-build": "rm -rf ./dist",
