@@ -6,6 +6,8 @@
     "pre-build": "rm -rf ./dist",
     "build": "tsc",
     "lint": "eslint .",
+    "release": "dotenv release-it",
+    "release-dry": "dotenv release-it --dry-run",
     "start": "ts-node src/Bot.ts",
     "test": "echo 'No tests yet'."
   },
@@ -21,13 +23,16 @@
   "devDependencies": {
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
+    "@release-it/conventional-changelog": "latest",
     "@types/node": "latest",
     "@typescript-eslint/eslint-plugin": "latest",
     "@typescript-eslint/parser": "latest",
+    "dotenv-cli": "latest",
     "eslint": "latest",
     "eslint-config-airbnb-base": "latest",
     "eslint-config-airbnb-typescript": "latest",
     "husky": "latest",
+    "release-it": "latest",
     "ts-node": "latest",
     "tslib": "latest",
     "typescript": "latest"
