@@ -10,7 +10,7 @@ import {
   ApplicationCommandOptionType,
   AnyThreadChannel,
   CacheType,
-} from "discord.js";
+} from 'discord.js';
 import {
   CHECK_MARK_EMOJI,
   FIRST_RESPONDERS_ROLE_ID,
@@ -28,37 +28,26 @@ import {
   updateNotionDBEntry,
   AUTOBOT_ID,
   NOT_THE_BOT_THREAD_FOR_CLOSING_ERROR_MESSAGE,
-} from "../utils";
-import { SlashCommand } from "../Command";
+} from '../utils';
+import { SlashCommand } from '../Command';
 
 /**
  * Function to create a thread.
  * @param issueText Text entered by the user
  * @param interaction CommandInteraction
  */
-async function _handleThreadCreation(
+async function handleThreadCreation(
   issueText: string | number | boolean | undefined,
-  interaction: CommandInteraction
+  interaction: CommandInteraction,
 ) {
   const author = interaction.user;
   const authorUsername = interaction.user.username;
-  const channelID = interaction.channel?.id ?? "";
+  const channelID = interaction.channel?.id ?? '';
 
   // Create an entry in the notion database.
-  const pageID: string = await createNotionDBEntry(
-    issueText,
-    authorUsername,
-    channelID
-  );
+  const pageID: string = await createNotionDBEntry(issueText, authorUsername, channelID);
 
-  const content =
-    THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1 +
-    "`" +
-    issueText +
-    "`" +
-    THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2 +
-    NOTION_PAGE_ID_DELIMITER +
-    pageID;
+  const content = `${THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1}\`${issueText}\`${THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2}${NOTION_PAGE_ID_DELIMITER}${pageID}`;
 
   // Send a followUp message.
   const message = await interaction.followUp({
@@ -71,13 +60,11 @@ async function _handleThreadCreation(
   const thread = await message.startThread({
     name: String(issueText),
     autoArchiveDuration: 60,
-    reason: "Support Ticket",
+    reason: 'Support Ticket',
   });
 
   // Send a message in the newly created thread.
-  thread.send(
-    `<@&${FIRST_RESPONDERS_ROLE_ID}> have been notified! ${author} hold tight.`
-  );
+  thread.send(`<@&${FIRST_RESPONDERS_ROLE_ID}> have been notified! ${author} hold tight.`);
 }
 
 /**
@@ -86,9 +73,9 @@ async function _handleThreadCreation(
  * @param interaction CommandInteraction
  * @param channel AnyThreadChannel
  */
-async function _handleThreadClosing(
+async function handleThreadClosing(
   interaction: CommandInteraction<CacheType>,
-  channel: AnyThreadChannel
+  channel: AnyThreadChannel,
 ) {
   const starterMessage = await channel.fetchStarterMessage();
 
@@ -115,14 +102,10 @@ async function _handleThreadClosing(
     const messagesInThread = await channel.messages.fetch();
 
     // For now, we only need `cleanContent` which is a formatted content string.
-    const cleanedMessages = messagesInThread.map(
-      (message) => message.cleanContent
-    );
+    const cleanedMessages = messagesInThread.map((message) => message.cleanContent);
 
     // Update the status of the entry in the notion database.
-    const notionPageID = String(
-      starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX)
-    );
+    const notionPageID = String(starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX));
     // cleanedMessages are ordered newest -> oldest
     updateNotionDBEntry(notionPageID, cleanedMessages.reverse());
   } else {
@@ -136,21 +119,21 @@ async function _handleThreadClosing(
   }
 }
 
-async function _executeRun(interaction: CommandInteraction) {
+async function executeRun(interaction: CommandInteraction) {
   // Snowflake structure received from get(), destructured and renamed.
   // https://discordjs.guide/interactions/slash-commands.html#parsing-options
   const { value: issueText } = interaction.options.get(OPTION_NAME, true);
 
   // Can be a text channel or public thread channel.
-  const channel = interaction.channel;
+  const { channel } = interaction;
   const isThread = channel?.isThread();
 
-  if (isThread && issueText === "close") {
+  if (isThread && issueText === 'close') {
     // COMMAND INVOKED FOR CLOSING A THREAD
 
     // Close/archive the thread i.e. the support ticket.
-    _handleThreadClosing(interaction, channel);
-  } else if (isThread && issueText !== "close") {
+    handleThreadClosing(interaction, channel);
+  } else if (isThread && issueText !== 'close') {
     // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A THREAD
 
     // Send an ERROR followUp to the thread.
@@ -158,7 +141,7 @@ async function _executeRun(interaction: CommandInteraction) {
       ephemeral: true,
       content: THREAD_CREATION_ERROR_MESSAGE,
     });
-  } else if (!isThread && issueText === "close") {
+  } else if (!isThread && issueText === 'close') {
     // COMMAND INVOKED FOR CLOSING A CHANNEL
 
     // Send a followUp message.
@@ -170,12 +153,12 @@ async function _executeRun(interaction: CommandInteraction) {
     // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A CHANNEL
 
     // Create a thread to handle the support ticket request.
-    _handleThreadCreation(issueText, interaction);
+    handleThreadCreation(issueText, interaction);
   }
 }
 
-export const Halp: SlashCommand = {
-  name: "halp",
+const Halp: SlashCommand = {
+  name: 'halp',
   description: OPTION_DESCRIPTION,
   options: [
     {
@@ -186,6 +169,8 @@ export const Halp: SlashCommand = {
     },
   ],
   run: async (_client: Client, interaction: CommandInteraction) => {
-    _executeRun(interaction);
+    executeRun(interaction);
   },
 };
+
+export default Halp;

@@ -1,26 +1,24 @@
-const FIRST_RESPONDERS_ROLE_ID = "1015868384811962429";
-const OPTION_NAME = "issue";
-const OPTION_DESCRIPTION = "Opens a support ticket (thread) for `issue`.";
+/* eslint-disable operator-linebreak */
+const FIRST_RESPONDERS_ROLE_ID = '1015868384811962429';
+const OPTION_NAME = 'issue';
+const OPTION_DESCRIPTION = 'Opens a support ticket (thread) for `issue`.';
 const THREAD_CLOSING_SUCCESSFUL_MESSAGE =
-  "OK, closing/archiving the thread. It can still be re-opened manually.";
-const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1 = "Creating a thread for ";
-const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2 =
-  ". Keep all your interactions in this thread. ";
-const THREAD_CREATION_ERROR_MESSAGE =
-  "Error! - Support tickets cannot be created inside threads!";
-const NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE =
-  "Error! Channels cannot be closed.";
+  'OK, closing/archiving the thread. It can still be re-opened manually.';
+const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1 = 'Creating a thread for ';
+const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2 = '. Keep all your interactions in this thread. ';
+const THREAD_CREATION_ERROR_MESSAGE = 'Error! - Support tickets cannot be created inside threads!';
+const NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE = 'Error! Channels cannot be closed.';
 const NOT_THE_BOT_THREAD_FOR_CLOSING_ERROR_MESSAGE =
-  "Error! Threads NOT created by the bot cannot be closed.";
-const CHECK_MARK_EMOJI = "✅";
-const NOTION_PAGE_ID_DELIMITER = "NOTION_PAGE_ID=";
+  'Error! Threads NOT created by the bot cannot be closed.';
+const CHECK_MARK_EMOJI = '✅';
+const NOTION_PAGE_ID_DELIMITER = 'NOTION_PAGE_ID=';
 // https://developers.notion.com/reference/page
-const _NOTION_PAGE_ID_LENGTH = 36;
-const THREAD_START_MESSAGE_SLICE_INDEX = -_NOTION_PAGE_ID_LENGTH;
-const NOTION_STATUS_PROPERTY_ID = "EFKM";
-const NOTION_STATUS_DONE = "Done";
-const NOTION_STATUS_OPEN = "Open";
-const AUTOBOT_ID = "1000479896579096597";
+const NOTION_PAGE_ID_LENGTH = 36;
+const THREAD_START_MESSAGE_SLICE_INDEX = -NOTION_PAGE_ID_LENGTH;
+const NOTION_STATUS_PROPERTY_ID = 'EFKM';
+const NOTION_STATUS_DONE = 'Done';
+const NOTION_STATUS_OPEN = 'Open';
+const AUTOBOT_ID = '1000479896579096597';
 
 export {
   AUTOBOT_ID,

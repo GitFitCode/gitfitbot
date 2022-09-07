@@ -1,13 +1,10 @@
-import { Client } from "@notionhq/client";
-import {
-  NOTION_STATUS_DONE,
-  NOTION_STATUS_OPEN,
-  NOTION_STATUS_PROPERTY_ID,
-} from "./constants";
-require("dotenv").config();
+import { Client } from '@notionhq/client';
+import { NOTION_STATUS_DONE, NOTION_STATUS_OPEN, NOTION_STATUS_PROPERTY_ID } from './constants';
 
-const _notion = new Client({ auth: process.env.NOTION_KEY ?? "" });
-const _databaseId = process.env.NOTION_DATABASE_ID ?? "";
+require('dotenv').config();
+
+const notion = new Client({ auth: process.env.NOTION_KEY ?? '' });
+const databaseId = process.env.NOTION_DATABASE_ID ?? '';
 
 type NotionParagraph = {
   paragraph: { rich_text: { text: { content: string } }[] };
@@ -18,7 +15,7 @@ type NotionParagraph = {
  * @param cleanedMessages Data to be sent to Notion.
  * @returns Formatted Notion data structure.
  */
-function _buildNotionBlockChildren(cleanedMessages: string[]) {
+function buildNotionBlockChildren(cleanedMessages: string[]) {
   // Create an empty array.
   const children: NotionParagraph[] = [];
   // Iterate through each element of the `cleanedMessages`.
@@ -47,18 +44,18 @@ function _buildNotionBlockChildren(cleanedMessages: string[]) {
 async function updateNotionDBEntry(notionPageID: string, data: string[]) {
   try {
     // Retrieve the value of "Status" property of the support ticket.
-    const response: any = await _notion.pages.properties.retrieve({
+    const response: any = await notion.pages.properties.retrieve({
       page_id: notionPageID,
       property_id: NOTION_STATUS_PROPERTY_ID,
     });
     const status: string = response.status.name;
 
     // Check if the status of the support ticket is Done.
-    if (status !== "Done") {
+    if (status !== 'Done') {
       // STATUS OF THE SUPPORT TICKET IS NOT DONE
 
       // Update the status of the page to Done.
-      await _notion.pages.update({
+      await notion.pages.update({
         page_id: notionPageID,
         properties: {
           Status: {
@@ -70,9 +67,9 @@ async function updateNotionDBEntry(notionPageID: string, data: string[]) {
       });
 
       // Add the data from discord thread to the notion page.
-      await _notion.blocks.children.append({
+      await notion.blocks.children.append({
         block_id: notionPageID,
-        children: _buildNotionBlockChildren(data),
+        children: buildNotionBlockChildren(data),
       });
     } else {
       // STATUS OF THE SUPPORT TICKET IS DONE
@@ -94,12 +91,12 @@ async function updateNotionDBEntry(notionPageID: string, data: string[]) {
 async function createNotionDBEntry(
   issueText: string | number | boolean | undefined,
   authorUsername: string,
-  channelID: string
+  channelID: string,
 ): Promise<string> {
   try {
     // Create a new page in notion.
-    const response = await _notion.pages.create({
-      parent: { database_id: _databaseId },
+    const response = await notion.pages.create({
+      parent: { database_id: databaseId },
       properties: {
         title: {
           title: [
@@ -121,7 +118,7 @@ async function createNotionDBEntry(
           ],
         },
         // Add the discord channel id.
-        "Discord Channel ID": {
+        'Discord Channel ID': {
           rich_text: [
             {
               text: {
@@ -142,7 +139,7 @@ async function createNotionDBEntry(
   } catch (error: any) {
     // https://github.com/makenotion/notion-sdk-js#handling-errors
     console.error(error.body);
-    return "";
+    return '';
   }
 }
 

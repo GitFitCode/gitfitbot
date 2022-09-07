@@ -2,11 +2,11 @@
  * "ready" event listener for the bot.
  */
 
-import { Client } from "discord.js";
-import { Commands } from "../Commands";
+import { Client } from 'discord.js';
+import Commands from '../Commands';
 
 export default (client: Client): void => {
-  client.on("ready", async () => {
+  client.on('ready', async () => {
     if (!client.user || !client.application) {
       return;
     }
