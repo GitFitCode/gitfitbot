@@ -1,5 +1,13 @@
 
 
+# [1.2.0](https://github.com/GitFitCode/discord-bot/compare/v1.1.0...v1.2.0) (2022-09-08)
+
+
+### Features
+
+* /ping now returns `websocket` and `roundtrip` latency ([e8e7f6a](https://github.com/GitFitCode/discord-bot/commit/e8e7f6a3564498daef988ba93b44f5a6be3ef6fd))
+* send welcome messages when a user joins the server ([44735ac](https://github.com/GitFitCode/discord-bot/commit/44735acfa1e7b2a53d094f26d930935fb464a082))
+
 # 1.1.0 (2022-09-07)
 
 
