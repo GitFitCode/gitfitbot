@@ -26,10 +26,11 @@ import {
   // Notion DB helper functions
   createNotionDBEntry,
   updateNotionDBEntry,
-  AUTOBOT_ID,
   NOT_THE_BOT_THREAD_FOR_CLOSING_ERROR_MESSAGE,
 } from '../utils';
 import { SlashCommand } from '../Command';
+
+require('dotenv').config();
 
 /**
  * Function to create a thread.
@@ -80,7 +81,7 @@ async function handleThreadClosing(
   const starterMessage = await channel.fetchStarterMessage();
 
   // Check if the thread was created by the bot.
-  if (starterMessage?.author.id === AUTOBOT_ID) {
+  if (starterMessage?.author.id === process.env.BOT_ID) {
     // THREAD WAS CREATED BY THE BOT
 
     // Send an appropriate followUp to the thread.

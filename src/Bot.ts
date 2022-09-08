@@ -3,6 +3,7 @@
  */
 
 import { Client, GatewayIntentBits } from 'discord.js';
+import guildMemberAdd from './listeners/guildMemberAdd';
 import interactionCreate from './listeners/interactionCreate';
 import ready from './listeners/ready';
 
@@ -16,13 +17,15 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMembers,
   ],
-  allowedMentions: { parse: ['users', 'roles'] },
+  allowedMentions: { parse: ['users', 'roles', 'everyone'] },
 });
 
 // Register the client with the ready listener.
 ready(client);
 // Register the client with the interactionCreate listener.
 interactionCreate(client);
+// Register the client with the guildMemberAdd listener.
+guildMemberAdd(client);
 
 // Call login on client for authenticating the bot with Discord.
 client.login(process.env.DISCORD_TOKEN);
