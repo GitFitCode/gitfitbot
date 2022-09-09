@@ -14,10 +14,10 @@ import {
 import {
   CHECK_MARK_EMOJI,
   FIRST_RESPONDERS_ROLE_ID,
+  HALP_DESCRIPTION,
+  HALP_OPTION_NAME,
   NOTION_PAGE_ID_DELIMITER,
   NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE,
-  OPTION_DESCRIPTION,
-  OPTION_NAME,
   THREAD_CLOSING_SUCCESSFUL_MESSAGE,
   THREAD_CREATION_ERROR_MESSAGE,
   THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1,
@@ -123,7 +123,7 @@ async function handleThreadClosing(
 async function executeRun(interaction: CommandInteraction) {
   // Snowflake structure received from get(), destructured and renamed.
   // https://discordjs.guide/interactions/slash-commands.html#parsing-options
-  const { value: issueText } = interaction.options.get(OPTION_NAME, true);
+  const { value: issueText } = interaction.options.get(HALP_OPTION_NAME, true);
 
   // Can be a text channel or public thread channel.
   const { channel } = interaction;
@@ -160,11 +160,11 @@ async function executeRun(interaction: CommandInteraction) {
 
 const Halp: SlashCommand = {
   name: 'halp',
-  description: OPTION_DESCRIPTION,
+  description: HALP_DESCRIPTION,
   options: [
     {
-      name: OPTION_NAME,
-      description: OPTION_DESCRIPTION,
+      name: HALP_OPTION_NAME,
+      description: HALP_DESCRIPTION,
       type: ApplicationCommandOptionType.String,
       required: true,
     },

@@ -3,6 +3,7 @@
   "version": "1.2.0",
   "description": "Discord bot for GitFitCode needs written in TypeScript.",
   "scripts": {
+    "clear-commands": "ts-node clearRegisteredCommands.ts",
     "pre-build": "rm -rf ./dist",
     "build": "tsc",
     "lint": "eslint .",

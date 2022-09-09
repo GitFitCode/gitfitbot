@@ -1,7 +1,7 @@
 /* eslint-disable operator-linebreak */
 const FIRST_RESPONDERS_ROLE_ID = '1015868384811962429';
-const OPTION_NAME = 'issue';
-const OPTION_DESCRIPTION = 'Opens a support ticket (thread) for `issue`.';
+const HALP_OPTION_NAME = 'issue';
+const HALP_DESCRIPTION = 'Opens a support ticket (thread) for `issue`.';
 const THREAD_CLOSING_SUCCESSFUL_MESSAGE =
   'OK, closing/archiving the thread. It can still be re-opened manually.';
 const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1 = 'Creating a thread for ';
@@ -22,8 +22,8 @@ const NOTION_STATUS_OPEN = 'Open';
 export {
   CHECK_MARK_EMOJI,
   FIRST_RESPONDERS_ROLE_ID,
-  OPTION_DESCRIPTION,
-  OPTION_NAME,
+  HALP_DESCRIPTION,
+  HALP_OPTION_NAME,
   NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE,
   NOT_THE_BOT_THREAD_FOR_CLOSING_ERROR_MESSAGE,
   NOTION_PAGE_ID_DELIMITER,
