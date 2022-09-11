@@ -5,7 +5,7 @@
  */
 
 import { CommandInteraction, Client, ChannelType } from 'discord.js';
-import { RETRO_FINISHED_MESSAGE, RETRO_NEXT_SPEAKER_MESSAGE } from 'src/utils';
+import { RETRO_FINISHED_MESSAGE, RETRO_NEXT_SPEAKER_MESSAGE } from '../utils';
 import { SlashCommand } from '../Command';
 
 const mainAttendeesList: string[] = [];

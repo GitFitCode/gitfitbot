@@ -19,7 +19,8 @@
     "@notionhq/client": "latest",
     "discord-api-types": "latest",
     "discord.js": "latest",
-    "dotenv": "latest"
+    "dotenv": "latest",
+    "undici": "latest"
   },
   "devDependencies": {
     "@commitlint/cli": "latest",

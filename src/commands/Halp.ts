@@ -108,7 +108,7 @@ async function handleThreadClosing(
     // Update the status of the entry in the notion database.
     const notionPageID = String(starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX));
     // cleanedMessages are ordered newest -> oldest
-    updateNotionDBEntry(notionPageID, cleanedMessages.reverse());
+    await updateNotionDBEntry(notionPageID, cleanedMessages.reverse());
   } else {
     // THREAD WAS NOT CREATED BY THE BOT
 
@@ -121,6 +121,8 @@ async function handleThreadClosing(
 }
 
 async function executeRun(interaction: CommandInteraction) {
+  // Try & catch NOT required for empty input here due to `issue` option being required.
+
   // Snowflake structure received from get(), destructured and renamed.
   // https://discordjs.guide/interactions/slash-commands.html#parsing-options
   const { value: issueText } = interaction.options.get(HALP_OPTION_NAME, true);
@@ -133,7 +135,7 @@ async function executeRun(interaction: CommandInteraction) {
     // COMMAND INVOKED FOR CLOSING A THREAD
 
     // Close/archive the thread i.e. the support ticket.
-    handleThreadClosing(interaction, channel);
+    await handleThreadClosing(interaction, channel);
   } else if (isThread && issueText !== 'close') {
     // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A THREAD
 
@@ -154,7 +156,7 @@ async function executeRun(interaction: CommandInteraction) {
     // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A CHANNEL
 
     // Create a thread to handle the support ticket request.
-    handleThreadCreation(issueText, interaction);
+    await handleThreadCreation(issueText, interaction);
   }
 }
 
@@ -170,7 +172,7 @@ const Halp: SlashCommand = {
     },
   ],
   run: async (_client: Client, interaction: CommandInteraction) => {
-    executeRun(interaction);
+    await executeRun(interaction);
   },
 };
 
