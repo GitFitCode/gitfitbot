@@ -1,5 +1,19 @@
 
 
+# [1.3.0](https://github.com/GitFitCode/discord-bot/compare/v1.2.0...v1.3.0) (2022-09-11)
+
+
+### Bug Fixes
+
+* fixed issues around env vars and no members in voice channel ([bbd10d9](https://github.com/GitFitCode/discord-bot/commit/bbd10d972d817a5d8d489616f5f625a0277f2228))
+
+
+### Features
+
+* added a command to randomly pick a user for their retro update ([001acea](https://github.com/GitFitCode/discord-bot/commit/001acea2020d65aac09b5245a0d7ae4084061277))
+* added a new command `/joke` for fetching jokes ([729c989](https://github.com/GitFitCode/discord-bot/commit/729c98948cec52c49d628ff0c9f1a490083dfe10))
+* added a script to clear out all registered commands ([c7ac1fe](https://github.com/GitFitCode/discord-bot/commit/c7ac1fe6c9026b27ff5fea5ece83d7668ae9ea9f))
+
 # [1.2.0](https://github.com/GitFitCode/discord-bot/compare/v1.1.0...v1.2.0) (2022-09-08)
 
 
