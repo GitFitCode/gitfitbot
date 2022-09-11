@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "release": "release-it",
     "release-dry": "release-it --dry-run",
-    "start": "ts-node src/Bot.ts",
+    "start": "pnpm i && ts-node src/Bot.ts",
     "test": "echo 'No tests yet'."
   },
   "author": "GitFitCode",

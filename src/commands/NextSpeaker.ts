@@ -8,6 +8,8 @@ import { CommandInteraction, Client, ChannelType } from 'discord.js';
 import { RETRO_FINISHED_MESSAGE, RETRO_NEXT_SPEAKER_MESSAGE } from '../utils';
 import { SlashCommand } from '../Command';
 
+require('dotenv').config();
+
 const mainAttendeesList: string[] = [];
 const attendeesCompletedRetroList: string[] = [];
 let nextSpeaker = '';
@@ -24,18 +26,18 @@ function setNextSpeaker() {
   attendeesCompletedRetroList.push(nextSpeaker);
 }
 
-const NextSpeaker: SlashCommand = {
-  name: 'next-speaker',
-  description: 'Randomly picks a user in the Check-Ins Channel.',
-  run: async (_client: Client, interaction: CommandInteraction) => {
-    // Get the Check-Ins Channel instance.
-    const voiceChannel = interaction.guild?.channels.cache.find(
-      (channel) => channel.id === process.env.CHECKINS_CHANNEL_ID,
-    );
-    if (voiceChannel?.type !== ChannelType.GuildVoice) return;
+async function executeRun(interaction: CommandInteraction) {
+  // Get the Check-Ins Channel instance.
+  const voiceChannel = interaction.guild?.channels.cache.find(
+    (channel) => channel.id === process.env.CHECKINS_VOICE_CHANNEL_ID,
+  );
+  if (voiceChannel?.type !== ChannelType.GuildVoice) return;
 
-    // Reset mainAttendeesList on every command call.
-    mainAttendeesList.length = 0;
+  // Reset mainAttendeesList on every command call.
+  mainAttendeesList.length = 0;
+
+  if (voiceChannel.members.size !== 0) {
+    // THERE ARE ATTENDEES IN THE CHANNEL
 
     // Get all currently connected members from the Check-Ins Channel.
     voiceChannel.members.forEach((member) => {
@@ -76,6 +78,25 @@ const NextSpeaker: SlashCommand = {
       ephemeral: true,
       content,
     });
+  } else {
+    // THERE ARE NO ATTENDEES IN THE CHANNEL
+
+    attendeesCompletedRetroList.length = 0;
+
+    content = 'Error! No attendees in the channel';
+
+    interaction.followUp({
+      ephemeral: true,
+      content,
+    });
+  }
+}
+
+const NextSpeaker: SlashCommand = {
+  name: 'next-speaker',
+  description: 'Randomly picks a user in the Check-Ins Channel.',
+  run: async (_client: Client, interaction: CommandInteraction) => {
+    await executeRun(interaction);
   },
 };
 
