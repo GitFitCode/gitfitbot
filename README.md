@@ -26,19 +26,30 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
 - Structure it so:
 
 ```js
-CLIENT_ID=
-GUILD_ID=
-DISCORD_TOKEN=
+DISCORD_BOT_TOKEN=
+BOT_ID=
+GFC_INTRO_SURVEY_LINK=
+
+ADMIN_1_DISCORD_ID=
+ADMIN_2_DISCORD_ID=
+
+GENERAL_CHAT_CHANNEL_ID=
+CHECKINS_VOICE_CHANNEL_ID=
+
 NOTION_KEY=
 NOTION_DATABASE_ID=
 ```
 
 - Populate fields in the .env file:
-  - `CLIENT_ID` - (Required) ID of the bot's OAuth2 client.
-  - `GUILD_ID` - (Required) ID of the server where the bot is installed/to be installed.
-  - `DISCORD_TOKEN` - (Required) Token provided by Discord when creating the bot.
-  - `NOTION_KEY` - (Required) Secret key of the Notion integration.
-  - `NOTION_DATABASE_ID` - (Required) ID of the Notion database which will store all support tickets.
+  - `DISCORD_BOT_TOKEN` - (Required) Token provided by Discord when creating the bot.
+  - `BOT_ID` - (Required) ID of the GFC Discord bot.
+  - `GFC_INTRO_SURVEY_LINK` - (Required) - URL of the GFC intro survey link.
+  - `ADMIN_1_DISCORD_ID` - (Required) ID of an admin of the GFC discord server.
+  - `ADMIN_2_DISCORD_ID` - (Required) - ID of another admin of the GFC discord server.
+  - `GENERAL_CHAT_CHANNEL_ID` - (Required) - ID of the general chat channel in the GFC discord server.
+  - `CHECKINS_VOICE_CHANNEL_ID` - (Required) - ID of the check-ins voice channel in the GFC discord server.
+  - `NOTION_KEY` - (Required) Secret key of the GFC Notion integration.
+  - `NOTION_DATABASE_ID` - (Required) ID of the GFC Notion database which will store all support tickets.
 
 ### Run the bot
 
@@ -51,18 +62,21 @@ pnpm start
 ### Slash commands
 
 - Create a new `.ts` file in `src/commands` folder.
-- Name it same as the slash command you'd like to use (e.g. `Ping.ts`).
+- Name it same as the slash command (e.g. `Info.ts`).
 - Follow the example format below to create a new slash command:
 
 ```typescript
-import { CommandInteraction, Client } from "discord.js";
-import { Command } from "../Command";
+import { CommandInteraction, Client } from 'discord.js';
+import { SlashCommand } from '../Command';
 
-export const Ping: Command = {
-  name: "ping",
-  description: "Returns Pong!",
+const Info: SlashCommand = {
+  name: 'info',
+  description: 'Displays info about yourself and the server.',
   run: async (_client: Client, interaction: CommandInteraction) => {
-    const content = "Pong!";
+    const content = `Your username: ${interaction.user.username}
+Your ID: ${interaction.user.id}
+Server name: ${interaction.guild?.name}
+Total members: ${interaction.guild?.memberCount}`;
 
     await interaction.followUp({
       ephemeral: true,
@@ -70,6 +84,8 @@ export const Ping: Command = {
     });
   },
 };
+
+export default Info;
 ```
 
 ```shell

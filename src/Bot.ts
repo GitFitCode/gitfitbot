@@ -16,6 +16,7 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildVoiceStates,
   ],
   allowedMentions: { parse: ['users', 'roles', 'everyone'] },
 });
@@ -28,4 +29,4 @@ interactionCreate(client);
 guildMemberAdd(client);
 
 // Call login on client for authenticating the bot with Discord.
-client.login(process.env.DISCORD_TOKEN);
+client.login(process.env.DISCORD_BOT_TOKEN);
