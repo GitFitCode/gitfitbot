@@ -15,6 +15,9 @@ const attendeesCompletedRetroList: string[] = [];
 let nextSpeaker = '';
 let content = '';
 
+/**
+ * Function to pick the next attendee randonly.
+ */
 function setNextSpeaker() {
   // Pick a member randomly.
   const random = Math.floor(Math.random() * mainAttendeesList.length);

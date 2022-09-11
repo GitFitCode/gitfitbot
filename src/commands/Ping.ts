@@ -7,20 +7,24 @@
 import { CommandInteraction, Client } from 'discord.js';
 import { SlashCommand } from '../Command';
 
+async function executeRun(client: Client, interaction: CommandInteraction) {
+  const sent = await interaction.followUp({
+    ephemeral: true,
+    content: 'Pinging...',
+    fetchReply: true,
+  });
+  interaction.editReply(
+    `Websocket heartbeat: ${client.ws.ping}ms\nRoundtrip latency: ${
+      sent.createdTimestamp - interaction.createdTimestamp
+    }ms`,
+  );
+}
+
 const Ping: SlashCommand = {
   name: 'ping',
   description: 'Returns Pong!',
   run: async (client: Client, interaction: CommandInteraction) => {
-    const sent = await interaction.followUp({
-      ephemeral: true,
-      content: 'Pinging...',
-      fetchReply: true,
-    });
-    interaction.editReply(
-      `Websocket heartbeat: ${client.ws.ping}ms\nRoundtrip latency: ${
-        sent.createdTimestamp - interaction.createdTimestamp
-      }ms`,
-    );
+    await executeRun(client, interaction);
   },
 };
 

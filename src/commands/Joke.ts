@@ -9,6 +9,11 @@ import { CommandInteraction, Client, ApplicationCommandOptionType } from 'discor
 import { request } from 'undici';
 import { SlashCommand } from '../Command';
 
+/**
+ * Function to query the joke api and send a joke to the discord server.
+ * @param interaction CommandInteraction
+ * @param chosenCategory Joke category chosen by the user
+ */
 async function sendJoke(interaction: CommandInteraction, chosenCategory: string) {
   // https://jokeapi.dev/, https://rapidapi.com/Sv443/api/jokeapi-v2/
   const URL = `https://v2.jokeapi.dev/joke/${chosenCategory}?blacklistFlags=nsfw,religious,political,racist,sexist,explicit`;
