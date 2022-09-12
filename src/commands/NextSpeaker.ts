@@ -86,7 +86,7 @@ async function executeRun(interaction: CommandInteraction) {
 
     attendeesCompletedRetroList.length = 0;
 
-    content = 'Error! No attendees in the channel';
+    content = 'Error! No attendees in the checkins voice channel!';
 
     interaction.followUp({
       ephemeral: true,

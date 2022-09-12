@@ -18,6 +18,7 @@
     "@discordjs/rest": "latest",
     "@notionhq/client": "latest",
     "discord-api-types": "latest",
+    "discord-tictactoe": "latest",
     "discord.js": "latest",
     "dotenv": "latest",
     "undici": "latest"
