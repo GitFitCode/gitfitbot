@@ -6,8 +6,10 @@
 
 import { CommandInteraction, Client, ApplicationCommandOptionType } from 'discord.js';
 import { SlashCommand } from '../Command';
-const ttt = require('discord-tictactoe');
-const game = new ttt({ language: 'en' });
+
+const TTT = require('discord-tictactoe');
+
+const game = new TTT({ language: 'en' });
 
 async function executeRun(interaction: CommandInteraction) {
   game.handleInteraction(interaction);
