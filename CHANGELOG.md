@@ -1,5 +1,12 @@
 
 
+# [1.4.0](https://github.com/GitFitCode/discord-bot/compare/v1.3.0...v1.4.0) (2022-09-13)
+
+
+### Features
+
+* added a new command `/tictactoe` to let users play that game ([dbcbb4d](https://github.com/GitFitCode/discord-bot/commit/dbcbb4d7b7ad184d64c7c56fbb1c22df562d71f0))
+
 # [1.3.0](https://github.com/GitFitCode/discord-bot/compare/v1.2.0...v1.3.0) (2022-09-11)
 
 
