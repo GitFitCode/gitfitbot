@@ -1,7 +1,4 @@
-# Recommended to use pnpm over npm!
-package-lock.json
-
-# This is mac specific 
+# macOS specific 
 .DS_Store
 
 # Logs

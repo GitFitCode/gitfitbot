@@ -12,7 +12,8 @@
     "start": "node dist/Bot.js",
     "dev": "npm i && ts-node src/Bot.ts",
     "test": "echo 'No tests yet'.",
-    "gcp-build": "tsc -p ."
+    "gcp-build": "tsc -p .",
+    "deploy": "gcloud app deploy"
   },
   "author": "GitFitCode",
   "license": "GNU GPLv3",
@@ -43,6 +44,6 @@
   },
   "engines": {
     "node": "16.x",
-    "npm": "7.x"
+    "npm": "8.x"
   }
 }
