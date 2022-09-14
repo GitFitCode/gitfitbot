@@ -54,7 +54,7 @@ NOTION_DATABASE_ID=
 ### Run the bot
 
 ```shell
-npm run start
+npm run dev
 ```
 
 ## Development
@@ -89,7 +89,7 @@ export default Info;
 ```
 
 ```shell
-npm run start
+npm run dev
 ```
 
 Your newly added slash commands are now ready to be used on discord!

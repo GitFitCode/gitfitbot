@@ -9,8 +9,10 @@
     "lint": "eslint .",
     "release": "release-it",
     "release-dry": "release-it --dry-run",
-    "start": "npm i && ts-node src/Bot.ts",
-    "test": "echo 'No tests yet'."
+    "start": "node dist/Bot.js",
+    "dev": "npm i && ts-node src/Bot.ts",
+    "test": "echo 'No tests yet'.",
+    "gcp-build": "tsc -p ."
   },
   "author": "GitFitCode",
   "license": "GNU GPLv3",
@@ -41,6 +43,6 @@
   },
   "engines": {
     "node": "16.x",
-    "pnpm": "7.x"
+    "npm": "7.x"
   }
 }

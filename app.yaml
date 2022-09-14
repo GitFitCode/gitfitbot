@@ -1,0 +1,10 @@
+runtime: nodejs16
+instance_class: F2
+automatic_scaling:
+  max_instances: 1
+
+handlers:
+  - url: .*
+    script: ./dist/Bot.js
+    secure: always
+    redirect_http_response_code: 301
