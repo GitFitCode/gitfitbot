@@ -22,7 +22,7 @@ async function executeRun(client: Client, interaction: CommandInteraction) {
 
 const Ping: SlashCommand = {
   name: 'ping',
-  description: 'Returns Pong!',
+  description: 'Check whether the bot is working.',
   run: async (client: Client, interaction: CommandInteraction) => {
     await executeRun(client, interaction);
   },

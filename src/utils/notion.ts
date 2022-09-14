@@ -1,5 +1,5 @@
 import { Client } from '@notionhq/client';
-import { NOTION_STATUS_DONE, NOTION_STATUS_OPEN, NOTION_STATUS_PROPERTY_ID } from './constants';
+import { NOTION_STATUS_DONE, NOTION_STATUS_OPEN } from './constants';
 
 require('dotenv').config();
 
@@ -46,7 +46,7 @@ async function updateNotionDBEntry(notionPageID: string, data: string[]) {
     // Retrieve the value of "Status" property of the support ticket.
     const response: any = await notion.pages.properties.retrieve({
       page_id: notionPageID,
-      property_id: NOTION_STATUS_PROPERTY_ID,
+      property_id: process.env.NOTION_DATABASE_STATUS_ID ?? '',
     });
     const status: string = response.status.name;
 

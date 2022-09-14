@@ -13,7 +13,6 @@ import {
 } from 'discord.js';
 import {
   CHECK_MARK_EMOJI,
-  FIRST_RESPONDERS_ROLE_ID,
   NOTION_PAGE_ID_DELIMITER,
   NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE,
   SUPPORT_DESCRIPTION,
@@ -65,7 +64,9 @@ async function handleThreadCreation(
   });
 
   // Send a message in the newly created thread.
-  thread.send(`<@&${FIRST_RESPONDERS_ROLE_ID}> have been notified! ${author} hold tight.`);
+  thread.send(
+    `<@&${process.env.FIRST_RESPONDERS_ROLE_ID}> have been notified! ${author} hold tight.`,
+  );
 }
 
 /**
