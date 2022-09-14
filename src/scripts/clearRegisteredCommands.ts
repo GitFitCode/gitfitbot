@@ -25,10 +25,13 @@ client.on('ready', async () => {
 
 (async () => {
   // Call login on client for authenticating the bot with Discord.
-  client.login(process.env.DISCORD_TOKEN);
+  client.login(process.env.DISCORD_BOT_TOKEN);
 
   // Give some time to discord for clearing registered commands.
   await delay(8000);
+
+  // Log out, terminate connection to Discord and destroy the client.
+  client.destroy();
 
   // Exit the script.
   process.exit();

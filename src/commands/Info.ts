@@ -10,9 +10,9 @@ import { SlashCommand } from '../Command';
 
 async function executeRun(interaction: CommandInteraction) {
   const content = `Your username: ${interaction.user.username}
-  Your ID: ${interaction.user.id}
-  Server name: ${interaction.guild?.name}
-  Total members: ${interaction.guild?.memberCount}`;
+Your ID: ${interaction.user.id}
+Server name: ${interaction.guild?.name}
+Total members: ${interaction.guild?.memberCount}`;
 
   await interaction.followUp({
     ephemeral: true,

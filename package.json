@@ -1,9 +1,9 @@
 {
-  "name": "gfc-discord-bot",
+  "name": "gitfitbot",
   "version": "1.4.0",
-  "description": "Discord bot for GitFitCode needs written in TypeScript.",
+  "description": "Discord bot for GitFitCode needs written in TypeScript and hosted on Google App Engine.",
   "scripts": {
-    "clear-commands": "ts-node clearRegisteredCommands.ts",
+    "clear-commands": "ts-node ./src/scripts/clearRegisteredCommands.ts",
     "pre-build": "rm -rf ./dist",
     "build": "tsc",
     "lint": "eslint .",
