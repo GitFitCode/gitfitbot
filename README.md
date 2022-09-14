@@ -4,13 +4,13 @@
 
 - [VSCode](https://code.visualstudio.com/)/[Intellij WebStorm](https://www.jetbrains.com/webstorm/)
 - [Nodejs v16 LTS](https://nodejs.org/en/)
-- [PnPM](https://pnpm.io/) (use the standalone script)
+- [NPM](https://www.npmjs.com/)
 - [Ensure that your bot was invited to the target server with `bot` and `applications.command` scopes enabled](https://discordjs.guide/preparations/adding-your-bot-to-servers.html).
 
 ### Installing Dependencies
 
 ```sh
-pnpm i
+npm i
 ```
 
 #### Setting up husky pre-commit hooks
@@ -54,7 +54,7 @@ NOTION_DATABASE_ID=
 ### Run the bot
 
 ```shell
-pnpm start
+npm run start
 ```
 
 ## Development
@@ -89,7 +89,7 @@ export default Info;
 ```
 
 ```shell
-pnpm start
+npm run start
 ```
 
 Your newly added slash commands are now ready to be used on discord!
