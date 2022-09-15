@@ -10,6 +10,8 @@ import {
   ApplicationCommandOptionType,
   AnyThreadChannel,
   CacheType,
+  ComponentType,
+  ButtonStyle,
 } from 'discord.js';
 import {
   CHECK_MARK_EMOJI,
@@ -44,8 +46,12 @@ async function handleThreadCreation(
   const authorUsername = interaction.user.username;
   const channelID = interaction.channel?.id ?? '';
 
-  // Create an entry in the notion database.
+  // Create an entry in the notion database and grab the page id.
   const pageID: string = await createNotionDBEntry(issueText, authorUsername, channelID);
+
+  // Notion link uses pageID without hyphens.
+  const pageIDWithoutHyphens = pageID.replaceAll('-', '');
+  const notionURL = `${process.env.NOTION_DATABASE_LINK}&p=${pageIDWithoutHyphens}`;
 
   const content = `${THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1}\`${issueText}\`${THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2}${NOTION_PAGE_ID_DELIMITER}${pageID}`;
 
@@ -54,6 +60,19 @@ async function handleThreadCreation(
     ephemeral: true,
     content,
     fetchReply: true,
+    components: [
+      {
+        type: ComponentType.ActionRow,
+        components: [
+          {
+            type: ComponentType.Button,
+            style: ButtonStyle.Link,
+            url: notionURL,
+            label: 'Notion Link',
+          },
+        ],
+      },
+    ],
   });
 
   // Create a thread from the reply sent by the bot.
