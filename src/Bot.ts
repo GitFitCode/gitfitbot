@@ -44,3 +44,12 @@ app.get('/', (_req, res) => {
 app.listen(PORT, () => {
   console.log(`Bot listening on port ${PORT}`);
 });
+
+process.on('SIGINT', (code) => {
+  // Log out, terminate connection to Discord and destroy the client.
+  client.destroy();
+
+  console.log(`Exiting with code ${code}`);
+
+  process.exit();
+});
