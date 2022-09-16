@@ -3,11 +3,11 @@
  */
 
 import { Client, GatewayIntentBits } from 'discord.js';
-import express = require('express');
 import guildMemberAdd from './listeners/guildMemberAdd';
 import interactionCreate from './listeners/interactionCreate';
 import ready from './listeners/ready';
 
+const config = require('gfc-vault-config');
 require('dotenv').config();
 
 // A new instance of `Client`.
@@ -31,19 +31,7 @@ interactionCreate(client);
 guildMemberAdd(client);
 
 // Call login on client for authenticating the bot with Discord.
-client.login(process.env.DISCORD_BOT_TOKEN);
-
-// Get an express server running to respond to GCP uptime checks (i.e. to keep the bot alive).
-const PORT = process.env.PORT || 8080;
-const app = express();
-
-app.get('/', (_req, res) => {
-  res.send('🎉 Bot is alive! 🎉');
-});
-
-app.listen(PORT, () => {
-  console.log(`Bot listening on port ${PORT}`);
-});
+client.login(config.discordBotToken);
 
 process.on('SIGINT', (code) => {
   // Log out, terminate connection to Discord and destroy the client.

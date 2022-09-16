@@ -32,6 +32,7 @@ import {
 import { SlashCommand } from '../Command';
 
 require('dotenv').config();
+const config = require('gfc-vault-config');
 
 /**
  * Function to create a thread.
@@ -51,7 +52,7 @@ async function handleThreadCreation(
 
   // Notion link uses pageID without hyphens.
   const pageIDWithoutHyphens = pageID.replaceAll('-', '');
-  const notionURL = `${process.env.NOTION_DATABASE_LINK}&p=${pageIDWithoutHyphens}`;
+  const notionURL = `${config.notionDatabaseLink}&p=${pageIDWithoutHyphens}`;
 
   const content = `${THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1}\`${issueText}\`${THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2}${NOTION_PAGE_ID_DELIMITER}${pageID}`;
 
@@ -83,9 +84,7 @@ async function handleThreadCreation(
   });
 
   // Send a message in the newly created thread.
-  thread.send(
-    `<@&${process.env.FIRST_RESPONDERS_ROLE_ID}> have been notified! ${author} hold tight.`,
-  );
+  thread.send(`<@&${config.firstRespondersRoleId}> have been notified! ${author} hold tight.`);
 }
 
 /**
@@ -101,7 +100,7 @@ async function handleThreadClosing(
   const starterMessage = await channel.fetchStarterMessage();
 
   // Check if the thread was created by the bot.
-  if (starterMessage?.author.id === process.env.BOT_ID) {
+  if (starterMessage?.author.id === config.botId) {
     // THREAD WAS CREATED BY THE BOT
 
     // Send an appropriate followUp to the thread.

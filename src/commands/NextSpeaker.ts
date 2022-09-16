@@ -9,6 +9,7 @@ import { RETRO_FINISHED_MESSAGE, RETRO_NEXT_SPEAKER_MESSAGE } from '../utils';
 import { SlashCommand } from '../Command';
 
 require('dotenv').config();
+const config = require('gfc-vault-config');
 
 const mainAttendeesList: string[] = [];
 const attendeesCompletedRetroList: string[] = [];
@@ -32,7 +33,7 @@ function setNextSpeaker() {
 async function executeRun(interaction: CommandInteraction) {
   // Get the Check-Ins Channel instance.
   const voiceChannel = interaction.guild?.channels.cache.find(
-    (channel) => channel.id === process.env.CHECKINS_VOICE_CHANNEL_ID,
+    (channel) => channel.id === config.checkinsVoiceChannelId,
   );
   if (voiceChannel?.type !== ChannelType.GuildVoice) return;
 

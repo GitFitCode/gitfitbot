@@ -1,5 +1,5 @@
 /**
- * Slash command that replies with the information of the serverand the user who
+ * Slash command that replies with the information of the server and the user who
  * triggered the command.
  *
  * To trigger, type `/info` on the discord server.

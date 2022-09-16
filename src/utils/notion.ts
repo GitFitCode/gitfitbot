@@ -2,9 +2,10 @@ import { Client } from '@notionhq/client';
 import { NOTION_STATUS_DONE, NOTION_STATUS_OPEN } from './constants';
 
 require('dotenv').config();
+const config = require('gfc-vault-config');
 
-const notion = new Client({ auth: process.env.NOTION_KEY ?? '' });
-const databaseId = process.env.NOTION_DATABASE_ID ?? '';
+const notion = new Client({ auth: config.notionKey ?? '' });
+const databaseId = config.notionDatabaseId ?? '';
 
 type NotionParagraph = {
   paragraph: { rich_text: { text: { content: string }; annotations?: { code: boolean } }[] };
@@ -69,7 +70,7 @@ async function updateNotionDBEntry(
     // Retrieve the value of "Status" property of the support ticket.
     const response: any = await notion.pages.properties.retrieve({
       page_id: notionPageID,
-      property_id: process.env.NOTION_DATABASE_STATUS_ID ?? '',
+      property_id: config.notionDatabaseStatusId ?? '',
     });
     const status: string = response.status.name;
 

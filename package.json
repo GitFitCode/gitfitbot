@@ -24,7 +24,7 @@
     "discord-tictactoe": "latest",
     "discord.js": "latest",
     "dotenv": "latest",
-    "express": "latest",
+    "gfc-vault-config": "git+https://git@github.com/GitFitCode/gfc-vault-config.git",
     "undici": "latest"
   },
   "devDependencies": {

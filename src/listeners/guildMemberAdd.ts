@@ -5,10 +5,11 @@
 import { Client } from 'discord.js';
 
 require('dotenv').config();
+const config = require('gfc-vault-config');
 
 export default (client: Client): void => {
   client.on('guildMemberAdd', async (member) => {
-    const channelID = process.env.GENERAL_CHAT_CHANNEL_ID ?? '';
+    const channelID = config.generalChatChannelId ?? '';
     const channelMessage = `"Successful people do what unsuccessful people are not willing to do. Don't wish it were easier; wish you were better."
 
 Hey @everyone, <@${member.id}>  has joined the community! Give them that warm welcome and introduce yourselves when you got the chance. 😄`;
@@ -17,9 +18,9 @@ Hey @everyone, <@${member.id}>  has joined the community! Give them that warm we
     // Send a message to the General channel.g
     channel.send(channelMessage);
 
-    const GFCIntroSurveyLink = process.env.GFC_INTRO_SURVEY_LINK ?? '';
-    const Admin1ID = process.env.ADMIN_1_DISCORD_ID ?? '';
-    const Admin2ID = process.env.ADMIN_2_DISCORD_ID ?? '';
+    const GFCIntroSurveyLink = config.gfcIntroSurveyLink ?? '';
+    const Admin1ID = config.admin1DiscordId ?? '';
+    const Admin2ID = config.admin2DiscordId ?? '';
     const userMessage = `Hey <@${member.id}>, welcome to **GitFitCode**!
 
 Before you jump in, can you quickly fill this out: ${GFCIntroSurveyLink}.

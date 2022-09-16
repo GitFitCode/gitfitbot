@@ -2,6 +2,7 @@ import { Client, GatewayIntentBits } from 'discord.js';
 import { SlashCommand } from 'src/Command';
 
 require('dotenv').config();
+const config = require('gfc-vault-config');
 
 function delay(ms: number) {
   // eslint-disable-next-line no-promise-executor-return
@@ -25,7 +26,7 @@ client.on('ready', async () => {
 
 (async () => {
   // Call login on client for authenticating the bot with Discord.
-  client.login(process.env.DISCORD_BOT_TOKEN);
+  client.login(config.discordBotToken);
 
   // Give some time to discord for clearing registered commands.
   await delay(8000);

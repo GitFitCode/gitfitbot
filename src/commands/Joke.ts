@@ -1,4 +1,3 @@
-/* eslint-disable operator-linebreak */
 /**
  * Slash command that replies with a joke from https://jokeapi.dev/ when triggered.
  *
