@@ -7,26 +7,43 @@ const notion = new Client({ auth: process.env.NOTION_KEY ?? '' });
 const databaseId = process.env.NOTION_DATABASE_ID ?? '';
 
 type NotionParagraph = {
-  paragraph: { rich_text: { text: { content: string } }[] };
+  paragraph: { rich_text: { text: { content: string }; annotations?: { code: boolean } }[] };
 };
 
 /**
  * Function to build a formatted notion structure with the provided data.
- * @param cleanedMessages Data to be sent to Notion.
+ * @param data Data to be sent to Notion.
  * @returns Formatted Notion data structure.
  */
-function buildNotionBlockChildren(cleanedMessages: string[]) {
+function buildNotionBlockChildren(
+  data: {
+    message: string;
+    author: string;
+  }[],
+) {
   // Create an empty array.
   const children: NotionParagraph[] = [];
-  // Iterate through each element of the `cleanedMessages`.
-  cleanedMessages.forEach((message) => {
+  data.forEach((datum) => {
     // Push an instance of the formatted notion structure with the provided data.
     children.push({
       paragraph: {
         rich_text: [
           {
             text: {
-              content: message,
+              content: `${datum.author}`,
+            },
+            annotations: {
+              code: true,
+            },
+          },
+          {
+            text: {
+              content: ' ',
+            },
+          },
+          {
+            text: {
+              content: `${datum.message}`,
             },
           },
         ],
@@ -41,7 +58,13 @@ function buildNotionBlockChildren(cleanedMessages: string[]) {
  * @param notionPageID ID of the Notion page.
  * @param data Data to be sent to Notion.
  */
-async function updateNotionDBEntry(notionPageID: string, data: string[]) {
+async function updateNotionDBEntry(
+  notionPageID: string,
+  data: {
+    message: string;
+    author: string;
+  }[],
+) {
   try {
     // Retrieve the value of "Status" property of the support ticket.
     const response: any = await notion.pages.properties.retrieve({

@@ -106,10 +106,7 @@ async function handleThreadClosing(
 
     // Send an appropriate followUp to the thread.
     // Any replies have to be sent BEFORE closing/archiving a thread.
-    await interaction.followUp({
-      ephemeral: true,
-      content: THREAD_CLOSING_SUCCESSFUL_MESSAGE,
-    });
+    await interaction.followUp({ ephemeral: true, content: THREAD_CLOSING_SUCCESSFUL_MESSAGE });
 
     // Close/Archive the thread.
     channel.setArchived(true);
@@ -122,13 +119,16 @@ async function handleThreadClosing(
     // 2. Does not fetch attachments automatically.
     const messagesInThread = await channel.messages.fetch();
 
-    // For now, we only need `cleanContent` which is a formatted content string.
-    const cleanedMessages = messagesInThread.map((message) => message.cleanContent);
+    // Grab `cleanContent`, which is the formatted content, and the message author's username.
+    const data = messagesInThread.map((message) => ({
+      message: message.cleanContent,
+      author: message.author.username,
+    }));
 
     // Update the status of the entry in the notion database.
     const notionPageID = String(starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX));
-    // cleanedMessages are ordered newest -> oldest
-    await updateNotionDBEntry(notionPageID, cleanedMessages.reverse());
+    // messges are ordered newest -> oldest
+    await updateNotionDBEntry(notionPageID, data.reverse());
   } else {
     // THREAD WAS NOT CREATED BY THE BOT
 
@@ -160,10 +160,7 @@ async function executeRun(interaction: CommandInteraction) {
     // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A THREAD
 
     // Send an ERROR followUp to the thread.
-    await interaction.followUp({
-      ephemeral: true,
-      content: THREAD_CREATION_ERROR_MESSAGE,
-    });
+    await interaction.followUp({ ephemeral: true, content: THREAD_CREATION_ERROR_MESSAGE });
   } else if (!isThread && issueText === 'close') {
     // COMMAND INVOKED FOR CLOSING A CHANNEL
 

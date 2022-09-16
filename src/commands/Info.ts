@@ -14,10 +14,7 @@ Your ID: ${interaction.user.id}
 Server name: ${interaction.guild?.name}
 Total members: ${interaction.guild?.memberCount}`;
 
-  await interaction.followUp({
-    ephemeral: true,
-    content,
-  });
+  await interaction.followUp({ ephemeral: true, content });
 }
 
 const Info: SlashCommand = {

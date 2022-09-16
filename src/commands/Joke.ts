@@ -34,10 +34,7 @@ async function sendJoke(interaction: CommandInteraction, chosenCategory: string)
     content = `${jokeJSON.joke}`;
   }
 
-  await interaction.followUp({
-    ephemeral: true,
-    content,
-  });
+  await interaction.followUp({ ephemeral: true, content });
 }
 
 async function executeRun(interaction: CommandInteraction) {

@@ -77,10 +77,7 @@ async function executeRun(interaction: CommandInteraction) {
       }
     }
 
-    await interaction.followUp({
-      ephemeral: true,
-      content,
-    });
+    await interaction.followUp({ ephemeral: true, content });
   } else {
     // THERE ARE NO ATTENDEES IN THE CHANNEL
 
@@ -88,10 +85,7 @@ async function executeRun(interaction: CommandInteraction) {
 
     content = 'Error! No attendees in the checkins voice channel!';
 
-    interaction.followUp({
-      ephemeral: true,
-      content,
-    });
+    interaction.followUp({ ephemeral: true, content });
   }
 }
 

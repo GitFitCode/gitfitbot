@@ -1,5 +1,5 @@
 /**
- * Slash command that replies with "Pong!" when triggered.
+ * Slash command that checks whether the bot is alive when triggered.
  *
  * To trigger, type `/ping` on the discord server.
  */

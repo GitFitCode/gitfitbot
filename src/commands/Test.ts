@@ -10,10 +10,7 @@ import { SlashCommand } from '../Command';
 async function executeRun(interaction: CommandInteraction) {
   const content = 'Test.';
 
-  await interaction.followUp({
-    ephemeral: true,
-    content,
-  });
+  await interaction.followUp({ ephemeral: true, content });
 }
 
 const Test: SlashCommand = {
