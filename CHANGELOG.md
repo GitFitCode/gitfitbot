@@ -1,5 +1,14 @@
 
 
+# [1.5.0](https://github.com/GitFitCode/gitfitbot/compare/v1.4.0...v1.5.0) (2022-09-16)
+
+
+### Features
+
+* added an express server to keep the bot alive ([38e8e30](https://github.com/GitFitCode/gitfitbot/commit/38e8e30027b781793d41e439d431d60df67d4cb6))
+* added message author's username to the notion support ticket data ([a519ee7](https://github.com/GitFitCode/gitfitbot/commit/a519ee789b06ebef092760cac0121aba663e73fd))
+* show a notion link button after creating support a ticket ([e5b0597](https://github.com/GitFitCode/gitfitbot/commit/e5b0597a63a55328c966075043f2f47580df175a))
+
 # [1.4.0](https://github.com/GitFitCode/discord-bot/compare/v1.3.0...v1.4.0) (2022-09-13)
 
 
