@@ -20,6 +20,7 @@
   "dependencies": {
     "@discordjs/rest": "latest",
     "@notionhq/client": "latest",
+    "dayjs": "latest",
     "discord-api-types": "latest",
     "discord-tictactoe": "latest",
     "discord.js": "latest",

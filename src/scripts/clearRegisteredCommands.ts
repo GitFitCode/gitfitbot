@@ -29,7 +29,7 @@ client.on('ready', async () => {
   client.login(config.discordBotToken);
 
   // Give some time to discord for clearing registered commands.
-  await delay(8000);
+  await delay(5000);
 
   // Log out, terminate connection to Discord and destroy the client.
   client.destroy();

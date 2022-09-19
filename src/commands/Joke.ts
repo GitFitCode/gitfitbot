@@ -11,7 +11,7 @@ import { SlashCommand } from '../Command';
 /**
  * Function to query the joke api and send a joke to the discord server.
  * @param interaction CommandInteraction
- * @param chosenCategory Joke category chosen by the user
+ * @param chosenCategory Joke category chosen by the user.
  */
 async function sendJoke(interaction: CommandInteraction, chosenCategory: string) {
   // https://jokeapi.dev/, https://rapidapi.com/Sv443/api/jokeapi-v2/

@@ -17,6 +17,7 @@ const client = new Client({
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildScheduledEvents,
     GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.MessageContent,
   ],
@@ -37,7 +38,7 @@ process.on('SIGINT', (code) => {
   // Log out, terminate connection to Discord and destroy the client.
   client.destroy();
 
-  console.log(`Exiting with code ${code}`);
+  console.log(`\nExiting with code ${code}`);
 
   process.exit();
 });

@@ -36,7 +36,7 @@ const config = require('gfc-vault-config');
 
 /**
  * Function to create a thread.
- * @param issueText Text entered by the user
+ * @param issueText Text entered by the user.
  * @param interaction CommandInteraction
  */
 async function handleThreadCreation(
@@ -52,7 +52,7 @@ async function handleThreadCreation(
 
   // Notion link uses pageID without hyphens.
   const pageIDWithoutHyphens = pageID.replaceAll('-', '');
-  const notionURL = `${config.notionDatabaseLink}&p=${pageIDWithoutHyphens}`;
+  const notionURL = `${config.notionSupportTicketsDatabaseLink}&p=${pageIDWithoutHyphens}`;
 
   const content = `${THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1}\`${issueText}\`${THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2}${NOTION_PAGE_ID_DELIMITER}${pageID}`;
 
