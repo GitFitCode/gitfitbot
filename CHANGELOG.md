@@ -1,5 +1,12 @@
 
 
+# [1.6.0](https://github.com/GitFitCode/gitfitbot/compare/v1.5.0...v1.6.0) (2022-09-19)
+
+
+### Features
+
+* added new command `/events` (GFC event manager) ([1e37c71](https://github.com/GitFitCode/gitfitbot/commit/1e37c71762432fb4e31bd42a934328c87f60aff0))
+
 # [1.5.0](https://github.com/GitFitCode/gitfitbot/compare/v1.4.0...v1.5.0) (2022-09-16)
 
 
