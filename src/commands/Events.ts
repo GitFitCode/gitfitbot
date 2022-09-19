@@ -81,7 +81,7 @@ async function handleEventCreation(
         // Create an event with the given options.
         await guildScheduledEventManger?.create(eventOptions);
 
-        const content = `${eventName} scheduled!`;
+        const content = `${eventName} event scheduled!`;
 
         await interaction.followUp({ content });
       } else {

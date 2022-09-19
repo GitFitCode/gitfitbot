@@ -5,15 +5,13 @@
   "scripts": {
     "clear-commands": "ts-node ./src/scripts/clearRegisteredCommands.ts",
     "pre-build": "rm -rf ./dist",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.production.json",
     "lint": "eslint .",
     "release": "release-it",
     "release-dry": "release-it --dry-run",
     "start": "node dist/Bot.js",
     "dev": "npm i && ts-node src/Bot.ts",
-    "test": "echo 'No tests yet'.",
-    "gcp-build": "tsc -p .",
-    "deploy": "gcloud app deploy"
+    "test": "echo 'No tests yet'."
   },
   "author": "GitFitCode",
   "license": "GNU GPLv3",
