@@ -3,13 +3,14 @@
   "version": "1.6.0",
   "description": "Discord bot for GitFitCode needs written in TypeScript and hosted on Google App Engine.",
   "scripts": {
-    "clear-commands": "ts-node ./src/scripts/clearRegisteredCommands.ts",
+    "clear-commands": "npm run build && node ./dist/scripts/clearRegisteredCommands.js",
+    "clear-events": "npm run build && node ./dist/scripts/clearScheduledEvents.js",
     "pre-build": "rm -rf ./dist",
     "build": "tsc -p tsconfig.production.json",
     "lint": "eslint .",
     "release": "release-it",
     "release-dry": "release-it --dry-run",
-    "start": "node dist/Bot.js",
+    "start": "npm run build && node dist/Bot.js",
     "dev": "npm i && ts-node src/Bot.ts",
     "test": "echo 'No tests yet'."
   },

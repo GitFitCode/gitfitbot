@@ -33,23 +33,37 @@ GFC_INTRO_SURVEY_LINK=
 ADMIN_1_DISCORD_ID=
 ADMIN_2_DISCORD_ID=
 
+DISCORD_SERVER_ID=
 GENERAL_CHAT_CHANNEL_ID=
 CHECKINS_VOICE_CHANNEL_ID=
+FIRST_RESPONDERS_ROLE_ID=
+VIRTUAL_OFFICE_VOICE_CHANNEL_ID=
 
 NOTION_KEY=
-NOTION_DATABASE_ID=
+NOTION_SUPPORT_TICKETS_DATABASE_ID=
+NOTION_SUPPORT_TICKETS_DATABASE_STATUS_ID=
+NOTION_SUPPORT_TICKETS_DATABASE_LINK=
 ```
 
-- Populate fields in the .env file:
+- Populate fields in the `.env` file:
+
   - `DISCORD_BOT_TOKEN` - (Required) Token provided by Discord when creating the bot.
   - `BOT_ID` - (Required) ID of the GFC Discord bot.
   - `GFC_INTRO_SURVEY_LINK` - (Required) - URL of the GFC intro survey link.
+
   - `ADMIN_1_DISCORD_ID` - (Required) ID of an admin of the GFC discord server.
   - `ADMIN_2_DISCORD_ID` - (Required) - ID of another admin of the GFC discord server.
+
+  - `DISCORD_SERVER_ID` - (Required) - ID of the server where this bot is invited.
   - `GENERAL_CHAT_CHANNEL_ID` - (Required) - ID of the general chat channel in the GFC discord server.
   - `CHECKINS_VOICE_CHANNEL_ID` - (Required) - ID of the check-ins voice channel in the GFC discord server.
+  - `FIRST_RESPONDERS_ROLE_ID` - (Required) - ID of the role `@First-Responders`.
+  - `VIRTUAL_OFFICE_VOICE_CHANNEL_ID` - (Required) - ID of the virtual office voice channel in the GFC discord server.
+
   - `NOTION_KEY` - (Required) Secret key of the GFC Notion integration.
-  - `NOTION_DATABASE_ID` - (Required) ID of the GFC Notion database which will store all support tickets.
+  - `NOTION_SUPPORT_TICKETS_DATABASE_ID` - (Required) ID of the GFC Notion database which will store all support tickets.
+  - `NOTION_SUPPORT_TICKETS_DATABASE_STATUS_ID` - (Required) - ID of the status property in the notion support tickets database.
+  - `NOTION_SUPPORT_TICKETS_DATABASE_LINK` - (Required) - URL of the notion support tickets database.
 
 ### Run the bot
 
