@@ -98,6 +98,12 @@ function buildEventOptions(eventName: string): GitFitCodeEventOptions {
         { name: 'PM', value: 'PM' },
       ],
     },
+    {
+      name: 'timezone',
+      description: 'Timezone abbreviation (https://www.timeanddate.com/time/zones/).',
+      type: ApplicationCommandOptionType.String,
+      required: true,
+    },
   ];
 }
 

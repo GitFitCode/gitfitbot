@@ -42,6 +42,7 @@ async function handleEventCreation(
   const { value: hour } = interaction.options.get('hour', true);
   const { value: minute } = interaction.options.get('minute', true);
   const { value: ampm } = interaction.options.get('ampm', true);
+  const { value: timezone } = interaction.options.get('timezone', true);
 
   if (
     typeof year === 'number' &&
@@ -49,9 +50,10 @@ async function handleEventCreation(
     typeof day === 'number' &&
     typeof hour === 'number' &&
     typeof minute === 'number' &&
-    typeof ampm === 'string'
+    typeof ampm === 'string' &&
+    typeof timezone === 'string'
   ) {
-    const retrievedDate = `${year}-${month}-${day} ${hour}:${minute} ${ampm}`;
+    const retrievedDate = `${year}-${month}-${day} ${hour}:${minute} ${ampm} ${timezone}`;
 
     // Check if the date provided by user is valid.
     if (dayjs(retrievedDate).isValid()) {
