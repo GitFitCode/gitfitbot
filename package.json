@@ -1,7 +1,7 @@
 {
   "name": "gitfitbot",
   "version": "1.6.0",
-  "description": "Discord bot for GitFitCode needs written in TypeScript and hosted on Google App Engine.",
+  "description": "Discord bot for GitFitCode needs, written in TypeScript.",
   "scripts": {
     "clear-commands": "npm run build && node ./dist/scripts/clearRegisteredCommands.js",
     "clear-events": "npm run build && node ./dist/scripts/clearScheduledEvents.js",

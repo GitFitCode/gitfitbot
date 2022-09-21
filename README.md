@@ -25,25 +25,25 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
 - Create a file called `.env`.
 - Structure it so:
 
-```js
-DISCORD_BOT_TOKEN=
-BOT_ID=
-GFC_INTRO_SURVEY_LINK=
+  ```js
+  DISCORD_BOT_TOKEN=
+  BOT_ID=
+  GFC_INTRO_SURVEY_LINK=
 
-ADMIN_1_DISCORD_ID=
-ADMIN_2_DISCORD_ID=
+  ADMIN_1_DISCORD_ID=
+  ADMIN_2_DISCORD_ID=
 
-DISCORD_SERVER_ID=
-GENERAL_CHAT_CHANNEL_ID=
-CHECKINS_VOICE_CHANNEL_ID=
-FIRST_RESPONDERS_ROLE_ID=
-VIRTUAL_OFFICE_VOICE_CHANNEL_ID=
+  DISCORD_SERVER_ID=
+  GENERAL_CHAT_CHANNEL_ID=
+  CHECKINS_VOICE_CHANNEL_ID=
+  FIRST_RESPONDERS_ROLE_ID=
+  VIRTUAL_OFFICE_VOICE_CHANNEL_ID=
 
-NOTION_KEY=
-NOTION_SUPPORT_TICKETS_DATABASE_ID=
-NOTION_SUPPORT_TICKETS_DATABASE_STATUS_ID=
-NOTION_SUPPORT_TICKETS_DATABASE_LINK=
-```
+  NOTION_KEY=
+  NOTION_SUPPORT_TICKETS_DATABASE_ID=
+  NOTION_SUPPORT_TICKETS_DATABASE_STATUS_ID=
+  NOTION_SUPPORT_TICKETS_DATABASE_LINK=
+  ```
 
 - Populate fields in the `.env` file:
 
@@ -79,32 +79,35 @@ npm run dev
 - Name it same as the slash command (e.g. `Info.ts`).
 - Follow the example format below to create a new slash command:
 
-```typescript
-import { CommandInteraction, Client } from 'discord.js';
-import { SlashCommand } from '../Command';
+  ```typescript
+  import { CommandInteraction, Client } from 'discord.js';
+  import { SlashCommand } from '../Command';
 
-const Info: SlashCommand = {
-  name: 'info',
-  description: 'Displays info about yourself and the server.',
-  run: async (_client: Client, interaction: CommandInteraction) => {
-    const content = `Your username: ${interaction.user.username}
-Your ID: ${interaction.user.id}
-Server name: ${interaction.guild?.name}
-Total members: ${interaction.guild?.memberCount}`;
+  const Info: SlashCommand = {
+    name: 'info',
+    description: 'Displays info about yourself and the server.',
+    run: async (_client: Client, interaction: CommandInteraction) => {
+      const content = `Your username: ${interaction.user.username}
+  Your ID: ${interaction.user.id}
+  Server name: ${interaction.guild?.name}
+  Total members: ${interaction.guild?.memberCount}`;
 
-    await interaction.followUp({
-      ephemeral: true,
-      content,
-    });
-  },
-};
+      await interaction.followUp({
+        ephemeral: true,
+        content,
+      });
+    },
+  };
 
-export default Info;
-```
+  export default Info;
+  ```
 
-```shell
-npm run dev
-```
+- Import the command in `src/Commands.ts` file.
+- Run the bot.
+
+  ```shell
+  npm run dev
+  ```
 
 Your newly added slash commands are now ready to be used on discord!
 
