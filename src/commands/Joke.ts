@@ -56,6 +56,8 @@ async function executeRun(interaction: CommandInteraction) {
 
       const chosenCategory: string = 'Any';
       await sendJoke(interaction, chosenCategory);
+    } else {
+      console.log(error.body);
     }
   }
 }

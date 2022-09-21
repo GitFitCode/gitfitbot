@@ -36,6 +36,8 @@ async function handleEventCreation(
   eventDescription: string,
   eventChannelID: string,
 ) {
+  // Snowflake structure received from get(), destructured and renamed.
+  // https://discordjs.guide/interactions/slash-commands.html#parsing-options
   const { value: year } = interaction.options.get('year', true);
   const { value: month } = interaction.options.get('month', true);
   const { value: day } = interaction.options.get('day', true);
@@ -158,7 +160,7 @@ async function executeRun(interaction: CommandInteraction) {
   // Check if subcommand `codewars` was fired.
   if (commandInput.startsWith('codewars')) {
     const eventName = 'GitFitCode Codewars';
-    const eventDescription = "Let's solve some katas on codewars!";
+    const eventDescription = "Let's solve some katas on [codewars](https://www.codewars.com)!";
     const eventChannelID = config.virtualOfficeVoiceChannelId;
 
     await handleEventCreation(interaction, eventName, eventDescription, eventChannelID);

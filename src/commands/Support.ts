@@ -1,3 +1,4 @@
+/* eslint-disable operator-linebreak */
 /**
  * Slash command that open a support ticket when triggered.
  *
@@ -17,8 +18,6 @@ import {
   CHECK_MARK_EMOJI,
   NOTION_PAGE_ID_DELIMITER,
   NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE,
-  SUPPORT_DESCRIPTION,
-  SUPPORT_OPTION_NAME,
   THREAD_CLOSING_SUCCESSFUL_MESSAGE,
   THREAD_CREATION_ERROR_MESSAGE,
   THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1,
@@ -99,8 +98,11 @@ async function handleThreadClosing(
 ) {
   const starterMessage = await channel.fetchStarterMessage();
 
-  // Check if the thread was created by the bot.
-  if (starterMessage?.author.id === config.botId) {
+  // Check if the thread was created by the bot and contains NOTION_PAGE_ID_DELIMITER.
+  if (
+    starterMessage?.author.id === config.botId &&
+    starterMessage?.content.includes(NOTION_PAGE_ID_DELIMITER)
+  ) {
     // THREAD WAS CREATED BY THE BOT
 
     // Send an appropriate followUp to the thread.
@@ -126,7 +128,8 @@ async function handleThreadClosing(
 
     // Update the status of the entry in the notion database.
     const notionPageID = String(starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX));
-    // messges are ordered newest -> oldest
+
+    // messages are ordered newest -> oldest
     await updateNotionDBEntry(notionPageID, data.reverse());
   } else {
     // THREAD WAS NOT CREATED BY THE BOT
@@ -140,27 +143,24 @@ async function handleThreadClosing(
 }
 
 async function executeRun(interaction: CommandInteraction) {
-  // Try & catch NOT required for empty input here due to `issue` option being required.
-
-  // Snowflake structure received from get(), destructured and renamed.
-  // https://discordjs.guide/interactions/slash-commands.html#parsing-options
-  const { value: issueText } = interaction.options.get(SUPPORT_OPTION_NAME, true);
-
-  // Can be a text channel or public thread channel.
+  // Can be a public/private text channel or public/private thread channel.
   const { channel } = interaction;
   const isThread = channel?.isThread();
 
-  if (isThread && issueText === 'close') {
+  // /<command> <subcommand> [<arg>:<value>]
+  const commandInput = String(interaction).replace('/support', '').trimStart();
+
+  if (isThread && commandInput.startsWith('close')) {
     // COMMAND INVOKED FOR CLOSING A THREAD
 
     // Close/archive the thread i.e. the support ticket.
     await handleThreadClosing(interaction, channel);
-  } else if (isThread && issueText !== 'close') {
+  } else if (isThread && commandInput.startsWith('create')) {
     // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A THREAD
 
     // Send an ERROR followUp to the thread.
     await interaction.followUp({ ephemeral: true, content: THREAD_CREATION_ERROR_MESSAGE });
-  } else if (!isThread && issueText === 'close') {
+  } else if (!isThread && commandInput.startsWith('close')) {
     // COMMAND INVOKED FOR CLOSING A CHANNEL
 
     // Send a followUp message.
@@ -171,6 +171,10 @@ async function executeRun(interaction: CommandInteraction) {
   } else {
     // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A CHANNEL
 
+    // Snowflake structure received from get(), destructured and renamed.
+    // https://discordjs.guide/interactions/slash-commands.html#parsing-options
+    const { value: issueText } = interaction.options.get('issue', true);
+
     // Create a thread to handle the support ticket request.
     await handleThreadCreation(issueText, interaction);
   }
@@ -178,13 +182,25 @@ async function executeRun(interaction: CommandInteraction) {
 
 const Support: SlashCommand = {
   name: 'support',
-  description: SUPPORT_DESCRIPTION,
+  description: 'Helper slash command for managing GFC support tickets.',
   options: [
     {
-      name: SUPPORT_OPTION_NAME,
-      description: SUPPORT_DESCRIPTION,
-      type: ApplicationCommandOptionType.String,
-      required: true,
+      name: 'create',
+      description: 'Create a support ticket.',
+      type: ApplicationCommandOptionType.Subcommand,
+      options: [
+        {
+          name: 'issue',
+          description: 'Issue summary.',
+          type: ApplicationCommandOptionType.String,
+          required: true,
+        },
+      ],
+    },
+    {
+      name: 'close',
+      description: 'Close a support ticket.',
+      type: ApplicationCommandOptionType.Subcommand,
     },
   ],
   run: async (_client: Client, interaction: CommandInteraction) => {

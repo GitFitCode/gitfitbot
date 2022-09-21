@@ -1,14 +1,14 @@
 /* eslint-disable operator-linebreak */
-const SUPPORT_OPTION_NAME = 'issue';
-const SUPPORT_DESCRIPTION = 'Opens a support ticket (thread) for `issue`.';
 const THREAD_CLOSING_SUCCESSFUL_MESSAGE =
   'OK, closing/archiving the thread. It can still be re-opened manually.';
 const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1 = 'Creating a thread for ';
 const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2 = '. Keep all your interactions in this thread. ';
-const THREAD_CREATION_ERROR_MESSAGE = 'Error! - Support tickets cannot be created inside threads!';
-const NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE = 'Error! Channels cannot be closed.';
+const THREAD_CREATION_ERROR_MESSAGE =
+  'Error! - Support tickets cannot be created inside threads! Please run this command in a channel.';
+const NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE =
+  'Error! Channels cannot be closed. Please run this command in a support ticket thread created by the bot.';
 const NOT_THE_BOT_THREAD_FOR_CLOSING_ERROR_MESSAGE =
-  'Error! Threads NOT created by the bot cannot be closed.';
+  'Error! Non-support ticket threads cannot be closed. Please run this command in a support ticket thread created by the bot.';
 const CHECK_MARK_EMOJI = '✅';
 const NOTION_PAGE_ID_DELIMITER = 'NOTION_PAGE_ID=';
 // https://developers.notion.com/reference/page
@@ -28,8 +28,6 @@ export {
   NOTION_STATUS_OPEN,
   RETRO_FINISHED_MESSAGE,
   RETRO_NEXT_SPEAKER_MESSAGE,
-  SUPPORT_DESCRIPTION,
-  SUPPORT_OPTION_NAME,
   THREAD_CLOSING_SUCCESSFUL_MESSAGE,
   THREAD_CREATION_ERROR_MESSAGE,
   THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1,
