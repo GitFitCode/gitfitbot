@@ -1,5 +1,17 @@
 
 
+# [1.7.0](https://github.com/GitFitCode/gitfitbot/compare/v1.6.0...v1.7.0) (2022-09-21)
+
+
+### Bug Fixes
+
+* better timezone handling in `/events` ([99cbd9e](https://github.com/GitFitCode/gitfitbot/commit/99cbd9e55f53a84b41055acea6c112c172808d1f))
+
+
+### Features
+
+* updated `/support` with sub-commands ([94efbb7](https://github.com/GitFitCode/gitfitbot/commit/94efbb7eea7024b3eb383b3ce1af22f81691cde9))
+
 # [1.6.0](https://github.com/GitFitCode/gitfitbot/compare/v1.5.0...v1.6.0) (2022-09-19)
 
 

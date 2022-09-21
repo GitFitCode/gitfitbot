@@ -1,6 +1,6 @@
 {
   "name": "gitfitbot",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Discord bot for GitFitCode needs, written in TypeScript.",
   "scripts": {
     "clear-commands": "npm run build && node ./dist/scripts/clearRegisteredCommands.js",
