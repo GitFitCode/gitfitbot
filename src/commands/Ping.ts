@@ -13,7 +13,8 @@ async function executeRun(client: Client, interaction: CommandInteraction) {
     content: 'Pinging...',
     fetchReply: true,
   });
-  interaction.editReply(
+
+  await interaction.editReply(
     `Websocket heartbeat: ${client.ws.ping}ms\nRoundtrip latency: ${
       sent.createdTimestamp - interaction.createdTimestamp
     }ms`,

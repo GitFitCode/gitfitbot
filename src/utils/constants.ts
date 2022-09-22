@@ -1,6 +1,6 @@
 /* eslint-disable operator-linebreak */
-const THREAD_CLOSING_SUCCESSFUL_MESSAGE =
-  'OK, closing/archiving the thread. It can still be re-opened manually.';
+const THREAD_CLOSING_MESSAGE = 'OK, closing/archiving the thread.';
+const THREAD_CLOSING_SUCCESSFUL_MESSAGE = 'Thread closed. It can still be re-opened manually.';
 const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1 = 'Creating a thread for ';
 const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2 = '. Keep all your interactions in this thread. ';
 const THREAD_CREATION_ERROR_MESSAGE =
@@ -28,6 +28,7 @@ export {
   NOTION_STATUS_OPEN,
   RETRO_FINISHED_MESSAGE,
   RETRO_NEXT_SPEAKER_MESSAGE,
+  THREAD_CLOSING_MESSAGE,
   THREAD_CLOSING_SUCCESSFUL_MESSAGE,
   THREAD_CREATION_ERROR_MESSAGE,
   THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1,

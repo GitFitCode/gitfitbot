@@ -27,6 +27,7 @@ import {
   createNotionDBEntry,
   updateNotionDBEntry,
   NOT_THE_BOT_THREAD_FOR_CLOSING_ERROR_MESSAGE,
+  THREAD_CLOSING_MESSAGE,
 } from '../utils';
 import { SlashCommand } from '../Command';
 
@@ -107,16 +108,10 @@ async function handleThreadClosing(
 
     // Send an appropriate followUp to the thread.
     // Any replies have to be sent BEFORE closing/archiving a thread.
-    await interaction.followUp({ ephemeral: true, content: THREAD_CLOSING_SUCCESSFUL_MESSAGE });
-
-    // Close/Archive the thread.
-    channel.setArchived(true);
-
-    // Add a ✅ emoji to the message that created this thread.
-    starterMessage?.react(CHECK_MARK_EMOJI);
+    await interaction.followUp({ ephemeral: true, content: THREAD_CLOSING_MESSAGE });
 
     // Get all messages in the thread. Caveats:
-    // 1. Does not fetch emojis automatically if they have not aleady been cached.
+    // 1. Does not fetch emojis automatically if they have not already been cached.
     // 2. Does not fetch attachments automatically.
     const messagesInThread = await channel.messages.fetch();
 
@@ -131,6 +126,14 @@ async function handleThreadClosing(
 
     // messages are ordered newest -> oldest
     await updateNotionDBEntry(notionPageID, data.reverse());
+
+    await interaction.editReply(THREAD_CLOSING_SUCCESSFUL_MESSAGE);
+
+    // Close/Archive the thread.
+    channel.setArchived(true);
+
+    // Add a ✅ emoji to the message that created this thread.
+    starterMessage?.react(CHECK_MARK_EMOJI);
   } else {
     // THREAD WAS NOT CREATED BY THE BOT
 
