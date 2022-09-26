@@ -4,6 +4,7 @@
  * To trigger, type `/joke` on the discord server.
  */
 
+import * as Sentry from '@sentry/node';
 import { CommandInteraction, Client, ApplicationCommandOptionType } from 'discord.js';
 import { request } from 'undici';
 import { SlashCommand } from '../Command';
@@ -58,6 +59,7 @@ async function executeRun(interaction: CommandInteraction) {
       await sendJoke(interaction, chosenCategory);
     } else {
       console.log(error.body);
+      Sentry.captureException(error);
     }
   }
 }

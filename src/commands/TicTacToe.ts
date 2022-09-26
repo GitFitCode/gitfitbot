@@ -23,7 +23,6 @@ const TicTacToe: SlashCommand = {
       name: 'opponent',
       description: '@ your opponent',
       type: ApplicationCommandOptionType.User,
-      required: false,
     },
   ],
   run: async (_client: Client, interaction: CommandInteraction) => {

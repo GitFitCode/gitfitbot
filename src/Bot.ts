@@ -24,15 +24,17 @@ const client = new Client({
   allowedMentions: { parse: ['users', 'roles', 'everyone'] },
 });
 
-// Register the client with the ready listener.
-ready(client);
-// Register the client with the interactionCreate listener.
-interactionCreate(client);
-// Register the client with the guildMemberAdd listener.
-guildMemberAdd(client);
+function start() {
+  // Register the client with the ready listener.
+  ready(client);
+  // Register the client with the interactionCreate listener.
+  interactionCreate(client);
+  // Register the client with the guildMemberAdd listener.
+  guildMemberAdd(client);
 
-// Call login on client for authenticating the bot with Discord.
-client.login(config.discordBotToken);
+  // Call login on client for authenticating the bot with Discord.
+  client.login(config.discordBotToken);
+}
 
 process.on('SIGINT', (code) => {
   // Log out, terminate connection to Discord and destroy the client.
@@ -42,3 +44,5 @@ process.on('SIGINT', (code) => {
 
   process.exit();
 });
+
+export default start;
