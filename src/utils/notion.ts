@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import { Client } from '@notionhq/client';
 import { NOTION_STATUS_DONE, NOTION_STATUS_OPEN } from './constants';
 
@@ -102,6 +103,7 @@ async function updateNotionDBEntry(
   } catch (error: any) {
     // https://github.com/makenotion/notion-sdk-js#handling-errors
     console.error(error.body);
+    Sentry.captureException(error);
   }
 }
 
@@ -163,6 +165,7 @@ async function createNotionDBEntry(
   } catch (error: any) {
     // https://github.com/makenotion/notion-sdk-js#handling-errors
     console.error(error.body);
+    Sentry.captureException(error);
     return '';
   }
 }
