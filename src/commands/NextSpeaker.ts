@@ -4,10 +4,12 @@
  * To trigger, type `/next-speaker` on the discord server.
  */
 
+import * as Sentry from '@sentry/node';
 import { CommandInteraction, Client, ChannelType } from 'discord.js';
 import { RETRO_FINISHED_MESSAGE, RETRO_NEXT_SPEAKER_MESSAGE } from '../utils';
 import { SlashCommand } from '../Command';
 
+require('@sentry/tracing');
 require('dotenv').config();
 const config = require('gfc-vault-config');
 
@@ -31,6 +33,11 @@ function setNextSpeaker() {
 }
 
 async function executeRun(interaction: CommandInteraction) {
+  const transaction = Sentry.startTransaction({
+    op: 'transaction',
+    name: '/next-speaker',
+  });
+
   // Get the Check-Ins Channel instance.
   const voiceChannel = interaction.guild?.channels.cache.find(
     (channel) => channel.id === config.checkinsVoiceChannelId,
@@ -88,6 +95,7 @@ async function executeRun(interaction: CommandInteraction) {
 
     interaction.followUp({ ephemeral: true, content });
   }
+  transaction.finish();
 }
 
 const NextSpeaker: SlashCommand = {

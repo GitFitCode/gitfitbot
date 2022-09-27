@@ -5,6 +5,7 @@
  * To trigger, type `/support` on the discord server.
  */
 
+import * as Sentry from '@sentry/node';
 import {
   CommandInteraction,
   Client,
@@ -31,6 +32,7 @@ import {
 } from '../utils';
 import { SlashCommand } from '../Command';
 
+require('@sentry/tracing');
 require('dotenv').config();
 const config = require('gfc-vault-config');
 
@@ -146,6 +148,11 @@ async function handleThreadClosing(
 }
 
 async function executeRun(interaction: CommandInteraction) {
+  const transaction = Sentry.startTransaction({
+    op: 'transaction',
+    name: '/support',
+  });
+
   // Can be a public/private text channel or public/private thread channel.
   const { channel } = interaction;
   const isThread = channel?.isThread();
@@ -181,6 +188,7 @@ async function executeRun(interaction: CommandInteraction) {
     // Create a thread to handle the support ticket request.
     await handleThreadCreation(issueText, interaction);
   }
+  transaction.finish();
 }
 
 const Support: SlashCommand = {

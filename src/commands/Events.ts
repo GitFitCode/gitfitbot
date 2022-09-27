@@ -5,6 +5,7 @@
  * To trigger, type `/events` on the discord server.
  */
 
+import * as Sentry from '@sentry/node';
 import {
   CommandInteraction,
   Client,
@@ -18,10 +19,11 @@ import duration from 'dayjs/plugin/duration';
 import { SlashCommand } from '../Command';
 import { buildEventOptions } from '../utils';
 
-dayjs.extend(duration);
-
+require('@sentry/tracing');
 require('dotenv').config();
 const config = require('gfc-vault-config');
+
+dayjs.extend(duration);
 
 /**
  * Function to schedule an event in the discord server.
@@ -110,11 +112,27 @@ async function handleEventCreation(
 }
 
 async function executeRun(interaction: CommandInteraction) {
+  Sentry.configureScope((scope) => {
+    scope.setUser({
+      id: interaction.user.id,
+      username: interaction.user.username,
+    });
+  });
+  const transactionForEvents = Sentry.startTransaction({
+    op: 'transaction',
+    name: '/events',
+  });
+
   // /<command> <subcommand> [<arg>:<value>]
   const commandInput = String(interaction).replace('/events', '').trimStart();
 
   // Check if subcommand `list` was fired.
   if (commandInput.startsWith('list')) {
+    const transactionForList = Sentry.startTransaction({
+      op: 'transaction',
+      name: '/events list',
+    });
+
     const discordEventManager = interaction.guild?.scheduledEvents;
     const scheduledEvents = await discordEventManager?.fetch();
 
@@ -145,26 +163,44 @@ async function executeRun(interaction: CommandInteraction) {
 
       interaction.followUp({ ephemeral: true, content });
     }
+    transactionForList.finish();
   }
 
   // Check if subcommand `retro` was fired.
   if (commandInput.startsWith('retro')) {
+    const transactionForRetro = Sentry.startTransaction({
+      op: 'transaction',
+      name: '/events retro',
+    });
+
     const eventName = 'GitFitCode Retrospective';
     const eventDescription =
       "Let's reflect on your last week's EBIs & WWWs and create some tangible action items!";
     const eventChannelID = config.checkinsVoiceChannelId;
 
     await handleEventCreation(interaction, eventName, eventDescription, eventChannelID);
+
+    transactionForRetro.finish();
   }
 
   // Check if subcommand `codewars` was fired.
   if (commandInput.startsWith('codewars')) {
+    const transactionForCodewars = Sentry.startTransaction({
+      op: 'transaction',
+      name: '/events codewars',
+    });
+
     const eventName = 'GitFitCode Codewars';
     const eventDescription = "Let's solve some katas on [codewars](https://www.codewars.com)!";
     const eventChannelID = config.virtualOfficeVoiceChannelId;
 
     await handleEventCreation(interaction, eventName, eventDescription, eventChannelID);
+
+    transactionForCodewars.finish();
   }
+
+  transactionForEvents.finish();
+  Sentry.setUser(null);
 }
 
 const Events: SlashCommand = {

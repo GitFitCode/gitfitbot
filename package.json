@@ -23,6 +23,7 @@
     "@sentry/integrations": "latest",
     "@sentry/node": "latest",
     "@sentry/tracing": "latest",
+    "@sentry/types": "latest",
     "dayjs": "latest",
     "discord-api-types": "latest",
     "discord-tictactoe": "latest",

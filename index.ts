@@ -2,8 +2,11 @@ import * as Sentry from '@sentry/node';
 import { RewriteFrames } from '@sentry/integrations';
 import start from './src/Bot';
 
+require('dotenv').config();
+const config = require('gfc-vault-config');
+
 Sentry.init({
-  dsn: 'https://cda5d84a06c94726aec2bac2fa1d9e44@o1426811.ingest.sentry.io/6775838',
+  dsn: config.sentryDSN,
 
   // We recommend adjusting this value in production, or using tracesSampler
   // for finer control
