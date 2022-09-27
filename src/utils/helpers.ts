@@ -103,6 +103,18 @@ function buildEventOptions(eventName: string): GitFitCodeEventOptions {
       description: 'Timezone abbreviation (https://www.timeanddate.com/time/zones/).',
       type: ApplicationCommandOptionType.String,
       required: true,
+      choices: [
+        { name: 'CDT (Central Daylight Time)', value: 'CDT' },
+        { name: 'CST (Central Standard Time)', value: 'CST' },
+        { name: 'EDT (Eastern Daylight Time)', value: 'EDT' },
+        { name: 'EST (Eastern Standard Time)', value: 'EST' },
+        { name: 'GMT (Greenwich Mean Time)', value: 'GMT' },
+        { name: 'MDT (Mountain Daylight Time)', value: 'MDT' },
+        { name: 'MST (Mountain Standard Time)', value: 'MST' },
+        { name: 'PDT (Pacific Daylight Time)', value: 'PDT' },
+        { name: 'PST (Pacific Standard Time)', value: 'PST' },
+        { name: 'UTC (Coordinated Universal Time)', value: 'UTC' },
+      ],
     },
   ];
 }
