@@ -9,6 +9,8 @@ import { CommandInteraction, Client, ApplicationCommandOptionType } from 'discor
 import { request } from 'undici';
 import { SlashCommand } from '../Command';
 
+require('@sentry/tracing');
+
 /**
  * Function to query the joke api and send a joke to the discord server.
  * @param interaction CommandInteraction
@@ -38,6 +40,11 @@ async function sendJoke(interaction: CommandInteraction, chosenCategory: string)
 }
 
 async function executeRun(interaction: CommandInteraction) {
+  const transaction = Sentry.startTransaction({
+    op: 'transaction',
+    name: '/joke',
+  });
+
   // Try & catch required for empty input here due to `category` option being optional.
   try {
     const { value: chosenCategory } = interaction.options.get('category', true);
@@ -61,6 +68,8 @@ async function executeRun(interaction: CommandInteraction) {
       console.log(error.body);
       Sentry.captureException(error);
     }
+  } finally {
+    transaction.finish();
   }
 }
 
