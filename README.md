@@ -43,6 +43,8 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
   NOTION_SUPPORT_TICKETS_DATABASE_ID=
   NOTION_SUPPORT_TICKETS_DATABASE_STATUS_ID=
   NOTION_SUPPORT_TICKETS_DATABASE_LINK=
+
+  SENTRY_DSN=
   ```
 
 - Populate fields in the `.env` file:
@@ -64,6 +66,8 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
   - `NOTION_SUPPORT_TICKETS_DATABASE_ID` - (Required) ID of the GFC Notion database which will store all support tickets.
   - `NOTION_SUPPORT_TICKETS_DATABASE_STATUS_ID` - (Required) - ID of the status property in the notion support tickets database.
   - `NOTION_SUPPORT_TICKETS_DATABASE_LINK` - (Required) - URL of the notion support tickets database.
+
+  - `SENTRY_DSN` - (Optional) - DSN of your nodejs project on [sentry.io](https://sentry.io/).
 
 ### Run the bot
 
