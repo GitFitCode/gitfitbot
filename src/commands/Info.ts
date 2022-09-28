@@ -7,12 +7,14 @@
 
 import { CommandInteraction, Client } from 'discord.js';
 import { SlashCommand } from '../Command';
+import { version } from '../../package.json';
 
 async function executeRun(interaction: CommandInteraction) {
-  const content = `Your username: ${interaction.user.username}
-Your ID: ${interaction.user.id}
-Server name: ${interaction.guild?.name}
-Total members: ${interaction.guild?.memberCount}`;
+  const content = `\`Your username\`: ${interaction.user.username}
+\`Your ID\`: ${interaction.user.id}
+\`Server name\`: ${interaction.guild?.name}
+\`Total members\`: ${interaction.guild?.memberCount}
+\`${interaction.client.user.username} version\`: ${version}`;
 
   await interaction.followUp({ ephemeral: true, content });
 }
