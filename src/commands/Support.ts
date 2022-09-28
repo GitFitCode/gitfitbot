@@ -54,8 +54,6 @@ async function handleThreadCreation(issueText: string, interaction: CommandInter
   const notionURL = `${config.notionSupportTicketsDatabaseLink}&p=${pageIDWithoutHyphens}`;
 
   const content = `${THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1}\`${issueText}\`${THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2}${NOTION_PAGE_ID_DELIMITER}${pageID}`;
-
-  // Send a followUp message.
   const message = await interaction.followUp({
     ephemeral: true,
     content,

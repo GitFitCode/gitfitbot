@@ -35,7 +35,6 @@ async function sendJoke(interaction: CommandInteraction, chosenCategory: string)
 
     content = `${jokeJSON.joke}`;
   }
-
   await interaction.followUp({ ephemeral: true, content });
 }
 
