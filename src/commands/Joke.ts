@@ -40,6 +40,12 @@ async function sendJoke(interaction: CommandInteraction, chosenCategory: string)
 }
 
 async function executeRun(interaction: CommandInteraction) {
+  Sentry.configureScope((scope) => {
+    scope.setUser({
+      id: interaction.user.id,
+      username: interaction.user.username,
+    });
+  });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
     name: '/joke',
@@ -70,6 +76,7 @@ async function executeRun(interaction: CommandInteraction) {
     }
   } finally {
     transaction.finish();
+    Sentry.setUser(null);
   }
 }
 

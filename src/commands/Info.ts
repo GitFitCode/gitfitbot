@@ -13,6 +13,12 @@ import { version } from '../../package.json';
 require('@sentry/tracing');
 
 async function executeRun(interaction: CommandInteraction) {
+  Sentry.configureScope((scope) => {
+    scope.setUser({
+      id: interaction.user.id,
+      username: interaction.user.username,
+    });
+  });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
     name: '/info',
@@ -27,6 +33,7 @@ async function executeRun(interaction: CommandInteraction) {
   await interaction.followUp({ ephemeral: true, content });
 
   transaction.finish();
+  Sentry.setUser(null);
 }
 
 const Info: SlashCommand = {

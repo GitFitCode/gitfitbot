@@ -14,6 +14,12 @@ const TTT = require('discord-tictactoe');
 const game = new TTT({ language: 'en' });
 
 async function executeRun(interaction: CommandInteraction) {
+  Sentry.configureScope((scope) => {
+    scope.setUser({
+      id: interaction.user.id,
+      username: interaction.user.username,
+    });
+  });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
     name: '/tictactoe',
@@ -22,6 +28,7 @@ async function executeRun(interaction: CommandInteraction) {
   game.handleInteraction(interaction);
 
   transaction.finish();
+  Sentry.setUser(null);
 }
 
 const TicTacToe: SlashCommand = {

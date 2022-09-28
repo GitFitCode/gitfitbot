@@ -148,6 +148,12 @@ async function handleThreadClosing(
 }
 
 async function executeRun(interaction: CommandInteraction) {
+  Sentry.configureScope((scope) => {
+    scope.setUser({
+      id: interaction.user.id,
+      username: interaction.user.username,
+    });
+  });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
     name: '/support',
@@ -189,6 +195,7 @@ async function executeRun(interaction: CommandInteraction) {
     await handleThreadCreation(issueText, interaction);
   }
   transaction.finish();
+  Sentry.setUser(null);
 }
 
 const Support: SlashCommand = {

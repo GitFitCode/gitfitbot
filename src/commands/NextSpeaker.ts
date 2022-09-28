@@ -33,6 +33,12 @@ function setNextSpeaker() {
 }
 
 async function executeRun(interaction: CommandInteraction) {
+  Sentry.configureScope((scope) => {
+    scope.setUser({
+      id: interaction.user.id,
+      username: interaction.user.username,
+    });
+  });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
     name: '/next-speaker',
@@ -96,6 +102,7 @@ async function executeRun(interaction: CommandInteraction) {
     interaction.followUp({ ephemeral: true, content });
   }
   transaction.finish();
+  Sentry.setUser(null);
 }
 
 const NextSpeaker: SlashCommand = {
