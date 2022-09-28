@@ -41,10 +41,7 @@ const config = require('gfc-vault-config');
  * @param issueText Text entered by the user.
  * @param interaction CommandInteraction
  */
-async function handleThreadCreation(
-  issueText: string | number | boolean | undefined,
-  interaction: CommandInteraction,
-) {
+async function handleThreadCreation(issueText: string, interaction: CommandInteraction) {
   const author = interaction.user;
   const authorUsername = interaction.user.username;
   const channelID = interaction.channel?.id ?? '';
@@ -192,7 +189,7 @@ async function executeRun(interaction: CommandInteraction) {
     const { value: issueText } = interaction.options.get('issue', true);
 
     // Create a thread to handle the support ticket request.
-    await handleThreadCreation(issueText, interaction);
+    await handleThreadCreation(String(issueText), interaction);
   }
   transaction.finish();
   Sentry.setUser(null);

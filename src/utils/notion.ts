@@ -115,7 +115,7 @@ async function updateNotionDBEntry(
  * @returns ID of the newly created entry in Notion DB.
  */
 async function createNotionDBEntry(
-  issueText: string | number | boolean | undefined,
+  issueText: string,
   authorUsername: string,
   channelID: string,
 ): Promise<string> {

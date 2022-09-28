@@ -25,13 +25,13 @@ async function sendJoke(interaction: CommandInteraction, chosenCategory: string)
   const jokeJSON = await response.body.json();
   let content = "I'm back!";
 
-  // Check if the joke is a twopart.
+  // Check if the joke is twopart.
   if (jokeJSON.type === 'twopart') {
-    // JOKE IS A TWOPART
+    // JOKE IS TWOPART
 
     content = `${jokeJSON.setup}\n||${jokeJSON.delivery}||`;
   } else {
-    // JOKE IS A SINGLE
+    // JOKE IS SINGLE
 
     content = `${jokeJSON.joke}`;
   }
@@ -55,15 +55,7 @@ async function executeRun(interaction: CommandInteraction) {
   try {
     const { value: chosenCategory } = interaction.options.get('category', true);
 
-    // Check if the type of chosenCategory is string.
-    if (typeof chosenCategory === 'string') {
-      // TYPE OF chosenCategory IS STRING
-
-      await sendJoke(interaction, chosenCategory);
-    } else {
-      // TYPE OF chosenCategory IS NOT STRING
-      // NO-OP
-    }
+    await sendJoke(interaction, String(chosenCategory));
   } catch (error: any) {
     if (error.code === 'CommandInteractionOptionNotFound') {
       // None of the options were selected.
