@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/node';
 import { RewriteFrames } from '@sentry/integrations';
 import start from './src/Bot';
+import { version } from './package.json';
 
 require('dotenv').config();
 const config = require('gfc-vault-config');
@@ -17,5 +18,7 @@ Sentry.init({
     }),
   ],
 });
+
+Sentry.setTag('bot_version', version);
 
 start();

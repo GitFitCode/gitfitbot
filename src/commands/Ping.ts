@@ -11,6 +11,12 @@ import { SlashCommand } from '../Command';
 require('@sentry/tracing');
 
 async function executeRun(client: Client, interaction: CommandInteraction) {
+  Sentry.configureScope((scope) => {
+    scope.setUser({
+      id: interaction.user.id,
+      username: interaction.user.username,
+    });
+  });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
     name: '/ping',
@@ -29,6 +35,7 @@ async function executeRun(client: Client, interaction: CommandInteraction) {
   );
 
   transaction.finish();
+  Sentry.setUser(null);
 }
 
 const Ping: SlashCommand = {
