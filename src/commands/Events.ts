@@ -48,63 +48,49 @@ async function handleEventCreation(
   const { value: ampm } = interaction.options.get('ampm', true);
   const { value: timezone } = interaction.options.get('timezone', true);
 
-  if (
-    typeof year === 'number' &&
-    typeof month === 'number' &&
-    typeof day === 'number' &&
-    typeof hour === 'number' &&
-    typeof minute === 'number' &&
-    typeof ampm === 'string' &&
-    typeof timezone === 'string'
-  ) {
-    const retrievedDate = `${year}-${month}-${day} ${hour}:${minute} ${ampm} ${timezone}`;
+  const retrievedDate = `${year}-${month}-${day} ${hour}:${minute} ${ampm} ${timezone}`;
 
-    // Check if the date provided by user is valid.
-    if (dayjs(retrievedDate).isValid()) {
-      // DATE IS VALID
+  // Check if the date provided by user is valid.
+  if (dayjs(retrievedDate).isValid()) {
+    // DATE IS VALID
 
-      const date = dayjs(retrievedDate).toDate();
+    const date = dayjs(retrievedDate).toDate();
 
-      const now = dayjs().toDate();
-      const difference = date.valueOf() - now.valueOf();
-      const formatted = dayjs.duration(difference, 'ms').format();
+    const now = dayjs().toDate();
+    const difference = date.valueOf() - now.valueOf();
+    const formatted = dayjs.duration(difference, 'ms').format();
 
-      if (difference > 0) {
-        // DATE IS VALID AND INTO THE FUTURE
+    if (difference > 0) {
+      // DATE IS VALID AND INTO THE FUTURE
 
-        // Build options required for the event.
-        const eventOptions: GuildScheduledEventCreateOptions = {
-          name: eventName,
-          scheduledStartTime: date,
-          privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
-          entityType: GuildScheduledEventEntityType.Voice,
-          description: eventDescription,
-          channel: eventChannelID,
-        };
+      // Build options required for the event.
+      const eventOptions: GuildScheduledEventCreateOptions = {
+        name: eventName,
+        scheduledStartTime: date,
+        privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
+        entityType: GuildScheduledEventEntityType.Voice,
+        description: eventDescription,
+        channel: eventChannelID,
+      };
 
-        // Retrieve the discord event manager.
-        const guildScheduledEventManger = interaction.guild?.scheduledEvents;
-        // Create an event with the given options.
-        await guildScheduledEventManger?.create(eventOptions);
+      // Retrieve the discord event manager.
+      const guildScheduledEventManger = interaction.guild?.scheduledEvents;
+      // Create an event with the given options.
+      await guildScheduledEventManger?.create(eventOptions);
 
-        const content = `${eventName} event scheduled!`;
+      const content = `${eventName} event scheduled!`;
 
-        await interaction.followUp({ content });
-      } else {
-        // DATE IS VALID BUT NOT INTO THE FUTURE
-
-        const content = `The date you gave me is ${formatted} into the past.`;
-
-        await interaction.followUp({ content });
-      }
+      await interaction.followUp({ content });
     } else {
-      // DATE IS NOT VALID
+      // DATE IS VALID BUT NOT INTO THE FUTURE
 
-      const content = 'Invalid date provided!';
+      const content = `The date you gave me is ${formatted} into the past.`;
 
       await interaction.followUp({ content });
     }
   } else {
+    // DATE IS NOT VALID
+
     const content = 'Invalid date provided!';
 
     await interaction.followUp({ content });
