@@ -39,11 +39,9 @@ async function sendJoke(interaction: CommandInteraction, chosenCategory: string)
 }
 
 async function executeRun(interaction: CommandInteraction) {
-  Sentry.configureScope((scope) => {
-    scope.setUser({
-      id: interaction.user.id,
-      username: interaction.user.username,
-    });
+  Sentry.setUser({
+    id: interaction.user.id,
+    username: interaction.user.username,
   });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
@@ -54,12 +52,19 @@ async function executeRun(interaction: CommandInteraction) {
   try {
     const { value: chosenCategory } = interaction.options.get('category', true);
 
+    transaction.setData('category', String(chosenCategory));
+    transaction.setTag('category', String(chosenCategory));
+
     await sendJoke(interaction, String(chosenCategory));
   } catch (error: any) {
     if (error.code === 'CommandInteractionOptionNotFound') {
       // None of the options were selected.
 
       const chosenCategory: string = 'Any';
+
+      transaction.setData('category', String(chosenCategory));
+      transaction.setTag('category', String(chosenCategory));
+
       await sendJoke(interaction, chosenCategory);
     } else {
       console.log(error.body);

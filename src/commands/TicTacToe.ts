@@ -14,21 +14,32 @@ const TTT = require('discord-tictactoe');
 const game = new TTT({ language: 'en' });
 
 async function executeRun(interaction: CommandInteraction) {
-  Sentry.configureScope((scope) => {
-    scope.setUser({
-      id: interaction.user.id,
-      username: interaction.user.username,
-    });
+  Sentry.setUser({
+    id: interaction.user.id,
+    username: interaction.user.username,
   });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
     name: '/tictactoe',
   });
 
-  game.handleInteraction(interaction);
+  // Try & catch required for empty input here due to `opponent` option being optional.
+  try {
+    const { value: opponent } = interaction.options.get('opponent', true);
 
-  transaction.finish();
-  Sentry.setUser(null);
+    transaction.setData('opponent', String(opponent));
+    transaction.setTag('opponent', String(opponent));
+  } catch (error: any) {
+    if (error.code === 'CommandInteractionOptionNotFound') {
+      transaction.setData('opponent', 'AI');
+      transaction.setTag('opponent', 'AI');
+    }
+  } finally {
+    game.handleInteraction(interaction);
+
+    transaction.finish();
+    Sentry.setUser(null);
+  }
 }
 
 const TicTacToe: SlashCommand = {
