@@ -16,6 +16,7 @@ import {
 } from 'discord.js';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+import { Transaction } from '@sentry/types';
 import { SlashCommand } from '../Command';
 import { buildEventOptions } from '../utils';
 
@@ -37,6 +38,7 @@ async function handleEventCreation(
   eventName: string,
   eventDescription: string,
   eventChannelID: string,
+  sentryTransaction: Transaction,
 ) {
   // Snowflake structure received from get(), destructured and renamed.
   // https://discordjs.guide/interactions/slash-commands.html#parsing-options
@@ -49,6 +51,7 @@ async function handleEventCreation(
   const { value: timezone } = interaction.options.get('timezone', true);
 
   const retrievedDate = `${year}-${month}-${day} ${hour}:${minute} ${ampm} ${timezone}`;
+  sentryTransaction.setData('date', retrievedDate);
 
   // Check if the date provided by user is valid.
   if (dayjs(retrievedDate).isValid()) {
@@ -79,25 +82,114 @@ async function handleEventCreation(
       await guildScheduledEventManger?.create(eventOptions);
 
       const content = `${eventName} event scheduled!`;
-
       await interaction.followUp({ content });
+
+      sentryTransaction.setData('success', true);
     } else {
       // DATE IS VALID BUT NOT INTO THE FUTURE
 
       const content = `The date you gave me is ${formatted} into the past.`;
-
       await interaction.followUp({ content });
+
+      sentryTransaction.setData('success', false);
     }
   } else {
     // DATE IS NOT VALID
 
     const content = 'Invalid date provided!';
-
     await interaction.followUp({ content });
+
+    sentryTransaction.setData('success', false);
   }
 }
 
+async function handleListEvent(interaction: CommandInteraction) {
+  const transactionForList = Sentry.startTransaction({
+    op: 'transaction',
+    name: '/events list',
+  });
+
+  const discordEventManager = interaction.guild?.scheduledEvents;
+  const scheduledEvents = await discordEventManager?.fetch();
+
+  if (scheduledEvents && scheduledEvents?.size > 0) {
+    let content =
+      scheduledEvents.size === 1
+        ? `${scheduledEvents.size} event scheduled:\n`
+        : `${scheduledEvents.size} events scheduled:\n`;
+
+    for (let i = 0; i < scheduledEvents.size; i += 1) {
+      content = content.concat(
+        '\n',
+        scheduledEvents.size === 1 ? '' : `Event #${i + 1}`,
+        scheduledEvents.size === 1 ? '' : '\n',
+        `\`${scheduledEvents.at(i)?.name}\``,
+        '\n',
+        scheduledEvents.at(i)?.description ?? '',
+        '\n',
+        dayjs(scheduledEvents.at(i)?.scheduledStartTimestamp).toString(),
+        '\n',
+        '\n',
+      );
+    }
+
+    interaction.followUp({ ephemeral: true, content });
+  } else {
+    const content = 'No scheduled events currently.';
+    interaction.followUp({ ephemeral: true, content });
+  }
+  transactionForList.finish();
+}
+
+async function handleRetroEvent(interaction: CommandInteraction) {
+  const transactionForRetro = Sentry.startTransaction({
+    op: 'transaction',
+    name: '/events retro',
+  });
+
+  const eventName = 'GitFitCode Retrospective';
+  const eventDescription =
+    "Let's reflect on your last week's EBIs & WWWs and create some tangible action items!";
+  const eventChannelID = config.checkinsVoiceChannelId;
+
+  await handleEventCreation(
+    interaction,
+    eventName,
+    eventDescription,
+    eventChannelID,
+    transactionForRetro,
+  );
+
+  transactionForRetro.finish();
+}
+
+async function handleCodewarsEvent(interaction: CommandInteraction) {
+  const transactionForCodewars = Sentry.startTransaction({
+    op: 'transaction',
+    name: '/events codewars',
+  });
+
+  const eventName = 'GitFitCode Codewars';
+  const eventDescription = "Let's solve some katas on [codewars](https://www.codewars.com) !";
+  const eventChannelID = config.virtualOfficeVoiceChannelId;
+
+  await handleEventCreation(
+    interaction,
+    eventName,
+    eventDescription,
+    eventChannelID,
+    transactionForCodewars,
+  );
+
+  transactionForCodewars.finish();
+}
+
 async function executeRun(interaction: CommandInteraction) {
+  // TODO figure out a way to set user scope for all subcommands
+  // https://sentry.io/organizations/gitfitcode/performance/summary/events/?project=4503888464314368&query=transaction.duration%3A%3C15m&statsPeriod=24h&transaction=%2Fevents+codewars
+
+  // TODO also add success and date as tags (in addition to data)
+
   Sentry.configureScope((scope) => {
     scope.setUser({
       id: interaction.user.id,
@@ -114,75 +206,17 @@ async function executeRun(interaction: CommandInteraction) {
 
   // Check if subcommand `list` was fired.
   if (commandInput.startsWith('list')) {
-    const transactionForList = Sentry.startTransaction({
-      op: 'transaction',
-      name: '/events list',
-    });
-
-    const discordEventManager = interaction.guild?.scheduledEvents;
-    const scheduledEvents = await discordEventManager?.fetch();
-
-    if (scheduledEvents && scheduledEvents?.size > 0) {
-      let content =
-        scheduledEvents.size === 1
-          ? `${scheduledEvents.size} event scheduled:\n`
-          : `${scheduledEvents.size} events scheduled:\n`;
-
-      for (let i = 0; i < scheduledEvents.size; i += 1) {
-        content = content.concat(
-          '\n',
-          scheduledEvents.size === 1 ? '' : `Event #${i + 1}`,
-          scheduledEvents.size === 1 ? '' : '\n',
-          `\`${scheduledEvents.at(i)?.name}\``,
-          '\n',
-          scheduledEvents.at(i)?.description ?? '',
-          '\n',
-          dayjs(scheduledEvents.at(i)?.scheduledStartTimestamp).toString(),
-          '\n',
-          '\n',
-        );
-      }
-
-      interaction.followUp({ ephemeral: true, content });
-    } else {
-      const content = 'No scheduled events currently.';
-
-      interaction.followUp({ ephemeral: true, content });
-    }
-    transactionForList.finish();
+    handleListEvent(interaction);
   }
 
   // Check if subcommand `retro` was fired.
   if (commandInput.startsWith('retro')) {
-    const transactionForRetro = Sentry.startTransaction({
-      op: 'transaction',
-      name: '/events retro',
-    });
-
-    const eventName = 'GitFitCode Retrospective';
-    const eventDescription =
-      "Let's reflect on your last week's EBIs & WWWs and create some tangible action items!";
-    const eventChannelID = config.checkinsVoiceChannelId;
-
-    await handleEventCreation(interaction, eventName, eventDescription, eventChannelID);
-
-    transactionForRetro.finish();
+    handleRetroEvent(interaction);
   }
 
   // Check if subcommand `codewars` was fired.
   if (commandInput.startsWith('codewars')) {
-    const transactionForCodewars = Sentry.startTransaction({
-      op: 'transaction',
-      name: '/events codewars',
-    });
-
-    const eventName = 'GitFitCode Codewars';
-    const eventDescription = "Let's solve some katas on [codewars](https://www.codewars.com)!";
-    const eventChannelID = config.virtualOfficeVoiceChannelId;
-
-    await handleEventCreation(interaction, eventName, eventDescription, eventChannelID);
-
-    transactionForCodewars.finish();
+    handleCodewarsEvent(interaction);
   }
 
   transactionForEvents.finish();

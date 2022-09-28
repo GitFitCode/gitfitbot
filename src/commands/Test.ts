@@ -23,7 +23,6 @@ async function executeRun(interaction: CommandInteraction) {
   });
 
   const content = 'Test.';
-
   await interaction.followUp({ ephemeral: true, content });
 
   transaction.finish();
