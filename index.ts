@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/node';
 import { RewriteFrames } from '@sentry/integrations';
-import start from './src/Bot';
+import { start, stop } from './src/Bot';
 import { version } from './package.json';
 
 require('dotenv').config();
@@ -22,3 +22,8 @@ Sentry.init({
 Sentry.setTag('bot_version', version);
 
 start();
+
+process.on('SIGINT', (code) => {
+  stop(code);
+  Sentry.close(2000).then(() => process.exit());
+});
