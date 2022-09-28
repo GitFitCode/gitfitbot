@@ -13,11 +13,9 @@ import { version } from '../../package.json';
 require('@sentry/tracing');
 
 async function executeRun(interaction: CommandInteraction) {
-  Sentry.configureScope((scope) => {
-    scope.setUser({
-      id: interaction.user.id,
-      username: interaction.user.username,
-    });
+  Sentry.setUser({
+    id: interaction.user.id,
+    username: interaction.user.username,
   });
   const transaction = Sentry.startTransaction({
     op: 'transaction',

@@ -51,7 +51,9 @@ async function handleEventCreation(
   const { value: timezone } = interaction.options.get('timezone', true);
 
   const retrievedDate = `${year}-${month}-${day} ${hour}:${minute} ${ampm} ${timezone}`;
+
   sentryTransaction.setData('date', retrievedDate);
+  sentryTransaction.setTag('date', retrievedDate);
 
   // Check if the date provided by user is valid.
   if (dayjs(retrievedDate).isValid()) {
@@ -85,6 +87,7 @@ async function handleEventCreation(
       await interaction.followUp({ content });
 
       sentryTransaction.setData('success', true);
+      sentryTransaction.setTag('success', true);
     } else {
       // DATE IS VALID BUT NOT INTO THE FUTURE
 
@@ -92,6 +95,7 @@ async function handleEventCreation(
       await interaction.followUp({ content });
 
       sentryTransaction.setData('success', false);
+      sentryTransaction.setTag('success', false);
     }
   } else {
     // DATE IS NOT VALID
@@ -100,6 +104,7 @@ async function handleEventCreation(
     await interaction.followUp({ content });
 
     sentryTransaction.setData('success', false);
+    sentryTransaction.setTag('success', false);
   }
 }
 
@@ -185,16 +190,9 @@ async function handleCodewarsEvent(interaction: CommandInteraction) {
 }
 
 async function executeRun(interaction: CommandInteraction) {
-  // TODO figure out a way to set user scope for all subcommands
-  // https://sentry.io/organizations/gitfitcode/performance/summary/events/?project=4503888464314368&query=transaction.duration%3A%3C15m&statsPeriod=24h&transaction=%2Fevents+codewars
-
-  // TODO also add success and date as tags (in addition to data)
-
-  Sentry.configureScope((scope) => {
-    scope.setUser({
-      id: interaction.user.id,
-      username: interaction.user.username,
-    });
+  Sentry.setUser({
+    id: interaction.user.id,
+    username: interaction.user.username,
   });
   const transactionForEvents = Sentry.startTransaction({
     op: 'transaction',

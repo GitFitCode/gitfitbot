@@ -33,11 +33,9 @@ function setNextSpeaker() {
 }
 
 async function executeRun(interaction: CommandInteraction) {
-  Sentry.configureScope((scope) => {
-    scope.setUser({
-      id: interaction.user.id,
-      username: interaction.user.username,
-    });
+  Sentry.setUser({
+    id: interaction.user.id,
+    username: interaction.user.username,
   });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
@@ -54,20 +52,23 @@ async function executeRun(interaction: CommandInteraction) {
   mainAttendeesList.length = 0;
 
   if (voiceChannel.members.size !== 0) {
-    // THERE ARE ATTENDEES IN THE CHANNEL
+    // THERE IS AT LEAST 1 ATTENDEE IN THE CHANNEL
 
     // Get all currently connected members from the Check-Ins Channel.
     voiceChannel.members.forEach((member) => {
       mainAttendeesList.push(member.user.id);
     });
 
+    transaction.setData('total_attendees_count', mainAttendeesList.length);
+    transaction.setTag('total_attendees_count', mainAttendeesList.length);
+
     // Check if the retro is just getting started (i.e. no one has provided their update yet).
     if (attendeesCompletedRetroList.length === 0) {
-      // RETRO IS JUST GETTING STARTED; NO ATTENDEE HAS GIVEN AN UPDATE YET
+      // RETRO IS JUST GETTING STARTED; NO ATTENDEE HAS PROVIDED AN UPDATE YET
 
       setNextSpeaker();
     } else {
-      // RETRO ALREADY STARTED; ATLEAST 1 ATTENDEE HAS GIVEN THEIR UPDATE
+      // RETRO ALREADY STARTED; AT LEAST 1 ATTENDEE HAS PROVIDED THEIR UPDATE
 
       // Get difference between mainAttendeesList and attendeesCompletedRetroList.
       // https://stackoverflow.com/a/33034768
@@ -85,7 +86,7 @@ async function executeRun(interaction: CommandInteraction) {
         mainAttendeesList.length = 0;
         attendeesCompletedRetroList.length = 0;
       } else {
-        // RETRO IS NOT FINISHED YET; ATLEAST 1 ATTENDEE YET TO PROVIDE THEIR UPDATE
+        // RETRO IS NOT FINISHED YET; AT LEAST 1 ATTENDEE YET TO PROVIDE THEIR UPDATE
 
         setNextSpeaker();
       }

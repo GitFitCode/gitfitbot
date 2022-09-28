@@ -11,11 +11,9 @@ import { SlashCommand } from '../Command';
 require('@sentry/tracing');
 
 async function executeRun(client: Client, interaction: CommandInteraction) {
-  Sentry.configureScope((scope) => {
-    scope.setUser({
-      id: interaction.user.id,
-      username: interaction.user.username,
-    });
+  Sentry.setUser({
+    id: interaction.user.id,
+    username: interaction.user.username,
   });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
