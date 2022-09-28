@@ -36,13 +36,11 @@ function start() {
   client.login(config.discordBotToken);
 }
 
-process.on('SIGINT', (code) => {
+function stop(code: NodeJS.Signals) {
   // Log out, terminate connection to Discord and destroy the client.
   client.destroy();
 
   console.log(`\nExiting with code ${code}`);
+}
 
-  process.exit();
-});
-
-export default start;
+export { start, stop };
