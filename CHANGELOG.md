@@ -1,5 +1,17 @@
 
 
+# [1.8.0](https://github.com/GitFitCode/gitfitbot/compare/v1.7.1...v1.8.0) (2022-10-07)
+
+
+### Bug Fixes
+
+* fixed multiple crashes when creating support tickets ([2d1c78f](https://github.com/GitFitCode/gitfitbot/commit/2d1c78f22a1fa8bdd3372479910a8c092e69494e))
+
+
+### Features
+
+* added ability to clear all scheduled events ([937c55c](https://github.com/GitFitCode/gitfitbot/commit/937c55c5165bbc12da2d2a3d405b2133bca29624))
+
 # [1.7.0](https://github.com/GitFitCode/gitfitbot/compare/v1.6.0...v1.7.0) (2022-09-21)
 
 

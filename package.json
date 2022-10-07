@@ -1,6 +1,6 @@
 {
   "name": "gitfitbot",
-  "version": "1.7.1",
+  "version": "1.8.0",
   "description": "Discord bot for GitFitCode needs, written in TypeScript.",
   "scripts": {
     "build": "npm i && tsc -p tsconfig.production.json",
