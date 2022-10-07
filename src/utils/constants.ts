@@ -4,7 +4,7 @@ const THREAD_CLOSING_SUCCESSFUL_MESSAGE = 'Thread closed. It can still be re-ope
 const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1 = 'Creating a thread for ';
 const THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2 = '. Keep all your interactions in this thread. ';
 const THREAD_CREATION_ERROR_MESSAGE =
-  'Error! - Support tickets cannot be created inside threads! Please run this command in a channel.';
+  'Error! - Support tickets cannot be created inside threads or voice-text channels! Please run this command in a regular text channel.';
 const NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE =
   'Error! Channels cannot be closed. Please run this command in a support ticket thread created by the bot.';
 const NOT_THE_BOT_THREAD_FOR_CLOSING_ERROR_MESSAGE =

@@ -14,6 +14,7 @@ import {
   CacheType,
   ComponentType,
   ButtonStyle,
+  ChannelType,
 } from 'discord.js';
 import {
   CHECK_MARK_EMOJI,
@@ -152,7 +153,7 @@ async function executeRun(interaction: CommandInteraction) {
     name: '/support',
   });
 
-  // Can be a public/private text channel or public/private thread channel.
+  // Can be a public/private text/voice-text channel or public/private thread channel.
   const { channel } = interaction;
   const isThread = channel?.isThread();
 
@@ -172,13 +173,18 @@ async function executeRun(interaction: CommandInteraction) {
   } else if (!isThread && commandInput.startsWith('close')) {
     // COMMAND INVOKED FOR CLOSING A CHANNEL
 
-    // Send a followUp message.
+    // Send an ERROR followUp to the thread.
     await interaction.followUp({
       ephemeral: true,
       content: NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE,
     });
+  } else if (channel?.type !== ChannelType.GuildText && commandInput.startsWith('create')) {
+    // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A NON-REGULAR TEXT CHANNEL
+
+    // Send an ERROR followUp to the thread.
+    interaction.followUp({ ephemeral: true, content: THREAD_CREATION_ERROR_MESSAGE });
   } else {
-    // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A CHANNEL
+    // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A REGULAR TEXT CHANNEL
 
     // Snowflake structure received from get(), destructured and renamed.
     // https://discordjs.guide/interactions/slash-commands.html#parsing-options
@@ -205,6 +211,7 @@ const Support: SlashCommand = {
           description: 'Issue summary.',
           type: ApplicationCommandOptionType.String,
           required: true,
+          maxLength: 100,
         },
       ],
     },
