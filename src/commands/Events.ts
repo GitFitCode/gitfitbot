@@ -13,6 +13,9 @@ import {
   GuildScheduledEventCreateOptions,
   GuildScheduledEventEntityType,
   GuildScheduledEventPrivacyLevel,
+  ChannelType,
+  Collection,
+  Role,
 } from 'discord.js';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -83,7 +86,7 @@ async function handleEventCreation(
       // Create an event with the given options.
       await guildScheduledEventManger?.create(eventOptions);
 
-      const content = `${eventName} event scheduled!`;
+      const content = `\`${eventName}\` event scheduled!`;
       await interaction.followUp({ content });
 
       sentryTransaction.setData('success', true);
@@ -108,6 +111,10 @@ async function handleEventCreation(
   }
 }
 
+/**
+ * Function to list all scheduled events in the discord server.
+ * @param interaction CommandInteraction
+ */
 async function handleListEvent(interaction: CommandInteraction) {
   const transactionForList = Sentry.startTransaction({
     op: 'transaction',
@@ -140,12 +147,16 @@ async function handleListEvent(interaction: CommandInteraction) {
 
     interaction.followUp({ ephemeral: true, content });
   } else {
-    const content = 'No scheduled events currently.';
+    const content = 'No events have been scheduled currently.';
     interaction.followUp({ ephemeral: true, content });
   }
   transactionForList.finish();
 }
 
+/**
+ * Function to build information for scheduling a retrospective event in the discord server.
+ * @param interaction CommandInteraction
+ */
 async function handleRetroEvent(interaction: CommandInteraction) {
   const transactionForRetro = Sentry.startTransaction({
     op: 'transaction',
@@ -168,6 +179,10 @@ async function handleRetroEvent(interaction: CommandInteraction) {
   transactionForRetro.finish();
 }
 
+/**
+ * Function to build information for scheduling a codewars event in the discord server.
+ * @param interaction CommandInteraction
+ */
 async function handleCodewarsEvent(interaction: CommandInteraction) {
   const transactionForCodewars = Sentry.startTransaction({
     op: 'transaction',
@@ -175,7 +190,7 @@ async function handleCodewarsEvent(interaction: CommandInteraction) {
   });
 
   const eventName = 'GitFitCode Codewars';
-  const eventDescription = "Let's solve some katas on [codewars](https://www.codewars.com) !";
+  const eventDescription = "Let's solve some katas on https://www.codewars.com !";
   const eventChannelID = config.virtualOfficeVoiceChannelId;
 
   await handleEventCreation(
@@ -185,6 +200,81 @@ async function handleCodewarsEvent(interaction: CommandInteraction) {
     eventChannelID,
     transactionForCodewars,
   );
+
+  transactionForCodewars.finish();
+}
+
+/**
+ * Function to build information for scheduling a custom event in the discord server.
+ * @param interaction CommandInteraction
+ */
+async function handleCustomEvent(interaction: CommandInteraction) {
+  const transactionForCodewars = Sentry.startTransaction({
+    op: 'transaction',
+    name: '/events custom',
+  });
+
+  // Snowflake structure received from get(), destructured and renamed.
+  // https://discordjs.guide/interactions/slash-commands.html#parsing-options
+  const { value: name } = interaction.options.get('name', true);
+  const { value: description } = interaction.options.get('desc', true);
+  const { value: channel } = interaction.options.get('voice-channel', true);
+
+  // Fetch the channel object.
+  const channelObj = await interaction.guild?.channels.fetch(String(channel));
+
+  if (channelObj?.type !== ChannelType.GuildVoice) {
+    const content = 'Please select a voice channel!';
+
+    interaction.followUp({ ephemeral: true, content });
+  } else {
+    await handleEventCreation(
+      interaction,
+      String(name),
+      String(description),
+      String(channel),
+      transactionForCodewars,
+    );
+  }
+
+  transactionForCodewars.finish();
+}
+
+/**
+ * Function to clear all scheduled events from the discord server.
+ * @param interaction CommandInteraction
+ */
+async function handleClearEvent(interaction: CommandInteraction) {
+  const transactionForCodewars = Sentry.startTransaction({
+    op: 'transaction',
+    name: '/events clear',
+  });
+
+  const roles = interaction.member?.roles.valueOf() as Collection<string, Role>;
+  const foundAdminRole = roles.find((role) => role.id === config.adminRoleID);
+
+  if (foundAdminRole) {
+    const eventManager = interaction.guild?.scheduledEvents;
+    const events = await eventManager?.fetch();
+
+    if (events && events.size > 0) {
+      events.forEach(async (event) => {
+        await event.delete();
+      });
+
+      const content = 'All events have been cleared!';
+
+      interaction.followUp({ ephemeral: true, content });
+    } else {
+      const content = 'No events found!';
+
+      interaction.followUp({ ephemeral: true, content });
+    }
+  } else {
+    const content = 'Only admins can use this command!';
+
+    interaction.followUp({ ephemeral: true, content });
+  }
 
   transactionForCodewars.finish();
 }
@@ -217,6 +307,16 @@ async function executeRun(interaction: CommandInteraction) {
     handleCodewarsEvent(interaction);
   }
 
+  // Check if subcommand `custom` was fired.
+  if (commandInput.startsWith('custom')) {
+    handleCustomEvent(interaction);
+  }
+
+  // Check if subcommand `clear` was fired.
+  if (commandInput.startsWith('clear')) {
+    handleClearEvent(interaction);
+  }
+
   transactionForEvents.finish();
   Sentry.setUser(null);
 }
@@ -225,6 +325,32 @@ const Events: SlashCommand = {
   name: 'events',
   description: 'Helper slash command for managing GFC events.',
   options: [
+    {
+      name: 'custom',
+      description: 'Schedule a custom event.',
+      type: ApplicationCommandOptionType.Subcommand,
+      options: [
+        {
+          name: 'name',
+          description: 'Name of the custom event.',
+          type: ApplicationCommandOptionType.String,
+          required: true,
+        },
+        {
+          name: 'desc',
+          description: 'Description of the custom event.',
+          type: ApplicationCommandOptionType.String,
+          required: true,
+        },
+        {
+          name: 'voice-channel',
+          description: 'Name of the channel to schedule the custom event in.',
+          type: ApplicationCommandOptionType.Channel,
+          required: true,
+        },
+        ...buildEventOptions('custom'),
+      ],
+    },
     {
       name: 'list',
       description: 'List all scheduled events.',
@@ -241,6 +367,11 @@ const Events: SlashCommand = {
       description: 'Schedule a GFC codewars event.',
       type: ApplicationCommandOptionType.Subcommand,
       options: buildEventOptions('codewars'),
+    },
+    {
+      name: 'clear',
+      description: 'Clear all scheduled events (admins only).',
+      type: ApplicationCommandOptionType.Subcommand,
     },
   ],
   run: async (_client: Client, interaction: CommandInteraction) => {
