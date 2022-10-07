@@ -34,6 +34,7 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
   ADMIN_2_DISCORD_ID=
 
   DISCORD_SERVER_ID=
+  ADMIN_ROLE_ID=
   GENERAL_CHAT_CHANNEL_ID=
   CHECKINS_VOICE_CHANNEL_ID=
   FIRST_RESPONDERS_ROLE_ID=
@@ -57,6 +58,7 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
   - `ADMIN_2_DISCORD_ID` - (Required) - ID of another admin of the GFC discord server.
 
   - `DISCORD_SERVER_ID` - (Required) - ID of the server where this bot is invited.
+  - `ADMIN_ROLE_ID` - (Required) - ID of the admin role in the server.
   - `GENERAL_CHAT_CHANNEL_ID` - (Required) - ID of the general chat channel in the GFC discord server.
   - `CHECKINS_VOICE_CHANNEL_ID` - (Required) - ID of the check-ins voice channel in the GFC discord server.
   - `FIRST_RESPONDERS_ROLE_ID` - (Required) - ID of the role `@First-Responders`.
