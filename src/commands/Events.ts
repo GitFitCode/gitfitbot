@@ -2,7 +2,7 @@
 /**
  * Helper slash command for managing GFC events.
  *
- * To trigger, type `/events` on the discord server.
+ * To trigger, type `/events` in the discord server.
  */
 
 import * as Sentry from '@sentry/node';

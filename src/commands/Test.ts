@@ -1,7 +1,7 @@
 /**
  * Helper slash command for dev mode that does nothing in live.
  *
- * To trigger, type `/test` on the discord server.
+ * To trigger, type `/test` in the discord server.
  */
 
 import * as Sentry from '@sentry/node';

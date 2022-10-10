@@ -17,7 +17,7 @@ type NotionParagraph = {
  * @param data Data to be sent to Notion.
  * @returns Formatted Notion data structure.
  */
-function buildNotionBlockChildren(
+function buildNotionSupportTicketsBlockChildren(
   data: {
     message: string;
     author: string;
@@ -52,15 +52,16 @@ function buildNotionBlockChildren(
       },
     });
   });
+
   return children;
 }
 
 /**
- * Function to update an entry of the Notion DB with the provided data.
+ * Function to update an entry of the Notion Support Ticket DB with the provided data.
  * @param notionPageID ID of the Notion page.
  * @param data Data to be sent to Notion.
  */
-async function updateNotionDBEntry(
+async function updateNotionSupportTicketsDBEntry(
   notionPageID: string,
   data: {
     message: string;
@@ -94,7 +95,7 @@ async function updateNotionDBEntry(
       // Add the data from discord thread to the notion page.
       await notion.blocks.children.append({
         block_id: notionPageID,
-        children: buildNotionBlockChildren(data),
+        children: buildNotionSupportTicketsBlockChildren(data),
       });
     } else {
       // STATUS OF THE SUPPORT TICKET IS DONE
@@ -108,13 +109,13 @@ async function updateNotionDBEntry(
 }
 
 /**
- * Function to create a new entry in the Notion DB with the data provided.
+ * Function to create a new entry in the Notion Support Ticket DB with the data provided.
  * @param issueText The message.
  * @param authorUsername Username of the discord user who generated this message.
  * @param channelID Discord Channel ID where the message was generated.
  * @returns ID of the newly created entry in Notion DB.
  */
-async function createNotionDBEntry(
+async function createNotionSupportTicketsDBEntry(
   issueText: string,
   authorUsername: string,
   channelID: string,
@@ -161,6 +162,7 @@ async function createNotionDBEntry(
         },
       },
     });
+
     return response.id;
   } catch (error: any) {
     // https://github.com/makenotion/notion-sdk-js#handling-errors
@@ -170,4 +172,66 @@ async function createNotionDBEntry(
   }
 }
 
-export { createNotionDBEntry, updateNotionDBEntry };
+/**
+ * Function to create a new entry in the Notion Backlog DB with the data provided.
+ * @param summary Summary of the change management.
+ * @param authorUsername Username of the discord user who generated this message.
+ * @param process Process where change management is to be applied.
+ * @returns
+ */
+async function createNotionBacklogDBEntry(
+  summary: string,
+  authorUsername: string,
+  process: string,
+) {
+  try {
+    // Create a new page in notion.
+    const response = await notion.pages.create({
+      parent: { database_id: config.notionBacklogDatabaseId },
+      properties: {
+        title: {
+          title: [
+            {
+              text: {
+                content: summary,
+              },
+            },
+          ],
+        },
+        // Add the user's username.
+        Requestor: {
+          rich_text: [
+            {
+              text: {
+                content: authorUsername,
+              },
+            },
+          ],
+        },
+        // Add the Process.
+        Process: {
+          rich_text: [
+            {
+              text: {
+                content: process,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    return response.id;
+  } catch (error: any) {
+    // https://github.com/makenotion/notion-sdk-js#handling-errors
+    console.error(error.body);
+    Sentry.captureException(error);
+    return '';
+  }
+}
+
+export {
+  createNotionSupportTicketsDBEntry,
+  updateNotionSupportTicketsDBEntry,
+  createNotionBacklogDBEntry,
+};

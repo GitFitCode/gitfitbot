@@ -1,7 +1,7 @@
 /**
  * Slash command that starts a tictactoe game when triggered.
  *
- * To trigger, type `/tictactoe` on the discord server.
+ * To trigger, type `/tictactoe` in the discord server.
  */
 
 import * as Sentry from '@sentry/node';

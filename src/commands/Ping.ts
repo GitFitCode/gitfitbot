@@ -1,7 +1,7 @@
 /**
  * Slash command that checks whether the bot is alive when triggered.
  *
- * To trigger, type `/ping` on the discord server.
+ * To trigger, type `/ping` in the discord server.
  */
 
 import * as Sentry from '@sentry/node';
