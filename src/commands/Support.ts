@@ -2,7 +2,7 @@
 /**
  * Slash command that open a support ticket when triggered.
  *
- * To trigger, type `/support` on the discord server.
+ * To trigger, type `/support` in the discord server.
  */
 
 import * as Sentry from '@sentry/node';
@@ -26,8 +26,8 @@ import {
   THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2,
   THREAD_START_MESSAGE_SLICE_INDEX,
   // Notion DB helper functions
-  createNotionDBEntry,
-  updateNotionDBEntry,
+  createNotionSupportTicketsDBEntry,
+  updateNotionSupportTicketsDBEntry,
   NOT_THE_BOT_THREAD_FOR_CLOSING_ERROR_MESSAGE,
   THREAD_CLOSING_MESSAGE,
 } from '../utils';
@@ -48,7 +48,11 @@ async function handleThreadCreation(issueText: string, interaction: CommandInter
   const channelID = interaction.channel?.id ?? '';
 
   // Create an entry in the notion database and grab the page id.
-  const pageID: string = await createNotionDBEntry(issueText, authorUsername, channelID);
+  const pageID: string = await createNotionSupportTicketsDBEntry(
+    issueText,
+    authorUsername,
+    channelID,
+  );
 
   // Notion link uses pageID without hyphens.
   const pageIDWithoutHyphens = pageID.replaceAll('-', '');
@@ -123,7 +127,7 @@ async function handleThreadClosing(
     const notionPageID = String(starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX));
 
     // messages are ordered newest -> oldest
-    await updateNotionDBEntry(notionPageID, data.reverse());
+    await updateNotionSupportTicketsDBEntry(notionPageID, data.reverse());
 
     await interaction.editReply(THREAD_CLOSING_SUCCESSFUL_MESSAGE);
 
@@ -208,7 +212,7 @@ const Support: SlashCommand = {
       options: [
         {
           name: 'issue',
-          description: 'Issue summary.',
+          description: 'Issue summary (max length = 100).',
           type: ApplicationCommandOptionType.String,
           required: true,
           maxLength: 100,

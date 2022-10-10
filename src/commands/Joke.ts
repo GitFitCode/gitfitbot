@@ -1,7 +1,7 @@
 /**
  * Slash command that replies with a joke from https://jokeapi.dev/ when triggered.
  *
- * To trigger, type `/joke` on the discord server.
+ * To trigger, type `/joke` in the discord server.
  */
 
 import * as Sentry from '@sentry/node';
@@ -50,6 +50,8 @@ async function executeRun(interaction: CommandInteraction) {
 
   // Try & catch required for empty input here due to `category` option being optional.
   try {
+    // Snowflake structure received from get(), destructured and renamed.
+    // https://discordjs.guide/interactions/slash-commands.html#parsing-options
     const { value: chosenCategory } = interaction.options.get('category', true);
 
     transaction.setData('category', String(chosenCategory));

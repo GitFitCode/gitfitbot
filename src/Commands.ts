@@ -3,15 +3,26 @@
  */
 
 import { SlashCommand } from './Command';
+import ChangeManagement from './commands/ChangeManagement';
 import Events from './commands/Events';
 import Info from './commands/Info';
 import Joke from './commands/Joke';
 import NextSpeaker from './commands/NextSpeaker';
 import Ping from './commands/Ping';
 import Support from './commands/Support';
-import TicTacToe from './commands/TicTacToe';
 import Test from './commands/Test';
+import TicTacToe from './commands/TicTacToe';
 
-const Commands: SlashCommand[] = [Ping, Info, Joke, NextSpeaker, Support, Test, TicTacToe, Events];
+const Commands: SlashCommand[] = [
+  ChangeManagement,
+  Events,
+  Info,
+  Joke,
+  NextSpeaker,
+  Ping,
+  Support,
+  Test,
+  TicTacToe,
+];
 
 export default Commands;

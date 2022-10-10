@@ -1,7 +1,7 @@
 /**
  * Slash command that randomly picks a user in the Check-Ins Channel when triggered.
  *
- * To trigger, type `/next-speaker` on the discord server.
+ * To trigger, type `/next-speaker` in the discord server.
  */
 
 import * as Sentry from '@sentry/node';
