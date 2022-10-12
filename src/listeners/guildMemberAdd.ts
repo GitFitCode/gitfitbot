@@ -10,9 +10,9 @@ const config = require('gfc-vault-config');
 export default (client: Client): void => {
   client.on('guildMemberAdd', async (member) => {
     const channelID = config.generalChatChannelId;
-    const channelMessage = `"Successful people do what unsuccessful people are not willing to do. Don't wish it were easier; wish you were better."
+    const channelMessage = `"Successful people do what unsuccessful people are not willing to do. Don't wish it were easier; wish you were better!"
 
-Hey @everyone, <@${member.id}>  has joined the community! Give them that warm welcome and introduce yourselves when you got the chance. 😄`;
+Hey @everyone, <@${member.id}> has joined the community! Give them a warm welcome and introduce yourselves when you get the chance. 😄`;
     const channel: any = client.channels.cache.get(channelID);
 
     // Send a message to the General channel.g
