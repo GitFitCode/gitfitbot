@@ -103,7 +103,7 @@ async function updateNotionSupportTicketsDBEntry(
     }
   } catch (error: any) {
     // https://github.com/makenotion/notion-sdk-js#handling-errors
-    console.error(error.body);
+    console.error(error);
     Sentry.captureException(error);
   }
 }
@@ -166,7 +166,7 @@ async function createNotionSupportTicketsDBEntry(
     return response.id;
   } catch (error: any) {
     // https://github.com/makenotion/notion-sdk-js#handling-errors
-    console.error(error.body);
+    console.error(error);
     Sentry.captureException(error);
     return '';
   }
@@ -224,7 +224,7 @@ async function createNotionBacklogDBEntry(
     return response.id;
   } catch (error: any) {
     // https://github.com/makenotion/notion-sdk-js#handling-errors
-    console.error(error.body);
+    console.error(error);
     Sentry.captureException(error);
     return '';
   }

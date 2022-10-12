@@ -137,3 +137,6 @@ dist
 
 # Husky pre-commit hooks
 .husky/
+
+# PouchDB
+attendees_db/

@@ -6,30 +6,30 @@
 
 import * as Sentry from '@sentry/node';
 import { CommandInteraction, Client, ChannelType } from 'discord.js';
-import { RETRO_FINISHED_MESSAGE, RETRO_NEXT_SPEAKER_MESSAGE } from '../utils';
+import {
+  fetchAllAttendees,
+  fetchRetroCompletedAttendees,
+  fetchRetroNotCompletedAttendees,
+  insertAttendees,
+  resetAttendeesDatabase,
+  RETRO_FINISHED_MESSAGE,
+  RETRO_NEXT_SPEAKER_MESSAGE,
+  updateAttendeeRetroStatus,
+} from '../utils';
 import { SlashCommand } from '../Command';
 
 require('@sentry/tracing');
 require('dotenv').config();
 const config = require('gfc-vault-config');
 
-const mainAttendeesList: string[] = [];
-const attendeesCompletedRetroList: string[] = [];
-let nextSpeaker = '';
-let content = '';
-
 /**
- * Function to pick the next attendee randonly.
+ * Function to pick the next attendee randomly.
+ * @param attendees Array of attendees from which to pick a random one.
  */
-function setNextSpeaker() {
-  // Pick a member randomly.
-  const random = Math.floor(Math.random() * mainAttendeesList.length);
-  nextSpeaker = mainAttendeesList[random];
+function getRandomAttendee(attendees: (string | undefined)[]) {
+  const random = Math.floor(Math.random() * attendees.length);
 
-  content = `<@${nextSpeaker}> ${RETRO_NEXT_SPEAKER_MESSAGE}`;
-
-  // Add the speaker to attendeesCompletedRetroList.
-  attendeesCompletedRetroList.push(nextSpeaker);
+  return attendees[random];
 }
 
 async function executeRun(interaction: CommandInteraction) {
@@ -48,57 +48,67 @@ async function executeRun(interaction: CommandInteraction) {
   );
   if (voiceChannel?.type !== ChannelType.GuildVoice) return;
 
-  // Reset mainAttendeesList on every command call.
-  mainAttendeesList.length = 0;
-
   if (voiceChannel.members.size !== 0) {
     // THERE IS AT LEAST 1 ATTENDEE IN THE CHANNEL
 
-    // Get all currently connected members from the Check-Ins Channel.
-    voiceChannel.members.forEach((member) => {
-      mainAttendeesList.push(member.user.id);
-    });
+    let followUpMessageContent = '';
 
-    transaction.setData('total_attendees_count', mainAttendeesList.length);
-    transaction.setTag('total_attendees_count', mainAttendeesList.length);
+    // Get all currently connected members from the Check-Ins Channel and insert into the database.
+    const connectedMembers = voiceChannel.members.map((member) => member.user.id);
+    await insertAttendees(connectedMembers);
+
+    // Get all stored attendees.
+    const allAttendees = await fetchAllAttendees();
+
+    transaction.setData('total_attendees_count', allAttendees.length);
+    transaction.setTag('total_attendees_count', allAttendees.length);
+
+    // Get all attendees who have completed their retro.
+    const attendeesCompletedRetro = await fetchRetroCompletedAttendees();
 
     // Check if the retro is just getting started (i.e. no one has provided their update yet).
-    if (attendeesCompletedRetroList.length === 0) {
+    if (attendeesCompletedRetro.length === 0) {
       // RETRO IS JUST GETTING STARTED; NO ATTENDEE HAS PROVIDED AN UPDATE YET
 
-      setNextSpeaker();
+      const nextSpeaker = getRandomAttendee(allAttendees) as string;
+
+      followUpMessageContent = `<@${nextSpeaker}> ${RETRO_NEXT_SPEAKER_MESSAGE}`;
+
+      // Update retro status of the attendee who just provided their update.
+      await updateAttendeeRetroStatus(nextSpeaker);
     } else {
       // RETRO ALREADY STARTED; AT LEAST 1 ATTENDEE HAS PROVIDED THEIR UPDATE
 
-      // Get difference between mainAttendeesList and attendeesCompletedRetroList.
-      // https://stackoverflow.com/a/33034768
-      const attendeesYetToSpeakList = mainAttendeesList.filter(
-        (attendee) => !attendeesCompletedRetroList.includes(attendee),
-      );
+      const attendeesYetToSpeakList = await fetchRetroNotCompletedAttendees();
 
       // Check if the retro is over (i.e. all attendees have provided their update).
       if (attendeesYetToSpeakList.length === 0) {
         // RETRO IS FINISHED; ALL ATTENDEES HAVE PROVIDED THEIR UPDATE
 
-        content = RETRO_FINISHED_MESSAGE;
+        followUpMessageContent = RETRO_FINISHED_MESSAGE;
 
-        // Reset mainAttendeesList and attendeesCompletedRetroList.
-        mainAttendeesList.length = 0;
-        attendeesCompletedRetroList.length = 0;
+        // Delete the database to clear out all data.
+        await resetAttendeesDatabase();
       } else {
         // RETRO IS NOT FINISHED YET; AT LEAST 1 ATTENDEE YET TO PROVIDE THEIR UPDATE
 
-        setNextSpeaker();
+        const nextSpeaker = getRandomAttendee(attendeesYetToSpeakList) as string;
+
+        followUpMessageContent = `<@${nextSpeaker}> ${RETRO_NEXT_SPEAKER_MESSAGE}`;
+
+        // Update retro status of the attendee who just provided their update.
+        await updateAttendeeRetroStatus(nextSpeaker);
       }
     }
 
-    await interaction.followUp({ ephemeral: true, content });
+    await interaction.followUp({ ephemeral: true, content: followUpMessageContent });
   } else {
     // THERE ARE NO ATTENDEES IN THE CHANNEL
 
-    attendeesCompletedRetroList.length = 0;
+    // Delete the database to clear out all data.
+    await resetAttendeesDatabase();
 
-    content = 'Error! No attendees in the checkins voice channel!';
+    const content = 'Error! No attendees in the checkins voice channel!';
     interaction.followUp({ ephemeral: true, content });
   }
   transaction.finish();
@@ -109,7 +119,12 @@ const NextSpeaker: SlashCommand = {
   name: 'next-speaker',
   description: 'Randomly picks a user in the Check-Ins Channel.',
   run: async (_client: Client, interaction: CommandInteraction) => {
-    await executeRun(interaction);
+    try {
+      await executeRun(interaction);
+    } catch (error: any) {
+      console.error(error);
+      Sentry.captureException(error);
+    }
   },
 };
 
