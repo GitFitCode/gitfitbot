@@ -4,22 +4,34 @@ type Attendee = { discordID: string; retroDone: boolean };
 
 let attendeesDB: PouchDB.Database<Attendee>;
 
+/**
+ * Function to open a new connection to Attendees database.
+ */
 function openAttendeesDatabase() {
   attendeesDB = new PouchDB<Attendee>('attendees_db');
 }
 
+/**
+ * Function to close the current connection to Attendees database.
+ */
 async function closeAttendeesDatabase() {
   if (attendeesDB) {
     await attendeesDB.close();
   }
 }
 
+/**
+ * Function to delete all documents and destroy the Attendees database.
+ */
 async function resetAttendeesDatabase() {
   if (attendeesDB) {
     await attendeesDB.destroy();
   }
 }
 
+/**
+ * Function to fetch all documents from the Attendees database.
+ */
 async function fetchAllAttendees() {
   openAttendeesDatabase();
 
@@ -28,6 +40,9 @@ async function fetchAllAttendees() {
   return result.rows.length > 0 ? result.rows.map((row) => row.doc?.discordID) : [];
 }
 
+/**
+ * Function to fetch all documents with retroDone = true from the Attendees database.
+ */
 async function fetchRetroCompletedAttendees() {
   openAttendeesDatabase();
 
@@ -38,6 +53,9 @@ async function fetchRetroCompletedAttendees() {
     : [];
 }
 
+/**
+ * Function to fetch all documents with retroDone = false from the Attendees database.
+ */
 async function fetchRetroNotCompletedAttendees() {
   openAttendeesDatabase();
 
@@ -48,6 +66,9 @@ async function fetchRetroNotCompletedAttendees() {
     : [];
 }
 
+/**
+ * Function to add multiple documents into the Attendees database.
+ */
 async function bulkAddAttendees(attendees: string[]) {
   openAttendeesDatabase();
 
@@ -60,6 +81,10 @@ async function bulkAddAttendees(attendees: string[]) {
   await attendeesDB.bulkDocs(attendeesDocs);
 }
 
+/**
+ * Function to add multiple documents ignoring duplicates.
+ * @param attendees Array of attendees to be added to the database.
+ */
 async function insertAttendees(attendees: string[]) {
   openAttendeesDatabase();
 
@@ -76,6 +101,9 @@ async function insertAttendees(attendees: string[]) {
   }
 }
 
+/**
+ * Function to update retro status of a document from the Attendees database.
+ */
 async function updateAttendeeRetroStatus(attendee: string) {
   openAttendeesDatabase();
 
