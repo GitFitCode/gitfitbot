@@ -24,8 +24,11 @@ async function closeAttendeesDatabase() {
  * Function to delete all documents and destroy the Attendees database.
  */
 async function resetAttendeesDatabase() {
-  if (attendeesDB) {
+  try {
+    await attendeesDB.info();
     await attendeesDB.destroy();
+  } catch (error) {
+    // NO-OP
   }
 }
 
