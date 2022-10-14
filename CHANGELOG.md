@@ -1,5 +1,19 @@
 
 
+# [1.9.0](https://github.com/GitFitCode/gitfitbot/compare/v1.8.0...v1.9.0) (2022-10-14)
+
+
+### Bug Fixes
+
+* fixed `/next-speaker` issues using PouchDB ([ed60ead](https://github.com/GitFitCode/gitfitbot/commit/ed60ead768632ecc7f15dc9459727339467b84b4))
+* fixed a crash when using `/next-speaker` ([ba5029d](https://github.com/GitFitCode/gitfitbot/commit/ba5029d1eba772911594c4ad64fadffcad661d5e))
+* prevent bot from being included in `/next-speaker` ([fb28bdd](https://github.com/GitFitCode/gitfitbot/commit/fb28bdd44bb3dffb38476e1515d09dc23dcec212))
+
+
+### Features
+
+* added a new command for feature/change management requests ([3174c51](https://github.com/GitFitCode/gitfitbot/commit/3174c51b297357f6fd90dad0c6a912ef468e2fc1))
+
 # [1.8.0](https://github.com/GitFitCode/gitfitbot/compare/v1.7.1...v1.8.0) (2022-10-07)
 
 
