@@ -54,7 +54,9 @@ async function executeRun(interaction: CommandInteraction) {
     let followUpMessageContent = '';
 
     // Get all currently connected members from the Check-Ins Channel and insert into the database.
-    const connectedMembers = voiceChannel.members.map((member) => member.user.id);
+    const connectedMembers = voiceChannel.members
+      .filter((member) => !member.user.bot)
+      .map((member) => member.user.id);
     await insertAttendees(connectedMembers);
 
     // Get all stored attendees.
