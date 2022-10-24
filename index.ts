@@ -1,10 +1,8 @@
 import * as Sentry from '@sentry/node';
 import { RewriteFrames } from '@sentry/integrations';
+import { config } from 'gfc-vault-config';
 import { start, stop } from './src/Bot';
 import { version } from './package.json';
-
-require('dotenv').config();
-const config = require('gfc-vault-config');
 
 Sentry.init({
   dsn: config.sentryDSN,

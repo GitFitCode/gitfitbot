@@ -1,7 +1,5 @@
 import { Client, GatewayIntentBits } from 'discord.js';
-
-require('dotenv').config();
-const config = require('gfc-vault-config');
+import { config } from 'gfc-vault-config';
 
 function delay(ms: number) {
   // eslint-disable-next-line no-promise-executor-return

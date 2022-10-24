@@ -29,7 +29,6 @@
     "discord-api-types": "latest",
     "discord-tictactoe": "latest",
     "discord.js": "latest",
-    "dotenv": "latest",
     "gfc-vault-config": "git+https://git@github.com/GitFitCode/gfc-vault-config.git",
     "pouchdb-node": "latest",
     "undici": "latest"

@@ -3,12 +3,10 @@
  */
 
 import { Client, GatewayIntentBits } from 'discord.js';
+import { config } from 'gfc-vault-config';
 import guildMemberAdd from './listeners/guildMemberAdd';
 import interactionCreate from './listeners/interactionCreate';
 import ready from './listeners/ready';
-
-const config = require('gfc-vault-config');
-require('dotenv').config();
 
 // A new instance of `Client`.
 const client = new Client({

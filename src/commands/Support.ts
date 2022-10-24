@@ -16,6 +16,7 @@ import {
   ButtonStyle,
   ChannelType,
 } from 'discord.js';
+import { config } from 'gfc-vault-config';
 import {
   CHECK_MARK_EMOJI,
   NOTION_PAGE_ID_DELIMITER,
@@ -34,8 +35,6 @@ import {
 import { SlashCommand } from '../Command';
 
 require('@sentry/tracing');
-require('dotenv').config();
-const config = require('gfc-vault-config');
 
 /**
  * Function to create a thread.

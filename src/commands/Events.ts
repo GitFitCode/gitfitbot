@@ -20,12 +20,11 @@ import {
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import { Transaction } from '@sentry/types';
+import { config } from 'gfc-vault-config';
 import { SlashCommand } from '../Command';
 import { buildEventOptions } from '../utils';
 
 require('@sentry/tracing');
-require('dotenv').config();
-const config = require('gfc-vault-config');
 
 dayjs.extend(duration);
 

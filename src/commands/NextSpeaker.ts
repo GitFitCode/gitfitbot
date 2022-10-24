@@ -6,6 +6,7 @@
 
 import * as Sentry from '@sentry/node';
 import { CommandInteraction, Client, ChannelType } from 'discord.js';
+import { config } from 'gfc-vault-config';
 import {
   fetchAllAttendees,
   fetchRetroCompletedAttendees,
@@ -19,8 +20,6 @@ import {
 import { SlashCommand } from '../Command';
 
 require('@sentry/tracing');
-require('dotenv').config();
-const config = require('gfc-vault-config');
 
 /**
  * Function to pick the next attendee randomly.

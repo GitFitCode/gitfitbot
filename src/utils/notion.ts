@@ -1,9 +1,7 @@
 import * as Sentry from '@sentry/node';
+import { config } from 'gfc-vault-config';
 import { Client } from '@notionhq/client';
 import { NOTION_STATUS_DONE, NOTION_STATUS_OPEN } from './constants';
-
-require('dotenv').config();
-const config = require('gfc-vault-config');
 
 const notion = new Client({ auth: config.notionKey });
 const databaseId = config.notionSupportTicketsDatabaseId;

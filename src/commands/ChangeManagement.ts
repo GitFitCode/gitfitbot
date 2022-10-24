@@ -12,12 +12,11 @@ import {
   ButtonStyle,
   ComponentType,
 } from 'discord.js';
+import { config } from 'gfc-vault-config';
 import { createNotionBacklogDBEntry } from '../utils';
 import { SlashCommand } from '../Command';
 
 require('@sentry/tracing');
-require('dotenv').config();
-const config = require('gfc-vault-config');
 
 async function executeRun(interaction: CommandInteraction) {
   Sentry.setUser({

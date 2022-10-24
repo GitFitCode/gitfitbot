@@ -3,9 +3,7 @@
  */
 
 import { Client } from 'discord.js';
-
-require('dotenv').config();
-const config = require('gfc-vault-config');
+import { config } from 'gfc-vault-config';
 
 export default (client: Client): void => {
   client.on('guildMemberAdd', async (member) => {
