@@ -190,7 +190,7 @@ async function executeRun(interaction: CommandInteraction) {
     // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A REGULAR TEXT CHANNEL
 
     // Snowflake structure received from get(), destructured and renamed.
-    // https://discordjs.guide/interactions/slash-commands.html#parsing-options
+    // https://discordjs.guide/slash-commands/parsing-options.html
     const { value: issueText } = interaction.options.get('issue', true);
 
     // Create a thread to handle the support ticket request.

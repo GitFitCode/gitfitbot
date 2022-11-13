@@ -43,7 +43,7 @@ async function handleEventCreation(
   sentryTransaction: Transaction,
 ) {
   // Snowflake structure received from get(), destructured and renamed.
-  // https://discordjs.guide/interactions/slash-commands.html#parsing-options
+  // https://discordjs.guide/slash-commands/parsing-options.html
   const { value: year } = interaction.options.get('year', true);
   const { value: month } = interaction.options.get('month', true);
   const { value: day } = interaction.options.get('day', true);
@@ -214,7 +214,7 @@ async function handleCustomEvent(interaction: CommandInteraction) {
   });
 
   // Snowflake structure received from get(), destructured and renamed.
-  // https://discordjs.guide/interactions/slash-commands.html#parsing-options
+  // https://discordjs.guide/slash-commands/parsing-options.html
   const { value: name } = interaction.options.get('name', true);
   const { value: description } = interaction.options.get('desc', true);
   const { value: channel } = interaction.options.get('voice-channel', true);

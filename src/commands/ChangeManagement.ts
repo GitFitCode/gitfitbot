@@ -29,7 +29,7 @@ async function executeRun(interaction: CommandInteraction) {
   });
 
   // Snowflake structure received from get(), destructured and renamed.
-  // https://discordjs.guide/interactions/slash-commands.html#parsing-options
+  // https://discordjs.guide/slash-commands/parsing-options.html
   const { value: process } = interaction.options.get('process', true);
   const { value: summary } = interaction.options.get('summary', true);
 
@@ -107,10 +107,9 @@ const ChangeManagement: SlashCommand = {
     },
     {
       name: 'summary',
-      description: 'Summary of the feature/change management request (max length = 100).',
+      description: 'Summary of the feature/change management request.',
       type: ApplicationCommandOptionType.String,
       required: true,
-      maxLength: 100,
     },
   ],
   run: async (_client: Client, interaction: CommandInteraction) => {
