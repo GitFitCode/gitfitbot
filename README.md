@@ -2,7 +2,7 @@
 
 ### What you'll need
 
-- [VSCode](https://code.visualstudio.com/)/[Intellij WebStorm](https://www.jetbrains.com/webstorm/)
+- [VSCode](https://code.visualstudio.com/) / [Intellij WebStorm](https://www.jetbrains.com/webstorm/)
 - [Nodejs LTS](https://nodejs.org/en/) (Please check package.json for the latest supported Node version)
 - [NPM](https://www.npmjs.com/)
 
@@ -59,7 +59,6 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
   - Now your local development environment is set up!
 
 - Get access to the `Digital Junkyard` development server on Discord from Sirrele, Pratik, Robert, Felix or Von.
-
 
 ### Run the bot
 
