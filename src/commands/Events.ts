@@ -24,7 +24,7 @@ import duration from 'dayjs/plugin/duration';
 import { Transaction } from '@sentry/types';
 import { config } from 'gfc-vault-config';
 import { SlashCommand } from '../Command';
-import { buildEventOptions } from '../utils';
+import { buildEventOptions, createEvent } from '../utils';
 
 require('@sentry/tracing');
 
@@ -61,16 +61,19 @@ async function handleEventCreation(
 
   // Check if the date provided by user is valid.
   if (dayjs(retrievedDate).isValid()) {
-    // DATE IS VALID
+    // DATE FORMAT IS VALID
 
     const date = dayjs(retrievedDate).toDate();
 
     const now = dayjs().toDate();
     const difference = date.valueOf() - now.valueOf();
-    const formatted = dayjs.duration(difference, 'ms').format();
+    const formattedDifference = dayjs.duration(difference, 'ms').format();
 
     if (difference > 0) {
-      // DATE IS VALID AND INTO THE FUTURE
+      // DATE FORMAT IS VALID AND INTO THE FUTURE
+
+      // TODO create a gcal event and retrieve ID/link
+      const eventDetails = await createEvent(eventName, eventDescription, date);
 
       // Build options required for the event.
       const eventOptions: GuildScheduledEventCreateOptions = {
@@ -115,16 +118,16 @@ async function handleEventCreation(
       sentryTransaction.setData('success', true);
       sentryTransaction.setTag('success', true);
     } else {
-      // DATE IS VALID BUT NOT INTO THE FUTURE
+      // DATE FORMAT IS VALID BUT INTO THE PAST
 
-      const content = `The date you gave me is ${formatted} into the past.`;
+      const content = `The date you gave me is ${formattedDifference} into the past.`;
       await interaction.followUp({ content });
 
       sentryTransaction.setData('success', false);
       sentryTransaction.setTag('success', false);
     }
   } else {
-    // DATE IS NOT VALID
+    // DATE FORMAT IS NOT VALID
 
     const content = 'Invalid date provided!';
     await interaction.followUp({ content });
