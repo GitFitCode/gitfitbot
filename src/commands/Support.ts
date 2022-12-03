@@ -86,6 +86,13 @@ async function handleThreadCreation(issueText: string, interaction: CommandInter
 
   // Send a message in the newly created thread.
   thread.send(`<@&${config.firstRespondersRoleId}> have been notified! ${author} hold tight.`);
+
+  const chatGPTResponse = await getChatGPTResponse(issueText);
+  await updateNotionSupportTicketsDBEntry(
+    pageID,
+    [{ message: chatGPTResponse, author: '' }],
+    false,
+  );
 }
 
 /**
@@ -126,7 +133,7 @@ async function handleThreadClosing(
     const notionPageID = String(starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX));
 
     // messages are ordered newest -> oldest
-    await updateNotionSupportTicketsDBEntry(notionPageID, data.reverse());
+    await updateNotionSupportTicketsDBEntry(notionPageID, data.reverse(), true);
 
     await interaction.editReply(THREAD_CLOSING_SUCCESSFUL_MESSAGE);
 
@@ -214,7 +221,7 @@ const Support: SlashCommand = {
           description: 'Issue summary (max length = 100).',
           type: ApplicationCommandOptionType.String,
           required: true,
-          maxLength: 100,
+          maxLength: 200,
         },
       ],
     },
