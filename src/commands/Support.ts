@@ -1,3 +1,4 @@
+/* eslint-disable implicit-arrow-linebreak */
 /* eslint-disable operator-linebreak */
 /**
  * Slash command that open a support ticket when triggered.
@@ -79,18 +80,40 @@ async function handleThreadCreation(issueText: string, interaction: CommandInter
 
   // Create a thread from the reply sent by the bot.
   const thread = await message.startThread({
-    name: String(issueText),
+    name: String(issueText.substring(0, 50)),
     autoArchiveDuration: 60,
     reason: 'Support Ticket',
   });
 
+  // We need to send the qtn to the thread so we can pick it up for chatGTP to respond.
+  thread.send(`#question: ${issueText}`);
   // Send a message in the newly created thread.
-  thread.send(`<@&${config.firstRespondersRoleId}> have been notified! ${author} hold tight.`);
+  thread.send(`
 
-  const chatGPTResponse = await getChatGPTResponse(issueText);
+    If you check out the Notion link above, you can see that your question has been
+    initially answered by our bot. If you have any follow up questions, please ask them
+    by using # + question in the thread.
+
+    Also, if you couldn't type out all of your question in the original command, you can
+    type it out in the thread with # + question. The bot will pick it up and respond in 
+    the notion document.
+
+    Notion: ${notionURL}
+    
+    If you are satisfied with the answer, please 
+    close the thread by using the support close command.
+
+    We have also notified <@&${config.firstRespondersRoleId}> that you need help ${author}   
+  `);
+
   await updateNotionSupportTicketsDBEntry(
     pageID,
-    [{ message: chatGPTResponse, author: '' }],
+    [
+      {
+        message: `#question: ${issueText}`,
+        author: authorUsername,
+      },
+    ],
     false,
   );
 }

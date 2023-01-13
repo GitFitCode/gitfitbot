@@ -1,3 +1,6 @@
+/* eslint-disable operator-linebreak */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable implicit-arrow-linebreak */
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable @typescript-eslint/indent */
 import {
@@ -6,8 +9,11 @@ import {
   ApplicationCommandSubGroupData,
   ApplicationCommandSubCommandData,
   ApplicationCommandOptionChoiceData,
+  Channel,
 } from 'discord.js';
 import dayjs from 'dayjs';
+import { config } from 'gfc-vault-config';
+import { NOTION_PAGE_ID_DELIMITER, THREAD_START_MESSAGE_SLICE_INDEX } from './constants';
 
 type GitFitCodeEventOptions = Exclude<
   ApplicationCommandOptionData,
@@ -119,4 +125,21 @@ function buildEventOptions(eventName: string): GitFitCodeEventOptions {
   ];
 }
 
-export { buildEventOptions };
+const getFormattedPrompt = (userProvidedPrompt: string) =>
+  `GFC Community Member: ${userProvidedPrompt} \n\n GFC Community Software Sparring Partner: `;
+
+const extractNotionPageIdFromTreadByChannel = async (clientChannel: any) => {
+  const starterMessage = await clientChannel.fetchStarterMessage();
+  // Message comes from a tread which was originally created by the gfc bot
+  const isMessageInAThread = clientChannel?.isThread();
+  const isAuthorAGFCBot =
+    starterMessage?.author?.id === config?.botId &&
+    starterMessage?.content?.includes(NOTION_PAGE_ID_DELIMITER);
+  if (starterMessage && isMessageInAThread && isAuthorAGFCBot) {
+    const notionPageID = String(starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX));
+    return notionPageID;
+  }
+  return '';
+};
+
+export { buildEventOptions, getFormattedPrompt, extractNotionPageIdFromTreadByChannel };
