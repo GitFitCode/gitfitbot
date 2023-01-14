@@ -2,6 +2,7 @@
 import { Configuration, OpenAIApi } from 'openai';
 import { config } from 'gfc-vault-config';
 import { getFormattedPrompt } from './helpers';
+import { OPEN_AI_CONFIG } from './constants';
 
 async function getChatOpenAIPromptResponse(prompt: string): Promise<string> {
   const configuration = new Configuration({
@@ -10,14 +11,14 @@ async function getChatOpenAIPromptResponse(prompt: string): Promise<string> {
   const openai = new OpenAIApi(configuration);
 
   const response = await openai.createCompletion({
-    model: 'text-davinci-003',
+    model: OPEN_AI_CONFIG.MODEL,
     prompt: getFormattedPrompt(prompt),
-    temperature: 0.7,
-    max_tokens: 1000,
-    top_p: 1.0,
-    frequency_penalty: 0.5,
-    presence_penalty: 0.0,
-    stop: ['GFC Community Member:'],
+    temperature: OPEN_AI_CONFIG.TEMPERATURE,
+    max_tokens: OPEN_AI_CONFIG.MAX_TOKENS,
+    top_p: OPEN_AI_CONFIG.TOP_P,
+    frequency_penalty: OPEN_AI_CONFIG.FREQ_PENALTY,
+    presence_penalty: OPEN_AI_CONFIG.PRECISION,
+    stop: OPEN_AI_CONFIG.STOP,
   });
 
   return response.data.choices[0].text || 'Unable to get response from OpenAI';

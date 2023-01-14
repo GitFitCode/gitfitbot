@@ -8,7 +8,7 @@ import {
   extractNotionPageIdFromTreadByChannel,
   getChatOpenAIPromptResponse,
   getFormattedPrompt,
-  SUPPORT_IDENTIFIER,
+  OPEN_AI_QUESTION_IDENTIFIER,
   updateNotionSupportTicketsDBEntry,
 } from '../utils';
 
@@ -29,29 +29,28 @@ export default (client: Client): void => {
       // We need to remove all text before the #question identifier.
       const indexOfQuestionIdentifier = message?.content?.indexOf('#question');
       const communityMemberMessage = message?.content?.slice(
-        indexOfQuestionIdentifier + SUPPORT_IDENTIFIER.length,
+        indexOfQuestionIdentifier + OPEN_AI_QUESTION_IDENTIFIER.length,
       );
 
       const formattedPrompt = getFormattedPrompt(communityMemberMessage);
       const openAIResponse = await getChatOpenAIPromptResponse(formattedPrompt);
+      const messageWithResponse = `
+        Qtn Asked: ${formattedPrompt}
+        --------------------
+        Response: ${openAIResponse}
+        --------------------
+      `;
       await updateNotionSupportTicketsDBEntry(
         notionPageId,
         [
           {
-            message: `
-              Qtn Asked: ${formattedPrompt}
-              --------------------
-              Response: ${openAIResponse}
-              --------------------
-            `,
+            message: messageWithResponse,
             author: 'GFC Community Software Sparring Partner',
           },
         ],
         false,
       );
-      await message?.reply(
-        'Your question has been sent to the GFC Community Software Sparring Partner! Please check notion for the response.',
-      );
+      await message?.reply(messageWithResponse);
     }
   });
 };
