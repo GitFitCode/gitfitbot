@@ -35,7 +35,7 @@ export default (client: Client): void => {
       const formattedPrompt = getFormattedPrompt(communityMemberMessage);
       const openAIResponse = await getChatOpenAIPromptResponse(formattedPrompt);
       const messageWithResponse = `
-        Qtn Asked: ${formattedPrompt}
+        Question Asked: ${formattedPrompt}
         --------------------
         Response: ${openAIResponse}
         --------------------
