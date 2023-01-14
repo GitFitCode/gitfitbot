@@ -21,7 +21,7 @@ async function getChatOpenAIPromptResponse(prompt: string): Promise<string> {
     stop: OPEN_AI_CONFIG.STOP,
   });
 
-  return response.data.choices[0].text || 'Unable to get response from OpenAI';
+  return response?.data?.choices?.[0]?.text || 'Unable to get response from OpenAI';
 }
 
 export { getChatOpenAIPromptResponse };
