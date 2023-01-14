@@ -23,11 +23,11 @@ export default (client: Client): void => {
       .catch(console.error);
 
     // Indicates that the community member is asking a software related question.
-    const containSupportIdentifier = message?.content?.includes('#question');
+    const containSupportIdentifier = message?.content?.includes(OPEN_AI_QUESTION_IDENTIFIER);
     if (containSupportIdentifier) {
       const notionPageId: string = await extractNotionPageIdFromTreadByChannel(msgChannel);
       // We need to remove all text before the #question identifier.
-      const indexOfQuestionIdentifier = message?.content?.indexOf('#question');
+      const indexOfQuestionIdentifier = message?.content?.indexOf(OPEN_AI_QUESTION_IDENTIFIER);
       const communityMemberMessage = message?.content?.slice(
         indexOfQuestionIdentifier + OPEN_AI_QUESTION_IDENTIFIER.length,
       );
