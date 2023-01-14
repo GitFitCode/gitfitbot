@@ -27,6 +27,7 @@ import {
   THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1,
   THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2,
   THREAD_START_MESSAGE_SLICE_INDEX,
+  OPEN_AI_QUESTION_IDENTIFIER,
   // Notion DB helper functions
   createNotionSupportTicketsDBEntry,
   updateNotionSupportTicketsDBEntry,
@@ -86,7 +87,7 @@ async function handleThreadCreation(issueText: string, interaction: CommandInter
   });
 
   // We need to send the qtn to the thread so we can pick it up for chatGTP to respond.
-  thread.send(`#question: ${issueText}`);
+  thread.send(`${OPEN_AI_QUESTION_IDENTIFIER}: ${issueText}`);
   // Send a message in the newly created thread.
   thread.send(`
 
@@ -110,7 +111,7 @@ async function handleThreadCreation(issueText: string, interaction: CommandInter
     pageID,
     [
       {
-        message: `#question: ${issueText}`,
+        message: `${OPEN_AI_QUESTION_IDENTIFIER}: ${issueText}`,
         author: authorUsername,
       },
     ],
