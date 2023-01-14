@@ -1,3 +1,4 @@
+/* eslint-disable implicit-arrow-linebreak */
 /* eslint-disable operator-linebreak */
 /**
  * Slash command that open a support ticket when triggered.
@@ -26,6 +27,7 @@ import {
   THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1,
   THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2,
   THREAD_START_MESSAGE_SLICE_INDEX,
+  OPEN_AI_QUESTION_IDENTIFIER,
   // Notion DB helper functions
   createNotionSupportTicketsDBEntry,
   updateNotionSupportTicketsDBEntry,
@@ -79,13 +81,42 @@ async function handleThreadCreation(issueText: string, interaction: CommandInter
 
   // Create a thread from the reply sent by the bot.
   const thread = await message.startThread({
-    name: String(issueText),
+    name: String(issueText.substring(0, 50)),
     autoArchiveDuration: 60,
     reason: 'Support Ticket',
   });
 
+  // We need to send the qtn to the thread so we can pick it up for chatGTP to respond.
+  thread.send(`${OPEN_AI_QUESTION_IDENTIFIER}: ${issueText}`);
   // Send a message in the newly created thread.
-  thread.send(`<@&${config.firstRespondersRoleId}> have been notified! ${author} hold tight.`);
+  thread.send(`
+
+    If you check out the Notion link above, you can see that your question has been
+    initially answered by our bot. If you have any follow up questions, please ask them
+    by using # + question in the thread.
+
+    Also, if you couldn't type out all of your question in the original command, you can
+    type it out in the thread with # + question. The bot will pick it up and respond in 
+    the notion document.
+
+    Notion: ${notionURL}
+    
+    If you are satisfied with the answer, please 
+    close the thread by using the support close command.
+
+    We have also notified <@&${config.firstRespondersRoleId}> that you need help ${author}   
+  `);
+
+  await updateNotionSupportTicketsDBEntry(
+    pageID,
+    [
+      {
+        message: `${OPEN_AI_QUESTION_IDENTIFIER}: ${issueText}`,
+        author: authorUsername,
+      },
+    ],
+    false,
+  );
 }
 
 /**
@@ -126,7 +157,7 @@ async function handleThreadClosing(
     const notionPageID = String(starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX));
 
     // messages are ordered newest -> oldest
-    await updateNotionSupportTicketsDBEntry(notionPageID, data.reverse());
+    await updateNotionSupportTicketsDBEntry(notionPageID, data.reverse(), true);
 
     await interaction.editReply(THREAD_CLOSING_SUCCESSFUL_MESSAGE);
 
@@ -214,7 +245,7 @@ const Support: SlashCommand = {
           description: 'Issue summary (max length = 100).',
           type: ApplicationCommandOptionType.String,
           required: true,
-          maxLength: 100,
+          maxLength: 200,
         },
       ],
     },

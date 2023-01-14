@@ -6,6 +6,7 @@ import { Client, GatewayIntentBits } from 'discord.js';
 import { config } from 'gfc-vault-config';
 import guildMemberAdd from './listeners/guildMemberAdd';
 import interactionCreate from './listeners/interactionCreate';
+import messageCreate from './listeners/messageCreate';
 import ready from './listeners/ready';
 
 // A new instance of `Client`.
@@ -27,9 +28,10 @@ function start() {
   ready(client);
   // Register the client with the interactionCreate listener.
   interactionCreate(client);
+
+  messageCreate(client);
   // Register the client with the guildMemberAdd listener.
   guildMemberAdd(client);
-
   // Call login on client for authenticating the bot with Discord.
   client.login(config.discordBotToken);
 }

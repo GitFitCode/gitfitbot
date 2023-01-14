@@ -19,6 +19,16 @@ const NOTION_STATUS_OPEN = 'Open';
 const RETRO_FINISHED_MESSAGE =
   "We're done here! All attendees have provided their update. See you next week!";
 const RETRO_NEXT_SPEAKER_MESSAGE = "you're next! Please provide your update.";
+const OPEN_AI_QUESTION_IDENTIFIER = '#question';
+const OPEN_AI_CONFIG = {
+  MODEL: 'text-davinci-003',
+  TEMPERATURE: 0.7,
+  TOP_P: 1.0,
+  MAX_TOKENS: 1000,
+  FREQ_PENALTY: 0.5,
+  PRECISION: 0.5,
+  STOP: ['GFC Community Member:'],
+};
 export {
   CHECK_MARK_EMOJI,
   NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE,
@@ -28,6 +38,8 @@ export {
   NOTION_STATUS_OPEN,
   RETRO_FINISHED_MESSAGE,
   RETRO_NEXT_SPEAKER_MESSAGE,
+  OPEN_AI_CONFIG,
+  OPEN_AI_QUESTION_IDENTIFIER,
   THREAD_CLOSING_MESSAGE,
   THREAD_CLOSING_SUCCESSFUL_MESSAGE,
   THREAD_CREATION_ERROR_MESSAGE,

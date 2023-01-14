@@ -65,6 +65,7 @@ async function updateNotionSupportTicketsDBEntry(
     message: string;
     author: string;
   }[],
+  isDone: boolean,
 ) {
   try {
     // Retrieve the value of "Status" property of the support ticket.
@@ -79,17 +80,18 @@ async function updateNotionSupportTicketsDBEntry(
       // STATUS OF THE SUPPORT TICKET IS NOT DONE
 
       // Update the status of the page to Done.
-      await notion.pages.update({
-        page_id: notionPageID,
-        properties: {
-          Status: {
-            status: {
-              name: NOTION_STATUS_DONE,
+      if (isDone) { 
+        await notion.pages.update({
+          page_id: notionPageID,
+          properties: {
+            Status: {
+              status: {
+                name: NOTION_STATUS_DONE,
+              },
             },
           },
-        },
-      });
-
+        });
+      }
       // Add the data from discord thread to the notion page.
       await notion.blocks.children.append({
         block_id: notionPageID,
