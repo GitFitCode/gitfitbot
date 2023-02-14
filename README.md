@@ -3,9 +3,8 @@
 ### What you'll need
 
 - [VSCode](https://code.visualstudio.com/)/[Intellij WebStorm](https://www.jetbrains.com/webstorm/)
-- [Nodejs v16 LTS](https://nodejs.org/en/)
+- [Nodejs LTS](https://nodejs.org/en/) (Please check package.json for the latest supported Node version)
 - [NPM](https://www.npmjs.com/)
-- [Ensure that your bot was invited to the target server with `bot` and `applications.command` scopes enabled](https://discordjs.guide/preparations/adding-your-bot-to-servers.html).
 
 ### Installing Dependencies
 
@@ -22,36 +21,9 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
 
 ### Setting up .env
 
-- Create a file called `.env`.
-- Structure it so:
+- Create a file called `.env` at the root of your project.
 
-  ```js
-  DISCORD_BOT_TOKEN=
-  BOT_ID=
-  GFC_INTRO_SURVEY_LINK=
-
-  ADMIN_1_DISCORD_ID=
-  ADMIN_2_DISCORD_ID=
-
-  DISCORD_SERVER_ID=
-  ADMIN_ROLE_ID=
-  GENERAL_CHAT_CHANNEL_ID=
-  CHECKINS_VOICE_CHANNEL_ID=
-  FIRST_RESPONDERS_ROLE_ID=
-  VIRTUAL_OFFICE_VOICE_CHANNEL_ID=
-
-  NOTION_KEY=
-  NOTION_SUPPORT_TICKETS_DATABASE_ID=
-  NOTION_SUPPORT_TICKETS_DATABASE_STATUS_ID=
-  NOTION_SUPPORT_TICKETS_DATABASE_LINK=
-  NOTION_RETRO_DATABASE_ID=
-  NOTION_BACKLOG_DATABASE_ID=
-  NOTION_BACKLOG_DATABASE_LINK=
-
-  SENTRY_DSN=
-  ```
-
-- Populate fields in the `.env` file:
+- Here are the required environment variables:
 
   - `DISCORD_BOT_TOKEN` - (Required) Token provided by Discord when creating the bot.
   - `BOT_ID` - (Required) ID of the GFC Discord bot.
@@ -76,6 +48,18 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
   - `NOTION_BACKLOG_DATABASE_LINK` - (Required) - URL of the notion backlog database.
 
   - `SENTRY_DSN` - (Optional) - DSN of your nodejs project on [sentry.io](https://sentry.io/).
+
+- Populate fields in the `.env` file.
+
+  - Sign up on [Keybase](https://keybase.io/)!
+  - Ask Sirrele, Pratik, or Robert for an invite to the GitFitCode Team in Keybase.
+  - Upon receiving the invite, navigate to the Files section in Keybase.
+  - Inside Files, look for team -> gitfitcode -> discord bot secrets -> autobot -> `.env`.
+  - Download or copy contents into your local `.env` file.
+  - Now your local development environment is set up!
+
+- Get access to the `Digital Junkyard` development server on Discord from Sirrele, Pratik, Robert, Felix or Von.
+
 
 ### Run the bot
 
