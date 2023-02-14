@@ -94,7 +94,6 @@ async function handleEventCreation(
         await interaction.followUp({
           ephemeral: true,
           content,
-          fetchReply: true,
           components: [
             {
               type: ComponentType.ActionRow,
