@@ -16,6 +16,8 @@ import {
   ChannelType,
   Collection,
   Role,
+  ComponentType,
+  ButtonStyle,
 } from 'discord.js';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -83,10 +85,33 @@ async function handleEventCreation(
       // Retrieve the discord event manager.
       const guildScheduledEventManger = interaction.guild?.scheduledEvents;
       // Create an event with the given options.
-      await guildScheduledEventManger?.create(eventOptions);
+      try {
+        const discordEvent = await guildScheduledEventManger?.create(eventOptions);
+        const eventLink = discordEvent?.url;
 
-      const content = `\`${eventName}\` event scheduled!`;
-      await interaction.followUp({ content });
+        const content = `\`${eventName}\` event scheduled!`;
+
+        await interaction.followUp({
+          ephemeral: true,
+          content,
+          fetchReply: true,
+          components: [
+            {
+              type: ComponentType.ActionRow,
+              components: [
+                {
+                  type: ComponentType.Button,
+                  style: ButtonStyle.Link,
+                  url: eventLink ?? 'https://www.gitfitcode.com',
+                  label: 'Discord Event Link',
+                },
+              ],
+            },
+          ],
+        });
+      } catch (err) {
+        console.error(err);
+      }
 
       sentryTransaction.setData('success', true);
       sentryTransaction.setTag('success', true);
