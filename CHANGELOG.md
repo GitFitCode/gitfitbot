@@ -1,5 +1,12 @@
 
 
+## [1.10.1](https://github.com/GitFitCode/gitfitbot/compare/v1.10.0...v1.10.1) (2023-02-18)
+
+
+### Bug Fixes
+
+* added guards against google service json file ([e162603](https://github.com/GitFitCode/gitfitbot/commit/e162603c45f2e96ad4779f52526f961e1235cf45))
+
 # [1.10.0](https://github.com/GitFitCode/gitfitbot/compare/v1.9.0...v1.10.0) (2023-02-18)
 
 
