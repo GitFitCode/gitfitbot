@@ -1,5 +1,18 @@
 
 
+# [1.10.0](https://github.com/GitFitCode/gitfitbot/compare/v1.9.0...v1.10.0) (2023-02-18)
+
+
+### Bug Fixes
+
+* remove fetchReply ([b1032bc](https://github.com/GitFitCode/gitfitbot/commit/b1032bcb9a2cf15adde312cd16b6943ae03cc652))
+
+
+### Features
+
+* added google calendar integration ([94ac443](https://github.com/GitFitCode/gitfitbot/commit/94ac4434d3c68d7ae6002f309c1a2fb57a45bb76))
+* return event url ([0ebcaba](https://github.com/GitFitCode/gitfitbot/commit/0ebcaba73a7bee6e02f7629d1f2a1f7c7b17d528))
+
 # [1.9.0](https://github.com/GitFitCode/gitfitbot/compare/v1.8.0...v1.9.0) (2022-10-14)
 
 
