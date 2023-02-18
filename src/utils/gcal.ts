@@ -1,8 +1,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
+import * as fs from 'fs';
 import * as Sentry from '@sentry/node';
-import { calendar_v3, google } from 'googleapis';
+import { path } from 'app-root-path';
 import { GaxiosResponse } from 'gaxios/build/src';
+import { calendar_v3, google } from 'googleapis';
 
 type GCalEventDetails = { eventID: string; eventLink: string };
 
@@ -23,6 +25,8 @@ const auth = new google.auth.GoogleAuth({
 
 const calendar = google.calendar({ version: 'v3', auth });
 
+const serviceFileExists = () => fs.existsSync(`${path}/service.json`);
+
 function addHoursToDate(date: Date, hours: number): Date {
   const dateToMilliseconds = date.getTime();
   const addedHour = dateToMilliseconds + 60 * 60 * 1000 * hours;
@@ -34,44 +38,44 @@ async function createEvent(
   description: string,
   date: Date,
 ): Promise<GCalEventDetails> {
-  const event: calendar_v3.Schema$Event = {
-    summary,
-    location: 'GitFitCode Discord',
-    description,
-    start: {
-      dateTime: date.toISOString(),
-    },
-    end: {
-      dateTime: addHoursToDate(date, 1).toISOString(),
-    },
-    // TODO we can have some default attendees
-    // attendees: [{ email: 'lpage@example.com' }, { email: 'sbrin@example.com' }],
-    reminders: {
-      useDefault: false,
-      overrides: [
-        { method: 'email', minutes: 60 },
-        { method: 'popup', minutes: 5 },
-      ],
-    },
-  };
-
-  let result: GaxiosResponse<calendar_v3.Schema$Event>;
-
   const eventDetails: GCalEventDetails = { eventID: '', eventLink: '' };
 
-  try {
-    result = await calendar.events.insert({
-      calendarId: GOOGLE_CALENDAR_ID,
-      requestBody: event,
-    });
+  if (serviceFileExists()) {
+    const event: calendar_v3.Schema$Event = {
+      summary,
+      location: 'GitFitCode Discord',
+      description,
+      start: {
+        dateTime: date.toISOString(),
+      },
+      end: {
+        dateTime: addHoursToDate(date, 1).toISOString(),
+      },
+      // TODO we can have some default attendees
+      // attendees: [{ email: 'lpage@example.com' }, { email: 'sbrin@example.com' }],
+      reminders: {
+        useDefault: false,
+        overrides: [
+          { method: 'email', minutes: 60 },
+          { method: 'popup', minutes: 5 },
+        ],
+      },
+    };
 
-    eventDetails.eventID = result.data.id ?? '';
-    eventDetails.eventLink = result.data.htmlLink ?? '';
+    let result: GaxiosResponse<calendar_v3.Schema$Event>;
 
-    console.log('Event created successfully!');
-  } catch (error: any) {
-    Sentry.captureException(error);
-    console.error(error);
+    try {
+      result = await calendar.events.insert({
+        calendarId: GOOGLE_CALENDAR_ID,
+        requestBody: event,
+      });
+
+      eventDetails.eventID = result.data.id ?? '';
+      eventDetails.eventLink = result.data.htmlLink ?? '';
+    } catch (error: any) {
+      Sentry.captureException(error);
+      console.error(error);
+    }
   }
 
   return eventDetails;

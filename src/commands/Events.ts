@@ -72,8 +72,7 @@ async function handleEventCreation(
     if (difference > 0) {
       // DATE FORMAT IS VALID AND INTO THE FUTURE
 
-      // TODO create a gcal event and retrieve ID/link
-      const eventDetails = await createEvent(eventName, eventDescription, date);
+      const gCalEventDetails = await createEvent(eventName, eventDescription, date);
 
       // Build options required for the event.
       const eventOptions: GuildScheduledEventCreateOptions = {
@@ -91,8 +90,24 @@ async function handleEventCreation(
       try {
         const discordEvent = await guildScheduledEventManger?.create(eventOptions);
         const eventLink = discordEvent?.url;
-
         const content = `\`${eventName}\` event scheduled!`;
+        const eventComponents: any = [
+          {
+            type: ComponentType.Button,
+            style: ButtonStyle.Link,
+            url: eventLink ?? 'https://www.gitfitcode.com',
+            label: 'Discord Event Link',
+          },
+        ];
+
+        if (gCalEventDetails.eventLink) {
+          eventComponents.push({
+            type: ComponentType.Button,
+            style: ButtonStyle.Link,
+            url: gCalEventDetails.eventLink,
+            label: 'Google Calendar Event Link',
+          });
+        }
 
         await interaction.followUp({
           ephemeral: true,
@@ -100,19 +115,17 @@ async function handleEventCreation(
           components: [
             {
               type: ComponentType.ActionRow,
-              components: [
-                {
-                  type: ComponentType.Button,
-                  style: ButtonStyle.Link,
-                  url: eventLink ?? 'https://www.gitfitcode.com',
-                  label: 'Discord Event Link',
-                },
-              ],
+              components: eventComponents,
             },
           ],
         });
       } catch (err) {
         console.error(err);
+
+        await interaction.followUp({
+          ephemeral: true,
+          content: 'Unable to schedule the event due to an error.',
+        });
       }
 
       sentryTransaction.setData('success', true);

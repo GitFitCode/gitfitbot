@@ -25,6 +25,7 @@
     "@sentry/tracing": "latest",
     "@sentry/types": "latest",
     "@types/pouchdb-node": "latest",
+    "app-root-path": "latest",
     "dayjs": "latest",
     "discord-api-types": "latest",
     "discord-tictactoe": "latest",

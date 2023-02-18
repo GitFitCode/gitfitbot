@@ -16,10 +16,7 @@ export default (client: Client): void => {
   client.on('messageCreate', async (message: Message) => {
     const msgChannel = await client?.channels
       .fetch(message?.channelId)
-      .then((messageChannel: any) => {
-        console.log(messageChannel?.name);
-        return messageChannel;
-      })
+      .then((messageChannel: any) => messageChannel)
       .catch(console.error);
 
     // Indicates that the community member is asking a software related question.
