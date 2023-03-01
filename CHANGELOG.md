@@ -1,5 +1,12 @@
 
 
+## [1.10.2](https://github.com/GitFitCode/gitfitbot/compare/v1.10.1...v1.10.2) (2023-03-01)
+
+
+### Bug Fixes
+
+* used a googleapis submodule instead of the library ([de0522c](https://github.com/GitFitCode/gitfitbot/commit/de0522c95f38f980ec23d656ec95cba28a279909))
+
 ## [1.10.1](https://github.com/GitFitCode/gitfitbot/compare/v1.10.0...v1.10.1) (2023-02-18)
 
 
