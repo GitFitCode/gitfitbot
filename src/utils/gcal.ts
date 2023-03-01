@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as Sentry from '@sentry/node';
 import { path } from 'app-root-path';
 import { GaxiosResponse } from 'gaxios/build/src';
-import { calendar_v3, google } from 'googleapis';
+import { calendar_v3, auth, calendar } from '@googleapis/calendar';
 
 type GCalEventDetails = { eventID: string; eventLink: string };
 
@@ -15,7 +15,7 @@ const SCOPES: string[] = [
 const GOOGLE_PRIVATE_KEY_FILE = './service.json';
 const GOOGLE_CALENDAR_ID = 'gitfitbot@gitfitcode.com';
 
-const auth = new google.auth.GoogleAuth({
+const googleAuth = new auth.GoogleAuth({
   keyFile: GOOGLE_PRIVATE_KEY_FILE,
   scopes: SCOPES,
   clientOptions: {
@@ -23,7 +23,7 @@ const auth = new google.auth.GoogleAuth({
   },
 });
 
-const calendar = google.calendar({ version: 'v3', auth });
+const googleCalendar = calendar({ version: 'v3', auth: googleAuth });
 
 const serviceFileExists = () => fs.existsSync(`${path}/service.json`);
 
@@ -65,7 +65,7 @@ async function createEvent(
     let result: GaxiosResponse<calendar_v3.Schema$Event>;
 
     try {
-      result = await calendar.events.insert({
+      result = await googleCalendar.events.insert({
         calendarId: GOOGLE_CALENDAR_ID,
         requestBody: event,
       });
