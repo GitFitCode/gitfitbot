@@ -20,7 +20,7 @@ export default (client: Client): void => {
 
     // Set status (i.e. activity) of the "autobot" bot.
     if (client.user.username.toLowerCase() === 'autobot') {
-      client.user.setActivity('the world slowly burn itself', { type: ActivityType.Watching });
+      client.user.setActivity('the world slowly 🔥 itself', { type: ActivityType.Watching });
     }
 
     // Register slash commands with the client.

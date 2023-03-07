@@ -31,7 +31,8 @@ async function executeRun(interaction: CommandInteraction) {
   // Snowflake structure received from get(), destructured and renamed.
   // https://discordjs.guide/slash-commands/parsing-options.html
   const { value: process } = interaction.options.get('process', true);
-  const { value: summary } = interaction.options.get('summary', true);
+  const { value: title } = interaction.options.get('title', true);
+  const { value: description } = interaction.options.get('description', true);
 
   const authorUsername = interaction.user.username;
 
@@ -40,9 +41,10 @@ async function executeRun(interaction: CommandInteraction) {
 
   // Create an entry in the notion database and grab the page id.
   const pageID: string = await createNotionBacklogDBEntry(
-    String(summary),
+    String(title),
     authorUsername,
     String(process),
+    String(description),
   );
 
   // Notion link uses pageID without hyphens.
@@ -100,14 +102,20 @@ const ChangeManagement: SlashCommand = {
           value: 'github',
         },
         {
-          name: 'Other (mention in summary)',
+          name: 'Other (mention in title/description)',
           value: 'other',
         },
       ],
     },
     {
-      name: 'summary',
-      description: 'Summary of the feature/change management request.',
+      name: 'title',
+      description: 'title of the feature/change management request.',
+      type: ApplicationCommandOptionType.String,
+      required: true,
+    },
+    {
+      name: 'description',
+      description: 'Description of the feature/change management request.',
       type: ApplicationCommandOptionType.String,
       required: true,
     },

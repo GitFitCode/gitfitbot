@@ -80,7 +80,7 @@ async function updateNotionSupportTicketsDBEntry(
       // STATUS OF THE SUPPORT TICKET IS NOT DONE
 
       // Update the status of the page to Done.
-      if (isDone) { 
+      if (isDone) {
         await notion.pages.update({
           page_id: notionPageID,
           properties: {
@@ -177,12 +177,14 @@ async function createNotionSupportTicketsDBEntry(
  * @param summary Summary of the change management.
  * @param authorUsername Username of the discord user who generated this message.
  * @param process Process where change management is to be applied.
+ * @param description Description of the change management.
  * @returns
  */
 async function createNotionBacklogDBEntry(
   summary: string,
   authorUsername: string,
   process: string,
+  description: string,
 ) {
   try {
     // Create a new page in notion.
@@ -219,6 +221,19 @@ async function createNotionBacklogDBEntry(
           ],
         },
       },
+      children: [
+        {
+          paragraph: {
+            rich_text: [
+              {
+                text: {
+                  content: description,
+                },
+              },
+            ],
+          },
+        },
+      ],
     });
 
     return response.id;
