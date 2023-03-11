@@ -72,7 +72,11 @@ async function handleEventCreation(
     if (difference > 0) {
       // DATE FORMAT IS VALID AND INTO THE FUTURE
 
+      // Create an event in GitFitBot's Google calendar.
       const gCalEventDetails = await createEvent(eventName, eventDescription, date);
+      const eventDescriptionWithGCalLink = gCalEventDetails.eventLink
+        ? `${eventDescription}\n\nGoogle calendar link - ${gCalEventDetails.eventLink}`
+        : eventDescription;
 
       // Build options required for the event.
       const eventOptions: GuildScheduledEventCreateOptions = {
@@ -80,7 +84,7 @@ async function handleEventCreation(
         scheduledStartTime: date,
         privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
         entityType: GuildScheduledEventEntityType.Voice,
-        description: eventDescription,
+        description: eventDescriptionWithGCalLink,
         channel: eventChannelID,
       };
 
@@ -100,6 +104,7 @@ async function handleEventCreation(
           },
         ];
 
+        // Add a discord button for Google calendar event link, if present.
         if (gCalEventDetails.eventLink) {
           eventComponents.push({
             type: ComponentType.Button,
