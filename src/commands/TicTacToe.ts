@@ -11,6 +11,8 @@ import { SlashCommand } from '../Command';
 require('@sentry/tracing');
 const TTT = require('discord-tictactoe');
 
+const COMMAND_NAME = 'tictactoe';
+const OPTION_OPPONENT = 'opponent';
 const game = new TTT({ language: 'en' });
 
 async function executeRun(interaction: CommandInteraction) {
@@ -20,19 +22,19 @@ async function executeRun(interaction: CommandInteraction) {
   });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
-    name: '/tictactoe',
+    name: `/${COMMAND_NAME}`,
   });
 
   // Try & catch required for empty input here due to `opponent` option being optional.
   try {
-    const { value: opponent } = interaction.options.get('opponent', true);
+    const { value: opponent } = interaction.options.get(OPTION_OPPONENT, true);
 
-    transaction.setData('opponent', String(opponent));
-    transaction.setTag('opponent', String(opponent));
+    transaction.setData(OPTION_OPPONENT, String(opponent));
+    transaction.setTag(OPTION_OPPONENT, String(opponent));
   } catch (error: any) {
     if (error.code === 'CommandInteractionOptionNotFound') {
-      transaction.setData('opponent', 'AI');
-      transaction.setTag('opponent', 'AI');
+      transaction.setData(OPTION_OPPONENT, 'AI');
+      transaction.setTag(OPTION_OPPONENT, 'AI');
     }
   } finally {
     game.handleInteraction(interaction);
@@ -43,11 +45,11 @@ async function executeRun(interaction: CommandInteraction) {
 }
 
 const TicTacToe: SlashCommand = {
-  name: 'tictactoe',
+  name: COMMAND_NAME,
   description: 'Starts a game of TicTacToe.',
   options: [
     {
-      name: 'opponent',
+      name: OPTION_OPPONENT,
       description: '@ your opponent',
       type: ApplicationCommandOptionType.User,
     },

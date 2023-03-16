@@ -43,6 +43,7 @@ async function handleEventCreation(
   eventDescription: string,
   eventChannelID: string,
   sentryTransaction: Transaction,
+  client: Client,
 ) {
   // Snowflake structure received from get(), destructured and renamed.
   // https://discordjs.guide/slash-commands/parsing-options.html
@@ -73,7 +74,7 @@ async function handleEventCreation(
       // DATE FORMAT IS VALID AND INTO THE FUTURE
 
       // Create an event in GitFitBot's Google calendar.
-      const gCalEventDetails = await createEvent(eventName, eventDescription, date);
+      const gCalEventDetails = await createEvent(eventName, eventDescription, date, client);
       const eventDescriptionWithGCalLink = gCalEventDetails.eventLink
         ? `${eventDescription}\n\nGoogle calendar link - ${gCalEventDetails.eventLink}`
         : eventDescription;
@@ -201,7 +202,7 @@ async function handleListEvent(interaction: CommandInteraction) {
  * Function to build information for scheduling a retrospective event in the discord server.
  * @param interaction CommandInteraction
  */
-async function handleRetroEvent(interaction: CommandInteraction) {
+async function handleRetroEvent(client: Client, interaction: CommandInteraction) {
   const transactionForRetro = Sentry.startTransaction({
     op: 'transaction',
     name: '/events retro',
@@ -218,6 +219,7 @@ async function handleRetroEvent(interaction: CommandInteraction) {
     eventDescription,
     eventChannelID,
     transactionForRetro,
+    client,
   );
 
   transactionForRetro.finish();
@@ -227,7 +229,7 @@ async function handleRetroEvent(interaction: CommandInteraction) {
  * Function to build information for scheduling a codewars event in the discord server.
  * @param interaction CommandInteraction
  */
-async function handleCodewarsEvent(interaction: CommandInteraction) {
+async function handleCodewarsEvent(client: Client, interaction: CommandInteraction) {
   const transactionForCodewars = Sentry.startTransaction({
     op: 'transaction',
     name: '/events codewars',
@@ -243,6 +245,7 @@ async function handleCodewarsEvent(interaction: CommandInteraction) {
     eventDescription,
     eventChannelID,
     transactionForCodewars,
+    client,
   );
 
   transactionForCodewars.finish();
@@ -252,7 +255,7 @@ async function handleCodewarsEvent(interaction: CommandInteraction) {
  * Function to build information for scheduling a custom event in the discord server.
  * @param interaction CommandInteraction
  */
-async function handleCustomEvent(interaction: CommandInteraction) {
+async function handleCustomEvent(client: Client, interaction: CommandInteraction) {
   const transactionForCodewars = Sentry.startTransaction({
     op: 'transaction',
     name: '/events custom',
@@ -278,6 +281,7 @@ async function handleCustomEvent(interaction: CommandInteraction) {
       String(description),
       String(channel),
       transactionForCodewars,
+      client,
     );
   }
 
@@ -323,7 +327,7 @@ async function handleClearEvent(interaction: CommandInteraction) {
   transactionForCodewars.finish();
 }
 
-async function executeRun(interaction: CommandInteraction) {
+async function executeRun(client: Client, interaction: CommandInteraction) {
   Sentry.setUser({
     id: interaction.user.id,
     username: interaction.user.username,
@@ -343,17 +347,17 @@ async function executeRun(interaction: CommandInteraction) {
 
   // Check if subcommand `retro` was fired.
   if (commandInput.startsWith('retro')) {
-    handleRetroEvent(interaction);
+    handleRetroEvent(client, interaction);
   }
 
   // Check if subcommand `codewars` was fired.
   if (commandInput.startsWith('codewars')) {
-    handleCodewarsEvent(interaction);
+    handleCodewarsEvent(client, interaction);
   }
 
   // Check if subcommand `custom` was fired.
   if (commandInput.startsWith('custom')) {
-    handleCustomEvent(interaction);
+    handleCustomEvent(client, interaction);
   }
 
   // Check if subcommand `clear` was fired.
@@ -418,8 +422,8 @@ const Events: SlashCommand = {
       type: ApplicationCommandOptionType.Subcommand,
     },
   ],
-  run: async (_client: Client, interaction: CommandInteraction) => {
-    await executeRun(interaction);
+  run: async (client: Client, interaction: CommandInteraction) => {
+    await executeRun(client, interaction);
   },
 };
 

@@ -1,3 +1,4 @@
+/* eslint-disable operator-linebreak */
 /* eslint-disable import/no-extraneous-dependencies */
 
 import * as fs from 'fs';
@@ -5,6 +6,7 @@ import * as Sentry from '@sentry/node';
 import { path } from 'app-root-path';
 import { GaxiosResponse } from 'gaxios/build/src';
 import { calendar_v3, auth, calendar } from '@googleapis/calendar';
+import { Client } from 'discord.js';
 
 type GCalEventDetails = { eventID: string; eventLink: string };
 
@@ -14,6 +16,9 @@ const SCOPES: string[] = [
 ];
 const GOOGLE_PRIVATE_KEY_FILE = './service.json';
 const GOOGLE_CALENDAR_ID = 'gitfitbot@gitfitcode.com';
+const GITFITBOT_NAME = 'gitfitbot';
+const GOOGLE_TEST_CALENDAR_ID =
+  'c_13f4e50a9628c836dc0f03febe1d8fd4fc67ff197913d2fb8caffa0e89062f14@group.calendar.google.com';
 
 const googleAuth = new auth.GoogleAuth({
   keyFile: GOOGLE_PRIVATE_KEY_FILE,
@@ -37,6 +42,7 @@ async function createEvent(
   summary: string,
   description: string,
   date: Date,
+  client: Client,
 ): Promise<GCalEventDetails> {
   const eventDetails: GCalEventDetails = { eventID: '', eventLink: '' };
 
@@ -63,10 +69,11 @@ async function createEvent(
     };
 
     let result: GaxiosResponse<calendar_v3.Schema$Event>;
+    const botName = client?.user?.username.toLowerCase();
 
     try {
       result = await googleCalendar.events.insert({
-        calendarId: GOOGLE_CALENDAR_ID,
+        calendarId: botName === GITFITBOT_NAME ? GOOGLE_CALENDAR_ID : GOOGLE_TEST_CALENDAR_ID,
         requestBody: event,
       });
 

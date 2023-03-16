@@ -19,6 +19,7 @@ Sentry.init({
 
 Sentry.setTag('bot_version', version);
 
+// Start the bot.
 start();
 
 process.on('SIGINT', (code) => {
