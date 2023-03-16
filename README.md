@@ -56,6 +56,7 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
   - Upon receiving the invite, navigate to the Files section in Keybase.
   - Inside Files, look for team -> gitfitcode -> discord bot secrets -> autobot -> `.env`.
   - Download or copy contents into your local `.env` file.
+  - Inside the autobot folder, look for `service.json` and download it into the root folder here.
   - Now your local development environment is set up!
 
 - Get access to the `Digital Junkyard` development server on Discord from Sirrele, Pratik, Robert, Felix or Von.
