@@ -18,6 +18,11 @@ import { SlashCommand } from '../Command';
 
 require('@sentry/tracing');
 
+const COMMAND_NAME = 'feature-cm';
+const OPTION_CATEGORY = 'category';
+const OPTION_TITLE = 'title';
+const OPTION_DESCRIPTION = 'description';
+
 async function executeRun(interaction: CommandInteraction) {
   Sentry.setUser({
     id: interaction.user.id,
@@ -25,25 +30,25 @@ async function executeRun(interaction: CommandInteraction) {
   });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
-    name: '/feature-cm',
+    name: `/${COMMAND_NAME}`,
   });
 
   // Snowflake structure received from get(), destructured and renamed.
   // https://discordjs.guide/slash-commands/parsing-options.html
-  const { value: process } = interaction.options.get('process', true);
-  const { value: title } = interaction.options.get('title', true);
-  const { value: description } = interaction.options.get('description', true);
+  const { value: category } = interaction.options.get(OPTION_CATEGORY, true);
+  const { value: title } = interaction.options.get(OPTION_TITLE, true);
+  const { value: description } = interaction.options.get(OPTION_DESCRIPTION, true);
 
   const authorUsername = interaction.user.username;
 
-  transaction.setData('process', String(process));
-  transaction.setTag('process', String(process));
+  transaction.setData(OPTION_CATEGORY, String(category));
+  transaction.setTag(OPTION_CATEGORY, String(category));
 
   // Create an entry in the notion database and grab the page id.
   const pageID: string = await createNotionBacklogDBEntry(
     String(title),
     authorUsername,
-    String(process),
+    String(category),
     String(description),
   );
 
@@ -76,12 +81,12 @@ async function executeRun(interaction: CommandInteraction) {
 }
 
 const ChangeManagement: SlashCommand = {
-  name: 'feature-cm',
+  name: COMMAND_NAME,
   description: 'Helper slash command for raising feature/change management requests.',
   options: [
     {
-      name: 'process',
-      description: 'Process where to apply feature/change management requests.',
+      name: OPTION_CATEGORY,
+      description: 'Category where to apply feature/change management requests.',
       type: ApplicationCommandOptionType.String,
       required: true,
       choices: [
@@ -102,19 +107,19 @@ const ChangeManagement: SlashCommand = {
           value: 'github',
         },
         {
-          name: 'Other (mention in title/description)',
+          name: 'Other (provide it in the title and description)',
           value: 'other',
         },
       ],
     },
     {
-      name: 'title',
-      description: 'title of the feature/change management request.',
+      name: OPTION_TITLE,
+      description: 'Title of the feature/change management request.',
       type: ApplicationCommandOptionType.String,
       required: true,
     },
     {
-      name: 'description',
+      name: OPTION_DESCRIPTION,
       description: 'Description of the feature/change management request.',
       type: ApplicationCommandOptionType.String,
       required: true,

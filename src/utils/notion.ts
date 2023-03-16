@@ -176,14 +176,14 @@ async function createNotionSupportTicketsDBEntry(
  * Function to create a new entry in the Notion Backlog DB with the data provided.
  * @param summary Summary of the change management.
  * @param authorUsername Username of the discord user who generated this message.
- * @param process Process where change management is to be applied.
+ * @param category Category where change management is to be applied.
  * @param description Description of the change management.
  * @returns
  */
 async function createNotionBacklogDBEntry(
   summary: string,
   authorUsername: string,
-  process: string,
+  category: string,
   description: string,
 ) {
   try {
@@ -210,12 +210,12 @@ async function createNotionBacklogDBEntry(
             },
           ],
         },
-        // Add the Process.
-        Process: {
+        // Add the category.
+        Category: {
           rich_text: [
             {
               text: {
-                content: process,
+                content: category,
               },
             },
           ],
