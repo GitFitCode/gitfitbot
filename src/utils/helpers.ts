@@ -13,7 +13,11 @@ import {
 } from 'discord.js';
 import dayjs from 'dayjs';
 import { config } from 'gfc-vault-config';
-import { NOTION_PAGE_ID_DELIMITER, THREAD_START_MESSAGE_SLICE_INDEX } from './constants';
+import {
+  COMMAND_EVENT,
+  NOTION_PAGE_ID_DELIMITER,
+  THREAD_START_MESSAGE_SLICE_INDEX,
+} from './constants';
 
 type GitFitCodeEventOptions = Exclude<
   ApplicationCommandOptionData,
@@ -63,39 +67,39 @@ function generateMonths(): ApplicationCommandOptionChoiceData<number>[] {
 function buildEventOptions(eventName: string): GitFitCodeEventOptions {
   return [
     {
-      name: 'year',
+      name: COMMAND_EVENT.OPTION_YEAR,
       description: `Year of the ${eventName} event.`,
       type: ApplicationCommandOptionType.Integer,
       required: true,
       choices: generateYears(),
     },
     {
-      name: 'month',
+      name: COMMAND_EVENT.OPTION_MONTH,
       description: `Month of the ${eventName} event.`,
       type: ApplicationCommandOptionType.Integer,
       required: true,
       choices: generateMonths(),
     },
     {
-      name: 'day',
+      name: COMMAND_EVENT.OPTION_DAY,
       description: `Day of the ${eventName} event.`,
       type: ApplicationCommandOptionType.Integer,
       required: true,
     },
     {
-      name: 'hour',
+      name: COMMAND_EVENT.OPTION_HOUR,
       description: `Hour of the ${eventName} event.`,
       type: ApplicationCommandOptionType.Integer,
       required: true,
     },
     {
-      name: 'minute',
+      name: COMMAND_EVENT.OPTION_MINUTE,
       description: `Minute of the ${eventName} event.`,
       type: ApplicationCommandOptionType.Integer,
       required: true,
     },
     {
-      name: 'ampm',
+      name: COMMAND_EVENT.OPTION_AMPM,
       description: 'AM or PM.',
       type: ApplicationCommandOptionType.String,
       required: true,
@@ -105,7 +109,7 @@ function buildEventOptions(eventName: string): GitFitCodeEventOptions {
       ],
     },
     {
-      name: 'timezone',
+      name: COMMAND_EVENT.OPTION_TIMEZONE,
       description: 'Timezone abbreviation (https://www.timeanddate.com/time/zones/).',
       type: ApplicationCommandOptionType.String,
       required: true,

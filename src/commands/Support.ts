@@ -20,6 +20,7 @@ import {
 import { config } from 'gfc-vault-config';
 import {
   CHECK_MARK_EMOJI,
+  COMMAND_SUPPORT,
   NOTION_PAGE_ID_DELIMITER,
   NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE,
   THREAD_CLOSING_SUCCESSFUL_MESSAGE,
@@ -184,7 +185,7 @@ async function executeRun(interaction: CommandInteraction) {
   });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
-    name: '/support',
+    name: `/${COMMAND_SUPPORT.COMMAND_NAME}`,
   });
 
   // Can be a public/private text/voice-text channel or public/private thread channel.
@@ -192,19 +193,21 @@ async function executeRun(interaction: CommandInteraction) {
   const isThread = channel?.isThread();
 
   // /<command> <subcommand> [<arg>:<value>]
-  const commandInput = String(interaction).replace('/support', '').trimStart();
+  const commandInput = String(interaction)
+    .replace(`/${COMMAND_SUPPORT.COMMAND_NAME}`, '')
+    .trimStart();
 
-  if (isThread && commandInput.startsWith('close')) {
+  if (isThread && commandInput.startsWith(COMMAND_SUPPORT.OPTION_CLOSE)) {
     // COMMAND INVOKED FOR CLOSING A THREAD
 
     // Close/archive the thread i.e. the support ticket.
     await handleThreadClosing(interaction, channel);
-  } else if (isThread && commandInput.startsWith('create')) {
+  } else if (isThread && commandInput.startsWith(COMMAND_SUPPORT.OPTION_CREATE)) {
     // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A THREAD
 
     // Send an ERROR followUp to the thread.
     await interaction.followUp({ ephemeral: true, content: THREAD_CREATION_ERROR_MESSAGE });
-  } else if (!isThread && commandInput.startsWith('close')) {
+  } else if (!isThread && commandInput.startsWith(COMMAND_SUPPORT.OPTION_CLOSE)) {
     // COMMAND INVOKED FOR CLOSING A CHANNEL
 
     // Send an ERROR followUp to the thread.
@@ -212,7 +215,10 @@ async function executeRun(interaction: CommandInteraction) {
       ephemeral: true,
       content: NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE,
     });
-  } else if (channel?.type !== ChannelType.GuildText && commandInput.startsWith('create')) {
+  } else if (
+    channel?.type !== ChannelType.GuildText &&
+    commandInput.startsWith(COMMAND_SUPPORT.OPTION_CREATE)
+  ) {
     // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A NON-REGULAR TEXT CHANNEL
 
     // Send an ERROR followUp to the thread.
@@ -222,7 +228,7 @@ async function executeRun(interaction: CommandInteraction) {
 
     // Snowflake structure received from get(), destructured and renamed.
     // https://discordjs.guide/slash-commands/parsing-options.html
-    const { value: issueText } = interaction.options.get('issue', true);
+    const { value: issueText } = interaction.options.get(COMMAND_SUPPORT.OPTION_ISSUE, true);
 
     // Create a thread to handle the support ticket request.
     await handleThreadCreation(String(issueText), interaction);
@@ -232,16 +238,16 @@ async function executeRun(interaction: CommandInteraction) {
 }
 
 const Support: SlashCommand = {
-  name: 'support',
+  name: COMMAND_SUPPORT.COMMAND_NAME,
   description: 'Helper slash command for managing GFC support tickets.',
   options: [
     {
-      name: 'create',
+      name: COMMAND_SUPPORT.OPTION_CREATE,
       description: 'Create a support ticket.',
       type: ApplicationCommandOptionType.Subcommand,
       options: [
         {
-          name: 'issue',
+          name: COMMAND_SUPPORT.OPTION_ISSUE,
           description: 'Issue summary (max length = 100).',
           type: ApplicationCommandOptionType.String,
           required: true,
@@ -250,7 +256,7 @@ const Support: SlashCommand = {
       ],
     },
     {
-      name: 'close',
+      name: COMMAND_SUPPORT.OPTION_CLOSE,
       description: 'Close a support ticket.',
       type: ApplicationCommandOptionType.Subcommand,
     },

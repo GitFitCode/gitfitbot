@@ -7,8 +7,9 @@
 
 import * as Sentry from '@sentry/node';
 import { CommandInteraction, Client } from 'discord.js';
-import { SlashCommand } from '../Command';
 import { version } from '../../package.json';
+import { COMMAND_INFO } from '../utils';
+import { SlashCommand } from '../Command';
 
 require('@sentry/tracing');
 
@@ -19,7 +20,7 @@ async function executeRun(interaction: CommandInteraction) {
   });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
-    name: '/info',
+    name: `/${COMMAND_INFO.COMMAND_NAME}`,
   });
 
   const content = `\`Your username\`: ${interaction.user.username}
@@ -35,7 +36,7 @@ async function executeRun(interaction: CommandInteraction) {
 }
 
 const Info: SlashCommand = {
-  name: 'info',
+  name: COMMAND_INFO.COMMAND_NAME,
   description: 'Displays info about yourself and the server.',
   run: async (_client: Client, interaction: CommandInteraction) => {
     await executeRun(interaction);

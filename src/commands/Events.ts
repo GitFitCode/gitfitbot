@@ -24,7 +24,7 @@ import duration from 'dayjs/plugin/duration';
 import { Transaction } from '@sentry/types';
 import { config } from 'gfc-vault-config';
 import { SlashCommand } from '../Command';
-import { buildEventOptions, createEvent } from '../utils';
+import { buildEventOptions, COMMAND_EVENT, createEvent } from '../utils';
 
 require('@sentry/tracing');
 
@@ -47,13 +47,13 @@ async function handleEventCreation(
 ) {
   // Snowflake structure received from get(), destructured and renamed.
   // https://discordjs.guide/slash-commands/parsing-options.html
-  const { value: year } = interaction.options.get('year', true);
-  const { value: month } = interaction.options.get('month', true);
-  const { value: day } = interaction.options.get('day', true);
-  const { value: hour } = interaction.options.get('hour', true);
-  const { value: minute } = interaction.options.get('minute', true);
-  const { value: ampm } = interaction.options.get('ampm', true);
-  const { value: timezone } = interaction.options.get('timezone', true);
+  const { value: year } = interaction.options.get(COMMAND_EVENT.OPTION_YEAR, true);
+  const { value: month } = interaction.options.get(COMMAND_EVENT.OPTION_MONTH, true);
+  const { value: day } = interaction.options.get(COMMAND_EVENT.OPTION_DAY, true);
+  const { value: hour } = interaction.options.get(COMMAND_EVENT.OPTION_HOUR, true);
+  const { value: minute } = interaction.options.get(COMMAND_EVENT.OPTION_MINUTE, true);
+  const { value: ampm } = interaction.options.get(COMMAND_EVENT.OPTION_AMPM, true);
+  const { value: timezone } = interaction.options.get(COMMAND_EVENT.OPTION_TIMEZONE, true);
 
   const retrievedDate = `${year}-${month}-${day} ${hour}:${minute} ${ampm} ${timezone}`;
 
@@ -73,10 +73,10 @@ async function handleEventCreation(
     if (difference > 0) {
       // DATE FORMAT IS VALID AND INTO THE FUTURE
 
-      // Create an event in GitFitBot's Google calendar.
+      // Create an event in the bot's Google calendar.
       const gCalEventDetails = await createEvent(eventName, eventDescription, date, client);
       const eventDescriptionWithGCalLink = gCalEventDetails.eventLink
-        ? `${eventDescription}\n\nGoogle calendar link - ${gCalEventDetails.eventLink}`
+        ? `${eventDescription}\n\n🗓️ - ${gCalEventDetails.eventLink}`
         : eventDescription;
 
       // Build options required for the event.
@@ -163,7 +163,7 @@ async function handleEventCreation(
 async function handleListEvent(interaction: CommandInteraction) {
   const transactionForList = Sentry.startTransaction({
     op: 'transaction',
-    name: '/events list',
+    name: `/${COMMAND_EVENT.COMMAND_NAME} list`,
   });
 
   const discordEventManager = interaction.guild?.scheduledEvents;
@@ -205,7 +205,7 @@ async function handleListEvent(interaction: CommandInteraction) {
 async function handleRetroEvent(client: Client, interaction: CommandInteraction) {
   const transactionForRetro = Sentry.startTransaction({
     op: 'transaction',
-    name: '/events retro',
+    name: `/${COMMAND_EVENT.COMMAND_NAME} retro`,
   });
 
   const eventName = 'GitFitCode Retrospective';
@@ -232,7 +232,7 @@ async function handleRetroEvent(client: Client, interaction: CommandInteraction)
 async function handleCodewarsEvent(client: Client, interaction: CommandInteraction) {
   const transactionForCodewars = Sentry.startTransaction({
     op: 'transaction',
-    name: '/events codewars',
+    name: `/${COMMAND_EVENT.COMMAND_NAME} codewars`,
   });
 
   const eventName = 'GitFitCode Codewars';
@@ -258,14 +258,14 @@ async function handleCodewarsEvent(client: Client, interaction: CommandInteracti
 async function handleCustomEvent(client: Client, interaction: CommandInteraction) {
   const transactionForCodewars = Sentry.startTransaction({
     op: 'transaction',
-    name: '/events custom',
+    name: `/${COMMAND_EVENT.COMMAND_NAME} custom`,
   });
 
   // Snowflake structure received from get(), destructured and renamed.
   // https://discordjs.guide/slash-commands/parsing-options.html
-  const { value: name } = interaction.options.get('name', true);
-  const { value: description } = interaction.options.get('desc', true);
-  const { value: channel } = interaction.options.get('voice-channel', true);
+  const { value: name } = interaction.options.get(COMMAND_EVENT.OPTION_NAME, true);
+  const { value: description } = interaction.options.get(COMMAND_EVENT.OPTION_DESCRIPTION, true);
+  const { value: channel } = interaction.options.get(COMMAND_EVENT.OPTION_VOICE_CHANNEL, true);
 
   // Fetch the channel object.
   const channelObj = await interaction.guild?.channels.fetch(String(channel));
@@ -295,7 +295,7 @@ async function handleCustomEvent(client: Client, interaction: CommandInteraction
 async function handleClearEvent(interaction: CommandInteraction) {
   const transactionForCodewars = Sentry.startTransaction({
     op: 'transaction',
-    name: '/events clear',
+    name: `/${COMMAND_EVENT.COMMAND_NAME} clear`,
   });
 
   const roles = interaction.member?.roles.valueOf() as Collection<string, Role>;
@@ -334,34 +334,36 @@ async function executeRun(client: Client, interaction: CommandInteraction) {
   });
   const transactionForEvents = Sentry.startTransaction({
     op: 'transaction',
-    name: '/events',
+    name: `/${COMMAND_EVENT.COMMAND_NAME}`,
   });
 
   // /<command> <subcommand> [<arg>:<value>]
-  const commandInput = String(interaction).replace('/events', '').trimStart();
+  const commandInput = String(interaction)
+    .replace(`/${COMMAND_EVENT.COMMAND_NAME}`, '')
+    .trimStart();
 
   // Check if subcommand `list` was fired.
-  if (commandInput.startsWith('list')) {
+  if (commandInput.startsWith(COMMAND_EVENT.OPTION_LIST)) {
     handleListEvent(interaction);
   }
 
   // Check if subcommand `retro` was fired.
-  if (commandInput.startsWith('retro')) {
+  if (commandInput.startsWith(COMMAND_EVENT.OPTION_RETRO)) {
     handleRetroEvent(client, interaction);
   }
 
   // Check if subcommand `codewars` was fired.
-  if (commandInput.startsWith('codewars')) {
+  if (commandInput.startsWith(COMMAND_EVENT.OPTION_CODEWARS)) {
     handleCodewarsEvent(client, interaction);
   }
 
   // Check if subcommand `custom` was fired.
-  if (commandInput.startsWith('custom')) {
+  if (commandInput.startsWith(COMMAND_EVENT.OPTION_CUSTOM)) {
     handleCustomEvent(client, interaction);
   }
 
   // Check if subcommand `clear` was fired.
-  if (commandInput.startsWith('clear')) {
+  if (commandInput.startsWith(COMMAND_EVENT.OPTION_CLEAR)) {
     handleClearEvent(interaction);
   }
 
@@ -370,54 +372,54 @@ async function executeRun(client: Client, interaction: CommandInteraction) {
 }
 
 const Events: SlashCommand = {
-  name: 'events',
+  name: COMMAND_EVENT.COMMAND_NAME,
   description: 'Helper slash command for managing GFC events.',
   options: [
     {
-      name: 'custom',
+      name: COMMAND_EVENT.OPTION_CUSTOM,
       description: 'Schedule a custom event.',
       type: ApplicationCommandOptionType.Subcommand,
       options: [
         {
-          name: 'name',
+          name: COMMAND_EVENT.OPTION_NAME,
           description: 'Name of the custom event.',
           type: ApplicationCommandOptionType.String,
           required: true,
         },
         {
-          name: 'desc',
+          name: COMMAND_EVENT.OPTION_DESCRIPTION,
           description: 'Description of the custom event.',
           type: ApplicationCommandOptionType.String,
           required: true,
         },
         {
-          name: 'voice-channel',
+          name: COMMAND_EVENT.OPTION_VOICE_CHANNEL,
           description: 'Name of the channel to schedule the custom event in.',
           type: ApplicationCommandOptionType.Channel,
           required: true,
         },
-        ...buildEventOptions('custom'),
+        ...buildEventOptions(COMMAND_EVENT.OPTION_CUSTOM),
       ],
     },
     {
-      name: 'list',
+      name: COMMAND_EVENT.OPTION_LIST,
       description: 'List all scheduled events.',
       type: ApplicationCommandOptionType.Subcommand,
     },
     {
-      name: 'retro',
+      name: COMMAND_EVENT.OPTION_RETRO,
       description: 'Schedule a GFC retrospective event.',
       type: ApplicationCommandOptionType.Subcommand,
-      options: buildEventOptions('retro'),
+      options: buildEventOptions(COMMAND_EVENT.OPTION_RETRO),
     },
     {
-      name: 'codewars',
+      name: COMMAND_EVENT.OPTION_CODEWARS,
       description: 'Schedule a GFC codewars event.',
       type: ApplicationCommandOptionType.Subcommand,
-      options: buildEventOptions('codewars'),
+      options: buildEventOptions(COMMAND_EVENT.OPTION_CODEWARS),
     },
     {
-      name: 'clear',
+      name: COMMAND_EVENT.OPTION_CLEAR,
       description: 'Clear all scheduled events (admins only).',
       type: ApplicationCommandOptionType.Subcommand,
     },

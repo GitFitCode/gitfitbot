@@ -8,6 +8,7 @@ import * as Sentry from '@sentry/node';
 import { CommandInteraction, Client, ChannelType } from 'discord.js';
 import { config } from 'gfc-vault-config';
 import {
+  COMMAND_NEXT_SPEAKER,
   fetchAllAttendees,
   fetchRetroCompletedAttendees,
   fetchRetroNotCompletedAttendees,
@@ -38,7 +39,7 @@ async function executeRun(interaction: CommandInteraction) {
   });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
-    name: '/next-speaker',
+    name: `/${COMMAND_NEXT_SPEAKER.COMMAND_NAME}`,
   });
 
   // Get the Check-Ins Channel instance.
@@ -117,7 +118,7 @@ async function executeRun(interaction: CommandInteraction) {
 }
 
 const NextSpeaker: SlashCommand = {
-  name: 'next-speaker',
+  name: COMMAND_NEXT_SPEAKER.COMMAND_NAME,
   description: 'Randomly picks a user in the Check-Ins Channel.',
   run: async (_client: Client, interaction: CommandInteraction) => {
     try {

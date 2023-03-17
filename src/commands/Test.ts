@@ -6,11 +6,10 @@
 
 import * as Sentry from '@sentry/node';
 import { CommandInteraction, Client } from 'discord.js';
+import { COMMAND_TEST } from '../utils';
 import { SlashCommand } from '../Command';
 
 require('@sentry/tracing');
-
-const COMMAND_NAME = 'test';
 
 async function executeRun(interaction: CommandInteraction) {
   Sentry.setUser({
@@ -19,7 +18,7 @@ async function executeRun(interaction: CommandInteraction) {
   });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
-    name: `/${COMMAND_NAME}`,
+    name: `/${COMMAND_TEST.COMMAND_NAME}`,
   });
 
   const content = 'Test.';
@@ -30,7 +29,7 @@ async function executeRun(interaction: CommandInteraction) {
 }
 
 const Test: SlashCommand = {
-  name: COMMAND_NAME,
+  name: COMMAND_TEST.COMMAND_NAME,
   description: 'Helper slash command for dev mode that does nothing in live.',
   run: async (_client: Client, interaction: CommandInteraction) => {
     await executeRun(interaction);

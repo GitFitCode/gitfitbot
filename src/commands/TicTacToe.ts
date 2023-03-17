@@ -6,13 +6,12 @@
 
 import * as Sentry from '@sentry/node';
 import { CommandInteraction, Client, ApplicationCommandOptionType } from 'discord.js';
+import { COMMAND_TICTACTOE } from '../utils';
 import { SlashCommand } from '../Command';
 
 require('@sentry/tracing');
 const TTT = require('discord-tictactoe');
 
-const COMMAND_NAME = 'tictactoe';
-const OPTION_OPPONENT = 'opponent';
 const game = new TTT({ language: 'en' });
 
 async function executeRun(interaction: CommandInteraction) {
@@ -22,19 +21,19 @@ async function executeRun(interaction: CommandInteraction) {
   });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
-    name: `/${COMMAND_NAME}`,
+    name: `/${COMMAND_TICTACTOE.COMMAND_NAME}`,
   });
 
   // Try & catch required for empty input here due to `opponent` option being optional.
   try {
-    const { value: opponent } = interaction.options.get(OPTION_OPPONENT, true);
+    const { value: opponent } = interaction.options.get(COMMAND_TICTACTOE.OPTION_OPPONENT, true);
 
-    transaction.setData(OPTION_OPPONENT, String(opponent));
-    transaction.setTag(OPTION_OPPONENT, String(opponent));
+    transaction.setData(COMMAND_TICTACTOE.OPTION_OPPONENT, String(opponent));
+    transaction.setTag(COMMAND_TICTACTOE.OPTION_OPPONENT, String(opponent));
   } catch (error: any) {
     if (error.code === 'CommandInteractionOptionNotFound') {
-      transaction.setData(OPTION_OPPONENT, 'AI');
-      transaction.setTag(OPTION_OPPONENT, 'AI');
+      transaction.setData(COMMAND_TICTACTOE.OPTION_OPPONENT, 'AI');
+      transaction.setTag(COMMAND_TICTACTOE.OPTION_OPPONENT, 'AI');
     }
   } finally {
     game.handleInteraction(interaction);
@@ -45,11 +44,11 @@ async function executeRun(interaction: CommandInteraction) {
 }
 
 const TicTacToe: SlashCommand = {
-  name: COMMAND_NAME,
+  name: COMMAND_TICTACTOE.COMMAND_NAME,
   description: 'Starts a game of TicTacToe.',
   options: [
     {
-      name: OPTION_OPPONENT,
+      name: COMMAND_TICTACTOE.OPTION_OPPONENT,
       description: '@ your opponent',
       type: ApplicationCommandOptionType.User,
     },
