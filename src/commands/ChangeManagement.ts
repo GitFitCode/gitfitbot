@@ -92,6 +92,10 @@ const ChangeManagement: SlashCommand = {
       required: true,
       choices: [
         {
+          name: 'GitFitCode (general)',
+          value: 'gitfitcode-general',
+        },
+        {
           name: 'Discord Server',
           value: 'discord-server',
         },
@@ -108,7 +112,7 @@ const ChangeManagement: SlashCommand = {
           value: 'github',
         },
         {
-          name: 'Other (provide it in the title and description)',
+          name: 'Other',
           value: 'other',
         },
       ],
