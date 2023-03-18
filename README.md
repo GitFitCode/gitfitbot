@@ -56,10 +56,12 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
   - Upon receiving the invite, navigate to the Files section in Keybase.
   - Inside Files, look for team -> gitfitcode -> discord bot secrets -> autobot -> `.env`.
   - Download or copy contents into your local `.env` file.
-  - Inside the autobot folder, look for `service.json` and download it into the root folder here.
-  - Now your local development environment is set up!
 
 - Get access to the `Digital Junkyard` development server on Discord from Sirrele, Pratik, Robert, Felix or Von.
+
+### Setting up service.json (Google Cloud)
+
+- In Keybase, inside the autobot folder, look for `service.json` and download it into the root folder of the project.
 
 ### Run the bot
 
@@ -68,6 +70,10 @@ npm run dev
 ```
 
 ## Development
+
+### Commit message
+
+When committing code to the repo, please follow the commit message guidelines/patterns set [here](https://github.com/conventional-changelog/commitlint#what-is-commitlint) and [here](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#type).
 
 ### Slash commands
 
@@ -99,7 +105,7 @@ npm run dev
   ```
 
 - Import the command in `src/Commands.ts` file.
-- Run the bot.
+- Run the bot:
 
   ```shell
   npm run dev
@@ -107,6 +113,28 @@ npm run dev
 
 Your newly added slash commands are now ready to be used on discord!
 
-### Commit message
+### Discord Event Listeners
 
-When committing code to the repo, please follow the commit message guidelines/patterns set [here](https://github.com/conventional-changelog/commitlint#what-is-commitlint) and [here](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#type).
+- Create a new `.ts` file in `src/listeners` folder.
+- Name it according to the event you want to listen to from [here](https://discord.js.org/#/docs/discord.js/14.8.0/class/Client) (e.g. `ready.ts`).
+- Follow the example below to create a new event listener:
+
+  ```typescript
+  import { ActivityType, Client } from 'discord.js';
+  import Commands from '../Commands';
+
+  export default (client: Client): void => {
+    client.on('ready', async () => {
+      if (!client.user || !client.application) {
+        return;
+      }
+
+      console.log(`${client.user.username} is online`);
+    });
+  };
+  ```
+
+- Run the bot:
+  ```shell
+  npm run dev
+  ```
