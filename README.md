@@ -1,10 +1,28 @@
+# gitfitbot <!-- omit from toc -->
+
+Table of Contents:
+
+- [Setting up the project](#setting-up-the-project)
+  - [What you'll need](#what-youll-need)
+  - [Installing Dependencies](#installing-dependencies)
+    - [Setting up husky pre-commit hooks](#setting-up-husky-pre-commit-hooks)
+  - [Setting up .env](#setting-up-env)
+  - [Setting up service.json (Google Cloud)](#setting-up-servicejson-google-cloud)
+  - [Run the bot](#run-the-bot)
+- [Development](#development)
+  - [Commit message](#commit-message)
+  - [Slash commands](#slash-commands)
+  - [Discord Event Listeners](#discord-event-listeners)
+- [\[OPTIONAL\] Local Docker Setup](#optional-local-docker-setup)
+
 ## Setting up the project
 
 ### What you'll need
 
 - [VSCode](https://code.visualstudio.com/) / [Intellij WebStorm](https://www.jetbrains.com/webstorm/)
 - [Nodejs LTS](https://nodejs.org/en/) (Please check package.json for the latest supported Node version)
-- [NPM](https://www.npmjs.com/)
+
+**Note**: You **_DO NOT_** need docker to run the bot locally.
 
 ### Installing Dependencies
 
@@ -61,7 +79,7 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
 
 ### Setting up service.json (Google Cloud)
 
-- In Keybase, inside the autobot folder, look for `service.json` and download it into the root folder of the project.
+- In Keybase, inside the autobot directory, look for `service.json` and download it into `/configurations` directory.
 
 ### Run the bot
 
@@ -77,7 +95,7 @@ When committing code to the repo, please follow the commit message guidelines/pa
 
 ### Slash commands
 
-- Create a new `.ts` file in `src/commands` folder.
+- Create a new `.ts` file in `src/commands` directory.
 - Name it same as the slash command (e.g. `Info.ts`).
 - Follow the example format below to create a new slash command:
 
@@ -115,7 +133,7 @@ Your newly added slash commands are now ready to be used on discord!
 
 ### Discord Event Listeners
 
-- Create a new `.ts` file in `src/listeners` folder.
+- Create a new `.ts` file in `src/listeners` directory.
 - Name it according to the event you want to listen to from [here](https://discord.js.org/#/docs/discord.js/14.8.0/class/Client) (e.g. `ready.ts`).
 - Follow the example below to create a new event listener:
 
@@ -134,7 +152,51 @@ Your newly added slash commands are now ready to be used on discord!
   };
   ```
 
+- Register the listener in `src/Bot.ts` file:
+
+  ```typescript
+  function start () {
+  ...
+    ready(client);
+  ...
+  }
+  ```
+
 - Run the bot:
   ```shell
   npm run dev
   ```
+
+**Note**: If you're having issues listening to events, ensure the intents are accurately provided in `src/Bot.ts` file.
+
+## [OPTIONAL] Local Docker Setup
+
+- Ensure you've followed every step in [Setting up the project](#setting-up-the-project) step.
+- Install Docker
+  - [Docker Engine](https://docs.docker.com/engine/install/) (if you're on a \*nix system)
+  - [Docker Desktop](https://docs.docker.com/desktop/) (Windows/macOS)
+- Build image:
+  ```shell
+  docker build -t gitfitbot .
+  ```
+- Run the bot:
+  ```shell
+    docker run --env-file ./.env -v <absolute_path>/configurations:/usr/src/bot/configurations -d gitfitbot
+  ```
+
+**Note**: Replace `<absolute_path>` with the full path on your system to the `configurations` directory.
+
+- Stop/Restart the bot
+
+  - List all docker processes:
+    ```shell
+    docker ps
+    ```
+  - Stop the bot's container:
+    ```shell
+    docker stop <CONTAINER ID>
+    ```
+  - Restart the bot's container:
+    ```shell
+    docker restart <CONTAINER ID>
+    ```
