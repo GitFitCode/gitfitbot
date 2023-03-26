@@ -61,7 +61,7 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
 
 ### Setting up service.json (Google Cloud)
 
-- In Keybase, inside the autobot folder, look for `service.json` and download it into the root folder of the project.
+- In Keybase, inside the autobot folder, look for `service.json` and download it into `/configurations` folder.
 
 ### Run the bot
 

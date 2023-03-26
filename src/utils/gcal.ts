@@ -14,7 +14,7 @@ const SCOPES: string[] = [
   'https://www.googleapis.com/auth/calendar',
   'https://www.googleapis.com/auth/calendar.events',
 ];
-const GOOGLE_PRIVATE_KEY_FILE = './service.json';
+const GOOGLE_PRIVATE_KEY_FILE = './configurations/service.json';
 const GOOGLE_CALENDAR_ID = 'gitfitbot@gitfitcode.com';
 const GITFITBOT_NAME = 'gitfitbot';
 const GOOGLE_TEST_CALENDAR_ID =
@@ -30,7 +30,7 @@ const googleAuth = new auth.GoogleAuth({
 
 const googleCalendar = calendar({ version: 'v3', auth: googleAuth });
 
-const serviceFileExists = () => fs.existsSync(`${path}/service.json`);
+const serviceFileExists = () => fs.existsSync(`${path}/configurations/service.json`);
 
 function addHoursToDate(date: Date, hours: number): Date {
   const dateToMilliseconds = date.getTime();
