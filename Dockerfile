@@ -16,4 +16,4 @@ RUN npm run build
 CMD [ "node", "./dist/index.js" ]
 
 # docker build -t gitfitbot .
-# docker run --env-file ./.env -v /<absolute_path>/configurations:/usr/src/bot/configurations -d gitfitbot
+# docker run --env-file ./.env -v <absolute_path>/configurations:/usr/src/bot/configurations -d gitfitbot
