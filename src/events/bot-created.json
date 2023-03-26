@@ -1,0 +1,33 @@
+GuildScheduledEvent {
+    id: '1088984498005356655',
+    guildId: '957891871810674749',
+    channelId: '1017945255837958214',
+    creatorId: '1000479896579096597',
+    name: 'sdfsdfs',
+    description: 'sdfsdf\n' +
+      '\n' +
+      '🗓️ - https://www.google.com/calendar/event?eid=dnM0ZGdobnNyYTZjbmM3bGI3ZTMwaWx1cjggY18xM2Y0ZTUwYTk2MjhjODM2Z
+  GMwZjAzZmViZTFkOGZkNGZjNjdmZjE5NzkxM2QyZmI4Y2FmZmEwZTg5MDYyZjE0QGc',
+    scheduledStartTimestamp: 1679706000000,
+    scheduledEndTimestamp: null,
+    privacyLevel: 2,
+    status: 1,
+    entityType: 2,
+    entityId: null,
+    userCount: null,
+    creator: ClientUser {
+      id: '1000479896579096597',
+      bot: true,
+      system: false,
+      flags: UserFlagsBitField { bitfield: 0 },
+      username: 'autobot',
+      discriminator: '0332',
+      avatar: 'f5ed0eaff0d33c4b1ff5212d13938058',
+      banner: undefined,
+      accentColor: undefined,
+      verified: true,
+      mfaEnabled: true
+    },
+    entityMetadata: null,
+    image: null
+  }

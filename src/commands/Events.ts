@@ -24,7 +24,7 @@ import duration from 'dayjs/plugin/duration';
 import { Transaction } from '@sentry/types';
 import { config } from 'gfc-vault-config';
 import { SlashCommand } from '../Command';
-import { buildEventOptions, COMMAND_EVENT, createEvent } from '../utils';
+import { buildEventOptions, COMMAND_EVENT } from '../utils';
 
 require('@sentry/tracing');
 
@@ -43,7 +43,6 @@ async function handleEventCreation(
   eventDescription: string,
   eventChannelID: string,
   sentryTransaction: Transaction,
-  client: Client,
 ) {
   // Snowflake structure received from get(), destructured and renamed.
   // https://discordjs.guide/slash-commands/parsing-options.html
@@ -74,10 +73,10 @@ async function handleEventCreation(
       // DATE FORMAT IS VALID AND INTO THE FUTURE
 
       // Create an event in the bot's Google calendar.
-      const gCalEventDetails = await createEvent(eventName, eventDescription, date, client);
-      const eventDescriptionWithGCalLink = gCalEventDetails.eventLink
-        ? `${eventDescription}\n\n🗓️ - ${gCalEventDetails.eventLink}`
-        : eventDescription;
+      // const gCalEventDetails = await createEvent(eventName, eventDescription, date, client);
+      // const eventDescriptionWithGCalLink = gCalEventDetails.eventLink
+      //   ? `${eventDescription}\n\n🗓️ - ${gCalEventDetails.eventLink}`
+      //   : eventDescription;
 
       // Build options required for the event.
       const eventOptions: GuildScheduledEventCreateOptions = {
@@ -85,7 +84,7 @@ async function handleEventCreation(
         scheduledStartTime: date,
         privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
         entityType: GuildScheduledEventEntityType.Voice,
-        description: eventDescriptionWithGCalLink,
+        description: eventDescription,
         channel: eventChannelID,
       };
 
@@ -106,14 +105,14 @@ async function handleEventCreation(
         ];
 
         // Add a discord button for Google calendar event link, if present.
-        if (gCalEventDetails.eventLink) {
-          eventComponents.push({
-            type: ComponentType.Button,
-            style: ButtonStyle.Link,
-            url: gCalEventDetails.eventLink,
-            label: 'Google Calendar Event Link',
-          });
-        }
+        // if (gCalEventDetails.eventLink) {
+        //   eventComponents.push({
+        //     type: ComponentType.Button,
+        //     style: ButtonStyle.Link,
+        //     url: gCalEventDetails.eventLink,
+        //     label: 'Google Calendar Event Link',
+        //   });
+        // }
 
         await interaction.followUp({
           ephemeral: true,
@@ -219,7 +218,6 @@ async function handleRetroEvent(client: Client, interaction: CommandInteraction)
     eventDescription,
     eventChannelID,
     transactionForRetro,
-    client,
   );
 
   transactionForRetro.finish();
@@ -245,7 +243,6 @@ async function handleCodewarsEvent(client: Client, interaction: CommandInteracti
     eventDescription,
     eventChannelID,
     transactionForCodewars,
-    client,
   );
 
   transactionForCodewars.finish();
@@ -281,7 +278,6 @@ async function handleCustomEvent(client: Client, interaction: CommandInteraction
       String(description),
       String(channel),
       transactionForCodewars,
-      client,
     );
   }
 

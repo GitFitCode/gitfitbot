@@ -63,6 +63,7 @@ async function createEvent(
         useDefault: false,
         overrides: [
           { method: 'email', minutes: 60 },
+          { method: 'popup', minutes: 30 },
           { method: 'popup', minutes: 5 },
         ],
       },
@@ -88,5 +89,12 @@ async function createEvent(
   return eventDetails;
 }
 
-// eslint-disable-next-line import/prefer-default-export
-export { createEvent };
+async function updateEvent() {
+  googleCalendar.events.update({
+    calendarId: '',
+    eventId: '',
+    requestBody: {},
+  });
+}
+
+export { createEvent, updateEvent };
