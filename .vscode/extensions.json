@@ -9,6 +9,7 @@
     "kisstkondoros.vscode-gutter-preview",
     "eamodio.gitlens",
     "yzhang.markdown-all-in-one",
-    "mikestead.dotenv"
+    "mikestead.dotenv",
+    "ms-azuretools.vscode-docker"
   ]
 }

@@ -42,7 +42,7 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
 - Create a file called `.env` at the root of your project.
 
   <details>
-    <summary>Here are the required environment variables</summary>
+  <summary>Here are the required environment variables</summary>
 
   - `DISCORD_BOT_TOKEN` - (Required) Token provided by Discord when creating the bot.
   - `BOT_ID` - (Required) ID of the GFC Discord bot.
