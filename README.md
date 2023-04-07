@@ -66,6 +66,8 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
   - `NOTION_BACKLOG_DATABASE_LINK` - (Required) - URL of the notion backlog database.
 
   - `SENTRY_DSN` - (Optional) - DSN of your nodejs project on [sentry.io](https://sentry.io/).
+  
+  - `OPENAI_API_KEY` - (Optional) - API Key for accessing OpenAI functionality.
 
 - Populate fields in the `.env` file.
 
