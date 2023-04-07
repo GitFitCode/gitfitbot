@@ -7,8 +7,8 @@ import { path } from 'app-root-path';
 import { GaxiosResponse } from 'gaxios/build/src';
 import { calendar_v3, auth, calendar } from '@googleapis/calendar';
 import { Client } from 'discord.js';
-
-type GCalEventDetails = { eventID: string; eventLink: string };
+import { addHoursToDate } from './helpers';
+import { GCalEventDetails } from './types';
 
 const SCOPES: string[] = [
   'https://www.googleapis.com/auth/calendar',
@@ -32,13 +32,7 @@ const googleCalendar = calendar({ version: 'v3', auth: googleAuth });
 
 const serviceFileExists = () => fs.existsSync(`${path}/configurations/service.json`);
 
-function addHoursToDate(date: Date, hours: number): Date {
-  const dateToMilliseconds = date.getTime();
-  const addedHour = dateToMilliseconds + 60 * 60 * 1000 * hours;
-  return new Date(addedHour);
-}
-
-async function createEvent(
+export async function createGCalEvent(
   summary: string,
   description: string,
   date: Date,
@@ -89,12 +83,10 @@ async function createEvent(
   return eventDetails;
 }
 
-async function updateEvent() {
+export async function updateGCalEvent() {
   googleCalendar.events.update({
     calendarId: '',
     eventId: '',
     requestBody: {},
   });
 }
-
-export { createEvent, updateEvent };
