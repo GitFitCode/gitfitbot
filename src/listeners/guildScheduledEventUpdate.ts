@@ -12,7 +12,7 @@ export default (client: Client): void => {
     console.log(scheduledEvent);
 
     // TODO get event from db
-    // TODO update event in db
     // TODO update gcal event
+    // TODO update event in db
   });
 };

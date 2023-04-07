@@ -152,6 +152,16 @@ export async function insertEvent(event: GFCEvent) {
   await eventsDB.put(event);
 }
 
+export async function retrieveEvent(
+  id: string,
+): Promise<GFCEvent & PouchDB.Core.IdMeta & PouchDB.Core.GetMeta> {
+  openEventsDatabase();
+
+  const result = await eventsDB.get(id);
+
+  return result;
+}
+
 export async function updateEvent(event: GFCEvent) {
   console.log('EVENT UPDATED in db');
   console.log(event);

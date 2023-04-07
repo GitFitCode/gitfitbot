@@ -1,3 +1,5 @@
+/* eslint-disable implicit-arrow-linebreak */
+/* eslint-disable no-confusing-arrow */
 /* eslint-disable operator-linebreak */
 /* eslint-disable import/no-extraneous-dependencies */
 
@@ -32,6 +34,9 @@ const googleCalendar = calendar({ version: 'v3', auth: googleAuth });
 
 const serviceFileExists = () => fs.existsSync(`${path}/configurations/service.json`);
 
+const getCalendarID = (botName: string) =>
+  botName === GITFITBOT_NAME ? GOOGLE_CALENDAR_ID : GOOGLE_TEST_CALENDAR_ID;
+
 export async function createGCalEvent(
   summary: string,
   description: string,
@@ -64,11 +69,11 @@ export async function createGCalEvent(
     };
 
     let result: GaxiosResponse<calendar_v3.Schema$Event>;
-    const botName = client?.user?.username.toLowerCase();
+    const botName = client?.user?.username.toLowerCase() ?? '';
 
     try {
       result = await googleCalendar.events.insert({
-        calendarId: botName === GITFITBOT_NAME ? GOOGLE_CALENDAR_ID : GOOGLE_TEST_CALENDAR_ID,
+        calendarId: getCalendarID(botName),
         requestBody: event,
       });
 
@@ -83,10 +88,21 @@ export async function createGCalEvent(
   return eventDetails;
 }
 
-export async function updateGCalEvent() {
+export async function updateGCalEvent(client: Client) {
+  const botName = client?.user?.username.toLowerCase() ?? '';
+
   googleCalendar.events.update({
-    calendarId: '',
+    calendarId: getCalendarID(botName),
     eventId: '',
     requestBody: {},
+  });
+}
+
+export async function deleteGCalEvent(gCalEventDetails: GCalEventDetails, client: Client) {
+  const botName = client?.user?.username.toLowerCase() ?? '';
+
+  googleCalendar.events.delete({
+    calendarId: getCalendarID(botName),
+    eventId: gCalEventDetails.eventID,
   });
 }
