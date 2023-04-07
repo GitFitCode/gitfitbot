@@ -41,7 +41,8 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
 
 - Create a file called `.env` at the root of your project.
 
-- Here are the required environment variables:
+  <details>
+    <summary>Here are the required environment variables</summary>
 
   - `DISCORD_BOT_TOKEN` - (Required) Token provided by Discord when creating the bot.
   - `BOT_ID` - (Required) ID of the GFC Discord bot.
@@ -66,8 +67,10 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
   - `NOTION_BACKLOG_DATABASE_LINK` - (Required) - URL of the notion backlog database.
 
   - `SENTRY_DSN` - (Optional) - DSN of your nodejs project on [sentry.io](https://sentry.io/).
-  
+
   - `OPENAI_API_KEY` - (Optional) - API Key for accessing OpenAI functionality.
+
+  </details>
 
 - Populate fields in the `.env` file.
 
