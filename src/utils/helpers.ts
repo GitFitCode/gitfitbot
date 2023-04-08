@@ -143,6 +143,12 @@ export const extractNotionPageIdFromTreadByChannel = async (clientChannel: any) 
   return '';
 };
 
+/**
+ * Function to add hours to a date.
+ * @param date Date to add hours to.
+ * @param hours Hours to add.
+ * @returns Date
+ */
 export function addHoursToDate(date: Date, hours: number): Date {
   const dateToMilliseconds = date.getTime();
   const addedHour = dateToMilliseconds + 60 * 60 * 1000 * hours;

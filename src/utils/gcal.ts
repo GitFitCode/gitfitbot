@@ -9,8 +9,7 @@ import { path } from 'app-root-path';
 import { GaxiosResponse } from 'gaxios/build/src';
 import { calendar_v3, auth, calendar } from '@googleapis/calendar';
 import { Client } from 'discord.js';
-import { addHoursToDate } from './helpers';
-import { GCalEventDetails } from './types';
+import { GCalEventDetails, GFCEvent } from './types';
 
 const SCOPES: string[] = [
   'https://www.googleapis.com/auth/calendar',
@@ -37,10 +36,20 @@ const serviceFileExists = () => fs.existsSync(`${path}/configurations/service.js
 const getCalendarID = (botName: string) =>
   botName === GITFITBOT_NAME ? GOOGLE_CALENDAR_ID : GOOGLE_TEST_CALENDAR_ID;
 
+/**
+ * Function to create a new event in Google Calendar.
+ * @param summary Event summary
+ * @param description Event description
+ * @param startDate Event start date
+ * @param endDate Event end date
+ * @param client Discord client
+ * @Event Google Calendar event ID and link
+ */
 export async function createGCalEvent(
   summary: string,
   description: string,
-  date: Date,
+  startDate: Date,
+  endDate: Date,
   client: Client,
 ): Promise<GCalEventDetails> {
   const eventDetails: GCalEventDetails = { eventID: '', eventLink: '' };
@@ -51,10 +60,10 @@ export async function createGCalEvent(
       location: 'GitFitCode Discord',
       description,
       start: {
-        dateTime: date.toISOString(),
+        dateTime: startDate.toISOString(),
       },
       end: {
-        dateTime: addHoursToDate(date, 1).toISOString(),
+        dateTime: endDate.toISOString(),
       },
       // TODO we can have some default attendees
       // attendees: [{ email: 'lpage@example.com' }, { email: 'sbrin@example.com' }],
@@ -88,16 +97,51 @@ export async function createGCalEvent(
   return eventDetails;
 }
 
-export async function updateGCalEvent(client: Client) {
+/**
+ * Function to update an existing event in Google Calendar.
+ * @param event GFCEvent
+ * @param gCalEventDetails GCalEventDetails
+ * @param client Discord client
+ */
+export async function updateGCalEvent(
+  event: GFCEvent,
+  gCalEventDetails: GCalEventDetails,
+  client: Client,
+) {
   const botName = client?.user?.username.toLowerCase() ?? '';
+
+  const eventBody: calendar_v3.Schema$Event = {
+    summary: event.name,
+    location: 'GitFitCode Discord',
+    description: event.description,
+    start: {
+      dateTime: new Date(event.starts_at).toISOString(),
+    },
+    end: {
+      dateTime: new Date(event.ends_at).toISOString(),
+    },
+    reminders: {
+      useDefault: false,
+      overrides: [
+        { method: 'email', minutes: 60 },
+        { method: 'popup', minutes: 30 },
+        { method: 'popup', minutes: 5 },
+      ],
+    },
+  };
 
   googleCalendar.events.update({
     calendarId: getCalendarID(botName),
-    eventId: '',
-    requestBody: {},
+    eventId: gCalEventDetails.eventID,
+    requestBody: eventBody,
   });
 }
 
+/**
+ * Function to delete an existing event in Google Calendar.
+ * @param gCalEventDetails GCalEventDetails
+ * @param client Discord client
+ */
 export async function deleteGCalEvent(gCalEventDetails: GCalEventDetails, client: Client) {
   const botName = client?.user?.username.toLowerCase() ?? '';
 

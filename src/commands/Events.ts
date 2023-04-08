@@ -72,12 +72,6 @@ async function handleEventCreation(
     if (difference > 0) {
       // DATE FORMAT IS VALID AND INTO THE FUTURE
 
-      // Create an event in the bot's Google calendar.
-      // const gCalEventDetails = await createEvent(eventName, eventDescription, date, client);
-      // const eventDescriptionWithGCalLink = gCalEventDetails.eventLink
-      //   ? `${eventDescription}\n\n🗓️ - ${gCalEventDetails.eventLink}`
-      //   : eventDescription;
-
       // Build options required for the event.
       const eventOptions: GuildScheduledEventCreateOptions = {
         name: eventName,
@@ -103,16 +97,6 @@ async function handleEventCreation(
             label: 'Discord Event Link',
           },
         ];
-
-        // Add a discord button for Google calendar event link, if present.
-        // if (gCalEventDetails.eventLink) {
-        //   eventComponents.push({
-        //     type: ComponentType.Button,
-        //     style: ButtonStyle.Link,
-        //     url: gCalEventDetails.eventLink,
-        //     label: 'Google Calendar Event Link',
-        //   });
-        // }
 
         await interaction.followUp({
           ephemeral: true,

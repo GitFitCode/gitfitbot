@@ -1,4 +1,4 @@
-import { GuildScheduledEventStatus } from 'discord.js';
+import { GuildScheduledEventEntityType, GuildScheduledEventStatus } from 'discord.js';
 
 export type Attendee = { discordID: string; retroDone: boolean };
 export type GFCEvent = {
@@ -10,6 +10,7 @@ export type GFCEvent = {
   id_gcal: string;
   url_gcal: string;
   status: GuildScheduledEventStatus;
+  type: GuildScheduledEventEntityType;
   starts_at: number;
   ends_at: number;
 };

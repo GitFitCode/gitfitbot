@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import PouchDB from 'pouchdb-node';
 import { Attendee, GFCEvent } from './types';
 
@@ -34,6 +35,7 @@ export async function resetAttendeesDatabase() {
 
 /**
  * Function to fetch all documents from the Attendees database.
+ * @returns Attendees ID array retrieved from the database.
  */
 export async function fetchAllAttendees() {
   openAttendeesDatabase();
@@ -45,6 +47,7 @@ export async function fetchAllAttendees() {
 
 /**
  * Function to fetch all documents with retroDone = true from the Attendees database.
+ * @returns Attendees ID array retrieved from the database.
  */
 export async function fetchRetroCompletedAttendees() {
   openAttendeesDatabase();
@@ -58,6 +61,7 @@ export async function fetchRetroCompletedAttendees() {
 
 /**
  * Function to fetch all documents with retroDone = false from the Attendees database.
+ * @returns Attendees ID array retrieved from the database.
  */
 export async function fetchRetroNotCompletedAttendees() {
   openAttendeesDatabase();
@@ -144,27 +148,47 @@ export async function resetEventsDatabase() {
   }
 }
 
+/**
+ * Function to insert a new event into the Events database.
+ * @param event Event to be inserted into the database.
+ */
 export async function insertEvent(event: GFCEvent) {
-  console.log('EVENT CREATED in db');
-  console.log(event);
   openEventsDatabase();
 
   await eventsDB.put(event);
 }
 
-export async function retrieveEvent(
-  id: string,
-): Promise<GFCEvent & PouchDB.Core.IdMeta & PouchDB.Core.GetMeta> {
+/**
+ * Function to retrieve an event from the Events database.
+ * @param id ID of the event to be retrieved.
+ * @returns Event retrieved from the database.
+ */
+export async function retrieveEvent(id: string): Promise<GFCEvent> {
   openEventsDatabase();
 
   const result = await eventsDB.get(id);
+  const event: GFCEvent = {
+    _id: result._id,
+    name: result.name,
+    description: result.description,
+    id_discord: result.id_discord,
+    url_discord: result.url_discord,
+    id_gcal: result.id_gcal,
+    url_gcal: result.url_gcal,
+    status: result.status,
+    type: result.type,
+    starts_at: result.starts_at,
+    ends_at: result.ends_at,
+  };
 
-  return result;
+  return event;
 }
 
+/**
+ * Function to update an event in the Events database.
+ * @param event Event to be updated in the database.
+ */
 export async function updateEvent(event: GFCEvent) {
-  console.log('EVENT UPDATED in db');
-  console.log(event);
   openEventsDatabase();
 
   const doc = await eventsDB.get(event.id_discord);
@@ -177,9 +201,11 @@ export async function updateEvent(event: GFCEvent) {
   await eventsDB.put(doc);
 }
 
+/**
+ * Function to delete an event from the Events database.
+ * @param event Event to be deleted from the database.
+ */
 export async function deleteEvent(event: GFCEvent) {
-  console.log('EVENT DELETED from db');
-  console.log(event);
   openEventsDatabase();
 
   const doc = await eventsDB.get(event.id_discord);

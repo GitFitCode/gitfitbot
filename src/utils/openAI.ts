@@ -1,9 +1,13 @@
-/* eslint-disable import/prefer-default-export */
 import { Configuration, OpenAIApi } from 'openai';
 import { config } from 'gfc-vault-config';
 import { getFormattedPrompt } from './helpers';
 import { OPEN_AI_CONFIG } from './constants';
 
+/**
+ * Function to get response from OpenAI for a given prompt.
+ * @param prompt Prompt to be sent to OpenAI.
+ * @returns OpenAI response.
+ */
 export async function getChatOpenAIPromptResponse(prompt: string): Promise<string> {
   const configuration = new Configuration({
     apiKey: config.openAIApiKey,
@@ -23,3 +27,5 @@ export async function getChatOpenAIPromptResponse(prompt: string): Promise<strin
 
   return response?.data?.choices?.[0]?.text || 'Unable to get response from OpenAI';
 }
+
+export default { getChatOpenAIPromptResponse };
