@@ -1,7 +1,5 @@
 /* eslint-disable operator-linebreak */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable implicit-arrow-linebreak */
-/* eslint-disable import/prefer-default-export */
 /* eslint-disable @typescript-eslint/indent */
 import {
   ApplicationCommandOptionType,
@@ -9,7 +7,6 @@ import {
   ApplicationCommandSubGroupData,
   ApplicationCommandSubCommandData,
   ApplicationCommandOptionChoiceData,
-  Channel,
 } from 'discord.js';
 import dayjs from 'dayjs';
 import { config } from 'gfc-vault-config';
@@ -64,7 +61,7 @@ function generateMonths(): ApplicationCommandOptionChoiceData<number>[] {
  * @param eventName Name of the event to be scheduled.
  * @returns GitFitCodeEventOptions
  */
-function buildEventOptions(eventName: string): GitFitCodeEventOptions {
+export function buildEventOptions(eventName: string): GitFitCodeEventOptions {
   return [
     {
       name: COMMAND_EVENT.OPTION_YEAR,
@@ -129,10 +126,10 @@ function buildEventOptions(eventName: string): GitFitCodeEventOptions {
   ];
 }
 
-const getFormattedPrompt = (userProvidedPrompt: string) =>
+export const getFormattedPrompt = (userProvidedPrompt: string) =>
   `GFC Community Member: ${userProvidedPrompt} \n\n GFC Community Software Sparring Partner: `;
 
-const extractNotionPageIdFromTreadByChannel = async (clientChannel: any) => {
+export const extractNotionPageIdFromTreadByChannel = async (clientChannel: any) => {
   const starterMessage = await clientChannel.fetchStarterMessage();
   // Message comes from a tread which was originally created by the gfc bot
   const isMessageInAThread = clientChannel?.isThread();
@@ -146,4 +143,14 @@ const extractNotionPageIdFromTreadByChannel = async (clientChannel: any) => {
   return '';
 };
 
-export { buildEventOptions, getFormattedPrompt, extractNotionPageIdFromTreadByChannel };
+/**
+ * Function to add hours to a date.
+ * @param date Date to add hours to.
+ * @param hours Hours to add.
+ * @returns Date
+ */
+export function addHoursToDate(date: Date, hours: number): Date {
+  const dateToMilliseconds = date.getTime();
+  const addedHour = dateToMilliseconds + 60 * 60 * 1000 * hours;
+  return new Date(addedHour);
+}

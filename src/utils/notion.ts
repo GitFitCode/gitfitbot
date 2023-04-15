@@ -59,7 +59,7 @@ function buildNotionSupportTicketsBlockChildren(
  * @param notionPageID ID of the Notion page.
  * @param data Data to be sent to Notion.
  */
-async function updateNotionSupportTicketsDBEntry(
+export async function updateNotionSupportTicketsDBEntry(
   notionPageID: string,
   data: {
     message: string;
@@ -115,7 +115,7 @@ async function updateNotionSupportTicketsDBEntry(
  * @param channelID Discord Channel ID where the message was generated.
  * @returns ID of the newly created entry in Notion DB.
  */
-async function createNotionSupportTicketsDBEntry(
+export async function createNotionSupportTicketsDBEntry(
   issueText: string,
   authorUsername: string,
   channelID: string,
@@ -180,7 +180,7 @@ async function createNotionSupportTicketsDBEntry(
  * @param description Description of the change management.
  * @returns
  */
-async function createNotionBacklogDBEntry(
+export async function createNotionBacklogDBEntry(
   summary: string,
   authorUsername: string,
   category: string,
@@ -244,9 +244,3 @@ async function createNotionBacklogDBEntry(
     return '';
   }
 }
-
-export {
-  createNotionSupportTicketsDBEntry,
-  updateNotionSupportTicketsDBEntry,
-  createNotionBacklogDBEntry,
-};

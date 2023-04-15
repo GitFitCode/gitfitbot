@@ -1,20 +1,21 @@
+/* eslint-disable no-underscore-dangle */
 import PouchDB from 'pouchdb-node';
-
-type Attendee = { discordID: string; retroDone: boolean };
+import { Attendee, GFCEvent } from './types';
 
 let attendeesDB: PouchDB.Database<Attendee>;
+let eventsDB: PouchDB.Database<GFCEvent>;
 
 /**
  * Function to open a new connection to Attendees database.
  */
-function openAttendeesDatabase() {
+export function openAttendeesDatabase() {
   attendeesDB = new PouchDB<Attendee>('attendees_db');
 }
 
 /**
  * Function to close the current connection to Attendees database.
  */
-async function closeAttendeesDatabase() {
+export async function closeAttendeesDatabase() {
   if (attendeesDB) {
     await attendeesDB.close();
   }
@@ -23,7 +24,7 @@ async function closeAttendeesDatabase() {
 /**
  * Function to delete all documents and destroy the Attendees database.
  */
-async function resetAttendeesDatabase() {
+export async function resetAttendeesDatabase() {
   try {
     await attendeesDB.info();
     await attendeesDB.destroy();
@@ -34,8 +35,9 @@ async function resetAttendeesDatabase() {
 
 /**
  * Function to fetch all documents from the Attendees database.
+ * @returns Attendees ID array retrieved from the database.
  */
-async function fetchAllAttendees() {
+export async function fetchAllAttendees() {
   openAttendeesDatabase();
 
   const result = await attendeesDB.allDocs({ include_docs: true });
@@ -45,8 +47,9 @@ async function fetchAllAttendees() {
 
 /**
  * Function to fetch all documents with retroDone = true from the Attendees database.
+ * @returns Attendees ID array retrieved from the database.
  */
-async function fetchRetroCompletedAttendees() {
+export async function fetchRetroCompletedAttendees() {
   openAttendeesDatabase();
 
   const result = await attendeesDB.allDocs({ include_docs: true });
@@ -58,8 +61,9 @@ async function fetchRetroCompletedAttendees() {
 
 /**
  * Function to fetch all documents with retroDone = false from the Attendees database.
+ * @returns Attendees ID array retrieved from the database.
  */
-async function fetchRetroNotCompletedAttendees() {
+export async function fetchRetroNotCompletedAttendees() {
   openAttendeesDatabase();
 
   const result = await attendeesDB.allDocs({ include_docs: true });
@@ -72,7 +76,7 @@ async function fetchRetroNotCompletedAttendees() {
 /**
  * Function to add multiple documents into the Attendees database.
  */
-async function bulkAddAttendees(attendees: string[]) {
+export async function bulkAddAttendees(attendees: string[]) {
   openAttendeesDatabase();
 
   const attendeesDocs: Attendee[] = attendees.map((attendee) => ({
@@ -88,7 +92,7 @@ async function bulkAddAttendees(attendees: string[]) {
  * Function to add multiple documents ignoring duplicates.
  * @param attendees Array of attendees to be added to the database.
  */
-async function insertAttendees(attendees: string[]) {
+export async function insertAttendees(attendees: string[]) {
   openAttendeesDatabase();
 
   const currentlyStoredAttendees = await fetchAllAttendees();
@@ -107,7 +111,7 @@ async function insertAttendees(attendees: string[]) {
 /**
  * Function to update retro status of a document from the Attendees database.
  */
-async function updateAttendeeRetroStatus(attendee: string) {
+export async function updateAttendeeRetroStatus(attendee: string) {
   openAttendeesDatabase();
 
   const attendeeDoc = await attendeesDB.get(attendee);
@@ -116,13 +120,94 @@ async function updateAttendeeRetroStatus(attendee: string) {
   await attendeesDB.put(attendeeDoc);
 }
 
-export {
-  closeAttendeesDatabase,
-  fetchAllAttendees,
-  fetchRetroNotCompletedAttendees,
-  fetchRetroCompletedAttendees,
-  insertAttendees,
-  openAttendeesDatabase,
-  resetAttendeesDatabase,
-  updateAttendeeRetroStatus,
-};
+/**
+ * Function to open a new connection to Events database.
+ */
+export function openEventsDatabase() {
+  eventsDB = new PouchDB<GFCEvent>('events_db');
+}
+
+/**
+ * Function to close the current connection to Events database.
+ */
+export async function closeEventsDatabase() {
+  if (eventsDB) {
+    await eventsDB.close();
+  }
+}
+
+/**
+ * Function to delete all documents and destroy the Events database.
+ */
+export async function resetEventsDatabase() {
+  try {
+    await eventsDB.info();
+    await eventsDB.destroy();
+  } catch (error) {
+    // NO-OP
+  }
+}
+
+/**
+ * Function to insert a new event into the Events database.
+ * @param event Event to be inserted into the database.
+ */
+export async function insertEvent(event: GFCEvent) {
+  openEventsDatabase();
+
+  await eventsDB.put(event);
+}
+
+/**
+ * Function to retrieve an event from the Events database.
+ * @param id ID of the event to be retrieved.
+ * @returns Event retrieved from the database.
+ */
+export async function retrieveEvent(id: string): Promise<GFCEvent> {
+  openEventsDatabase();
+
+  const result = await eventsDB.get(id);
+  const event: GFCEvent = {
+    _id: result._id,
+    name: result.name,
+    description: result.description,
+    id_discord: result.id_discord,
+    url_discord: result.url_discord,
+    id_gcal: result.id_gcal,
+    url_gcal: result.url_gcal,
+    status: result.status,
+    type: result.type,
+    starts_at: result.starts_at,
+    ends_at: result.ends_at,
+  };
+
+  return event;
+}
+
+/**
+ * Function to update an event in the Events database.
+ * @param event Event to be updated in the database.
+ */
+export async function updateEvent(event: GFCEvent) {
+  openEventsDatabase();
+
+  const doc = await eventsDB.get(event.id_discord);
+  doc.name = event.name;
+  doc.description = event.description;
+  doc.status = event.status;
+  doc.starts_at = event.starts_at;
+  doc.ends_at = event.ends_at;
+
+  await eventsDB.put(doc);
+}
+
+/**
+ * Function to delete an event from the Events database.
+ * @param event Event to be deleted from the database.
+ */
+export async function deleteEvent(event: GFCEvent) {
+  openEventsDatabase();
+
+  const doc = await eventsDB.get(event.id_discord);
+  await eventsDB.remove(doc);
+}

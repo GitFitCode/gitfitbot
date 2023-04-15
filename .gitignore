@@ -140,6 +140,7 @@ dist
 
 # PouchDB
 attendees_db/
+events_db/
 
 # GCP project service config file
 service.json
