@@ -22,7 +22,10 @@ Sentry.setTag('bot_version', version);
 // Start the bot.
 start();
 
-process.on('SIGINT', (code) => {
+const handleSignal = (code: NodeJS.Signals) => {
   stop(code);
   Sentry.close(2000).then(() => process.exit());
-});
+};
+
+process.on('SIGINT', (code) => handleSignal(code));
+process.on('SIGTERM', (code) => handleSignal(code));
