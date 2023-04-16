@@ -93,8 +93,8 @@ export const COMMAND_INFO = {
   COMMAND_NAME: 'info',
 };
 
-// Change Management command constants
-export const COMMAND_CHANGE_MANAGEMENT = {
+// Feature / Change Management command constants
+export const COMMAND_FEATURE_CHANGE_MANAGEMENT = {
   COMMAND_NAME: 'feature-cm',
   OPTION_CATEGORY: 'category',
   OPTION_TITLE: 'title',

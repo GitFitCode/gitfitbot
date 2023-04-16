@@ -13,7 +13,7 @@ import {
   ComponentType,
 } from 'discord.js';
 import { config } from 'gfc-vault-config';
-import { COMMAND_CHANGE_MANAGEMENT, createNotionBacklogDBEntry } from '../utils';
+import { COMMAND_FEATURE_CHANGE_MANAGEMENT, createNotionBacklogDBEntry } from '../utils';
 import { SlashCommand } from '../Command';
 
 require('@sentry/tracing');
@@ -25,25 +25,28 @@ async function executeRun(interaction: CommandInteraction) {
   });
   const transaction = Sentry.startTransaction({
     op: 'transaction',
-    name: `/${COMMAND_CHANGE_MANAGEMENT.COMMAND_NAME}`,
+    name: `/${COMMAND_FEATURE_CHANGE_MANAGEMENT.COMMAND_NAME}`,
   });
 
   // Snowflake structure received from get(), destructured and renamed.
   // https://discordjs.guide/slash-commands/parsing-options.html
   const { value: category } = interaction.options.get(
-    COMMAND_CHANGE_MANAGEMENT.OPTION_CATEGORY,
+    COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_CATEGORY,
     true,
   );
-  const { value: title } = interaction.options.get(COMMAND_CHANGE_MANAGEMENT.OPTION_TITLE, true);
+  const { value: title } = interaction.options.get(
+    COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TITLE,
+    true,
+  );
   const { value: description } = interaction.options.get(
-    COMMAND_CHANGE_MANAGEMENT.OPTION_DESCRIPTION,
+    COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_DESCRIPTION,
     true,
   );
 
   const authorUsername = interaction.user.username;
 
-  transaction.setData(COMMAND_CHANGE_MANAGEMENT.OPTION_CATEGORY, String(category));
-  transaction.setTag(COMMAND_CHANGE_MANAGEMENT.OPTION_CATEGORY, String(category));
+  transaction.setData(COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_CATEGORY, String(category));
+  transaction.setTag(COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_CATEGORY, String(category));
 
   // Create an entry in the notion database and grab the page id.
   const pageID: string = await createNotionBacklogDBEntry(
@@ -82,11 +85,11 @@ async function executeRun(interaction: CommandInteraction) {
 }
 
 const ChangeManagement: SlashCommand = {
-  name: COMMAND_CHANGE_MANAGEMENT.COMMAND_NAME,
+  name: COMMAND_FEATURE_CHANGE_MANAGEMENT.COMMAND_NAME,
   description: 'Helper slash command for raising feature/change management requests.',
   options: [
     {
-      name: COMMAND_CHANGE_MANAGEMENT.OPTION_CATEGORY,
+      name: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_CATEGORY,
       description: 'Category where to apply feature/change management requests.',
       type: ApplicationCommandOptionType.String,
       required: true,
@@ -118,13 +121,13 @@ const ChangeManagement: SlashCommand = {
       ],
     },
     {
-      name: COMMAND_CHANGE_MANAGEMENT.OPTION_TITLE,
+      name: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TITLE,
       description: 'Title of the feature/change management request.',
       type: ApplicationCommandOptionType.String,
       required: true,
     },
     {
-      name: COMMAND_CHANGE_MANAGEMENT.OPTION_DESCRIPTION,
+      name: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_DESCRIPTION,
       description: 'Description of the feature/change management request.',
       type: ApplicationCommandOptionType.String,
       required: true,
