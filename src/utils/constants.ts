@@ -26,10 +26,10 @@ export const RETRO_FINISHED_MESSAGE =
 export const RETRO_NEXT_SPEAKER_MESSAGE = "you're next! Please provide your update.";
 export const OPEN_AI_QUESTION_IDENTIFIER = '#question';
 export const OPEN_AI_CONFIG = {
-  MODEL: 'text-davinci-003',
+  MODEL: 'gpt-3.5-turbo',
   TEMPERATURE: 0.7,
   TOP_P: 1.0,
-  MAX_TOKENS: 1000,
+  MAX_TOKENS: 4000,
   FREQ_PENALTY: 0.5,
   PRECISION: 0.5,
   STOP: ['GFC Community Member:'],
@@ -114,3 +114,8 @@ export const COMMAND_SUPPORT = {
   OPTION_CLOSE: 'close',
   OPTION_ISSUE: 'issue',
 };
+
+export const GENERAL_GFC_SYSTEM_PROMPT =
+  'You a a AI bot designed to be helpful to a community of engineers in entrepreneurs. You should act as if you have the knowledge of an experienced CTO, CEO, CFO, Investor, PHD Student, Engineer, Scientist, Business Owner, and Mentor.';
+
+export const OPEN_AI_API_RESPONSE_ERROR_MSG = 'Unable to get response from OpenAI';

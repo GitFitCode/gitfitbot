@@ -32,7 +32,7 @@
     "discord-tictactoe": "latest",
     "discord.js": "latest",
     "gfc-vault-config": "git+https://git@github.com/GitFitCode/gfc-vault-config.git",
-    "openai": "latest",
+    "langchain": "latest",
     "pouchdb-node": "latest",
     "undici": "latest"
   },
