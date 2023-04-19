@@ -215,14 +215,6 @@ async function executeRun(interaction: CommandInteraction) {
       ephemeral: true,
       content: NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE,
     });
-  } else if (
-    channel?.type !== ChannelType.GuildText &&
-    commandInput.startsWith(COMMAND_SUPPORT.OPTION_CREATE)
-  ) {
-    // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A NON-REGULAR TEXT CHANNEL
-
-    // Send an ERROR followUp to the thread.
-    interaction.followUp({ ephemeral: true, content: THREAD_CREATION_ERROR_MESSAGE });
   } else {
     // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A REGULAR TEXT CHANNEL
 
