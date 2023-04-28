@@ -4,5 +4,6 @@
   "editor.formatOnPaste": false,
   "files.autoSave": "off",
   "prettier.requireConfig": true,
-  "prettier.configPath": "./.prettierrc"
+  "prettier.configPath": "./.prettierrc",
+  "python.terminal.activateEnvironment": false
 }
