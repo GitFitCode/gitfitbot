@@ -64,7 +64,7 @@ export async function retrieveEvent(id: string): Promise<GFCEvent | null> {
  * Function to retrieve all non-deleted events from the Events database.
  * @returns All events from the Events database.
  */
-export async function retrieveAllEvents(): Promise<GFCEvent[] | null> {
+export async function retrieveAllEvents(): Promise<GFCEvent[]> {
   openEventsDatabase();
 
   // TODO unsure if we need to filter out "completed" events here
@@ -89,7 +89,7 @@ export async function retrieveAllEvents(): Promise<GFCEvent[] | null> {
     });
     return events;
   }
-  return null;
+  return [];
 }
 
 /**

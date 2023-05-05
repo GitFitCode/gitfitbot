@@ -23,7 +23,7 @@ export default (client: Client): void => {
       scheduledEvent.entityType !== GuildScheduledEventEntityType.StageInstance
     ) {
       // Get event from the DB.
-      const eventFromDB = await retrieveEvent(String(scheduledEvent?.id));
+      const eventFromDB = await retrieveEvent(scheduledEvent?.id);
       if (eventFromDB != null) {
         // Update event details.
         const addOneHourToEventStartTime: number = addHoursToDate(

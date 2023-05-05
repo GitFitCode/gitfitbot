@@ -1,8 +1,8 @@
 import { GuildScheduledEventEntityType, GuildScheduledEventStatus } from 'discord.js';
 
 export type Attendee = { discordID: string; retroDone: boolean };
+
 export type GFCEvent = {
-  // _id: string;
   name: string;
   description: string;
   id_discord: string;

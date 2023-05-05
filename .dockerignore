@@ -4,3 +4,4 @@ dist/
 node_modules/
 .github/
 .vscode/
+attendees_db/
