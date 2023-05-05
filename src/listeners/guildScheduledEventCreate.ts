@@ -43,7 +43,6 @@ export default (client: Client): void => {
       // TODO Edit the bot's reply and add google calendar event link button.
 
       const eventDetails: GFCEvent = {
-        _id: scheduledEvent.id,
         name: eventName,
         description: eventDescriptionWithGCalLink,
         id_discord: scheduledEvent.id,
@@ -56,8 +55,10 @@ export default (client: Client): void => {
         ends_at: eventEndTime.getTime(),
       };
 
-      // Add an entry for the event in the local DB.
-      await insertEvent(eventDetails);
+      // Add an entry for the event in the DB.
+      if (!(await insertEvent(eventDetails))) {
+        console.error('ERROR: Failed to insert event into the DB.');
+      }
     }
   });
 };
