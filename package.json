@@ -24,6 +24,7 @@
     "@sentry/node": "latest",
     "@sentry/tracing": "latest",
     "@sentry/types": "latest",
+    "@supabase/supabase-js": "latest",
     "@types/pouchdb-node": "latest",
     "app-root-path": "latest",
     "dayjs": "latest",
