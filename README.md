@@ -70,6 +70,9 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
 
   - `OPENAI_API_KEY` - (Optional) - API Key for accessing OpenAI functionality.
 
+  - `SUPABASE_URL` - (Required) - URL of the Supabase project.
+  - `SUPABASE_ANON_KEY` - (Required) - Anon key to access the Supabase project.
+
   </details>
 
 - Populate fields in the `.env` file.
