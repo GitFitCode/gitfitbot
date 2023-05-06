@@ -130,7 +130,7 @@ export async function updateGCalEvent(
     },
   };
 
-  googleCalendar.events.update({
+  await googleCalendar.events.update({
     calendarId: getCalendarID(botName),
     eventId: gCalEventDetails.eventID,
     requestBody: eventBody,
@@ -145,7 +145,7 @@ export async function updateGCalEvent(
 export async function deleteGCalEvent(gCalEventDetails: GCalEventDetails, client: Client) {
   const botName = client?.user?.username.toLowerCase() ?? '';
 
-  googleCalendar.events.delete({
+  await googleCalendar.events.delete({
     calendarId: getCalendarID(botName),
     eventId: gCalEventDetails.eventID,
   });

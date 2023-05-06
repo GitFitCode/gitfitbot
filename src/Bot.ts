@@ -11,6 +11,7 @@ import guildScheduledEventUpdate from './listeners/guildScheduledEventUpdate';
 import interactionCreate from './listeners/interactionCreate';
 import messageCreate from './listeners/messageCreate';
 import ready from './listeners/ready';
+import { keepDBAlive } from './utils';
 
 // A new instance of `Client`.
 const client = new Client({
@@ -38,6 +39,10 @@ function start() {
 
   // Call login on client for authenticating the bot with Discord.
   client.login(config.discordBotToken);
+
+  // TODO remove this if and when we move to supabase paid tier.
+  // Keep the DB alive.
+  keepDBAlive();
 }
 
 function stop(code: NodeJS.Signals) {

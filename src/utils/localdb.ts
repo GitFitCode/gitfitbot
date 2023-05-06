@@ -1,9 +1,8 @@
 /* eslint-disable no-underscore-dangle */
 import PouchDB from 'pouchdb-node';
-import { Attendee, GFCEvent } from './types';
+import { Attendee } from './types';
 
 let attendeesDB: PouchDB.Database<Attendee>;
-let eventsDB: PouchDB.Database<GFCEvent>;
 
 /**
  * Function to open a new connection to Attendees database.
@@ -118,96 +117,4 @@ export async function updateAttendeeRetroStatus(attendee: string) {
   attendeeDoc.retroDone = true;
 
   await attendeesDB.put(attendeeDoc);
-}
-
-/**
- * Function to open a new connection to Events database.
- */
-export function openEventsDatabase() {
-  eventsDB = new PouchDB<GFCEvent>('events_db');
-}
-
-/**
- * Function to close the current connection to Events database.
- */
-export async function closeEventsDatabase() {
-  if (eventsDB) {
-    await eventsDB.close();
-  }
-}
-
-/**
- * Function to delete all documents and destroy the Events database.
- */
-export async function resetEventsDatabase() {
-  try {
-    await eventsDB.info();
-    await eventsDB.destroy();
-  } catch (error) {
-    // NO-OP
-  }
-}
-
-/**
- * Function to insert a new event into the Events database.
- * @param event Event to be inserted into the database.
- */
-export async function insertEvent(event: GFCEvent) {
-  openEventsDatabase();
-
-  await eventsDB.put(event);
-}
-
-/**
- * Function to retrieve an event from the Events database.
- * @param id ID of the event to be retrieved.
- * @returns Event retrieved from the database.
- */
-export async function retrieveEvent(id: string): Promise<GFCEvent> {
-  openEventsDatabase();
-
-  const result = await eventsDB.get(id);
-  const event: GFCEvent = {
-    _id: result._id,
-    name: result.name,
-    description: result.description,
-    id_discord: result.id_discord,
-    url_discord: result.url_discord,
-    id_gcal: result.id_gcal,
-    url_gcal: result.url_gcal,
-    status: result.status,
-    type: result.type,
-    starts_at: result.starts_at,
-    ends_at: result.ends_at,
-  };
-
-  return event;
-}
-
-/**
- * Function to update an event in the Events database.
- * @param event Event to be updated in the database.
- */
-export async function updateEvent(event: GFCEvent) {
-  openEventsDatabase();
-
-  const doc = await eventsDB.get(event.id_discord);
-  doc.name = event.name;
-  doc.description = event.description;
-  doc.status = event.status;
-  doc.starts_at = event.starts_at;
-  doc.ends_at = event.ends_at;
-
-  await eventsDB.put(doc);
-}
-
-/**
- * Function to delete an event from the Events database.
- * @param event Event to be deleted from the database.
- */
-export async function deleteEvent(event: GFCEvent) {
-  openEventsDatabase();
-
-  const doc = await eventsDB.get(event.id_discord);
-  await eventsDB.remove(doc);
 }
