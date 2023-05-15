@@ -47,6 +47,9 @@ export default (client: Client): void => {
           case GuildScheduledEventStatus.Completed:
             eventFromDB.name = `[COMPLETED] ${scheduledEvent?.name}`;
             break;
+          case GuildScheduledEventStatus.Canceled:
+            eventFromDB.name = `[CANCELLED] ${scheduledEvent?.name}`;
+            break;
           default:
             eventFromDB.name = scheduledEvent?.name ?? '';
             break;

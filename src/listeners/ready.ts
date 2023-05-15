@@ -5,8 +5,8 @@
 import { ActivityType, Client } from 'discord.js';
 import Commands from '../Commands';
 
-const GITFITBOT_NAME = 'gitfitbot';
-const AUTOBOT_NAME = 'autobot';
+const GITFITBOT = 'gitfitbot';
+const AUTOBOT = 'autobot';
 
 export default (client: Client): void => {
   client.on('ready', async () => {
@@ -15,14 +15,14 @@ export default (client: Client): void => {
     }
 
     // Set status (i.e. activity) of the "GitFitBot" bot.
-    if (client.user.username.toLowerCase() === GITFITBOT_NAME) {
+    if (client.user.username.toLowerCase() === GITFITBOT) {
       client.user.setActivity('"Do Androids Dream of ⚡🐑?" audio book', {
         type: ActivityType.Listening,
       });
     }
 
     // Set status (i.e. activity) of the "autobot" bot.
-    if (client.user.username.toLowerCase() === AUTOBOT_NAME) {
+    if (client.user.username.toLowerCase() === AUTOBOT) {
       client.user.setActivity('the world slowly 🔥 itself', { type: ActivityType.Watching });
     }
 

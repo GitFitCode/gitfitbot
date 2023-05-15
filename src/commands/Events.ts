@@ -108,6 +108,9 @@ async function handleEventCreation(
             },
           ],
         });
+
+        sentryTransaction.setData('success', true);
+        sentryTransaction.setTag('success', true);
       } catch (err) {
         console.error(err);
 
@@ -115,10 +118,10 @@ async function handleEventCreation(
           ephemeral: true,
           content: 'Unable to schedule the event due to an error.',
         });
-      }
 
-      sentryTransaction.setData('success', true);
-      sentryTransaction.setTag('success', true);
+        sentryTransaction.setData('success', false);
+        sentryTransaction.setTag('success', false);
+      }
     } else {
       // DATE FORMAT IS VALID BUT INTO THE PAST
 
@@ -185,7 +188,7 @@ async function handleListEvent(interaction: CommandInteraction) {
  * Function to build information for scheduling a retrospective event in the discord server.
  * @param interaction CommandInteraction
  */
-async function handleRetroEvent(client: Client, interaction: CommandInteraction) {
+async function handleRetroEvent(_client: Client, interaction: CommandInteraction) {
   const transactionForRetro = Sentry.startTransaction({
     op: 'transaction',
     name: `/${COMMAND_EVENT.COMMAND_NAME} retro`,
@@ -211,7 +214,7 @@ async function handleRetroEvent(client: Client, interaction: CommandInteraction)
  * Function to build information for scheduling a codewars event in the discord server.
  * @param interaction CommandInteraction
  */
-async function handleCodewarsEvent(client: Client, interaction: CommandInteraction) {
+async function handleCodewarsEvent(_client: Client, interaction: CommandInteraction) {
   const transactionForCodewars = Sentry.startTransaction({
     op: 'transaction',
     name: `/${COMMAND_EVENT.COMMAND_NAME} codewars`,
@@ -236,7 +239,7 @@ async function handleCodewarsEvent(client: Client, interaction: CommandInteracti
  * Function to build information for scheduling a custom event in the discord server.
  * @param interaction CommandInteraction
  */
-async function handleCustomEvent(client: Client, interaction: CommandInteraction) {
+async function handleCustomEvent(_client: Client, interaction: CommandInteraction) {
   const transactionForCodewars = Sentry.startTransaction({
     op: 'transaction',
     name: `/${COMMAND_EVENT.COMMAND_NAME} custom`,
