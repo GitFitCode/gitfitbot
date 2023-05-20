@@ -7,6 +7,8 @@ import { config } from 'gfc-vault-config';
 
 export default (client: Client): void => {
   client.on('guildMemberAdd', async (member) => {
+    if (member.user.bot) return;
+
     const channelID = config.generalChatChannelId;
     const channelMessage = `"Successful people do what unsuccessful people are not willing to do. Don't wish it were easier; wish you were better!"
 
