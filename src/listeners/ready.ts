@@ -19,11 +19,14 @@ import {
   AUTOBOT,
   GFCEvent,
   GITFITBOT,
+  createGCalEvent,
   deleteEvent,
+  deleteGCalEvent,
   insertEvent,
   processDiscordEventIntoGFCEvent,
   retrieveAllEvents,
   updateEvent,
+  updateGCalEvent,
 } from '../utils';
 import Commands from '../Commands';
 
@@ -48,7 +51,19 @@ async function syncEvents(client: Client) {
     if (stragglerEventsOnDB.length > 0) {
       // https://gist.github.com/joeytwiddle/37d2085425c049629b80956d3c618971#process-all-the-players-in-parallel
       // Instead of using foreach aysnc, we execute all the promises in parallel at once.
-      await Promise.all(stragglerEventsOnDB.map(async (event) => deleteEvent(event)));
+      await Promise.all(
+        stragglerEventsOnDB.map(async (event) => {
+          // Delete event from the DB.
+          await deleteEvent(event);
+
+          const gCalEventDetails = {
+            eventID: event.id_gcal,
+            eventLink: event.url_gcal,
+          };
+          // Delete event from gcal.
+          await deleteGCalEvent(gCalEventDetails, client);
+        }),
+      );
     }
   }
 
@@ -70,7 +85,19 @@ async function syncEvents(client: Client) {
         processDiscordEventIntoGFCEvent(event),
       );
 
-      await Promise.all(processedEvents.map(async (event) => updateEvent(event)));
+      await Promise.all(
+        processedEvents.map(async (event) => {
+          // Update event in the DB.
+          await updateEvent(event);
+
+          const gCalEventDetails = {
+            eventID: event.id_gcal,
+            eventLink: event.url_gcal,
+          };
+          // Update event in gcal.
+          await updateGCalEvent(event, gCalEventDetails, client);
+        }),
+      );
     }
   }
 
@@ -89,7 +116,21 @@ async function syncEvents(client: Client) {
         processDiscordEventIntoGFCEvent(event),
       );
 
-      await Promise.all(processedEvents.map(async (event) => insertEvent(event)));
+      await Promise.all(
+        processedEvents.map(async (event) => {
+          // Insert event into the DB.
+          await insertEvent(event);
+
+          // Create event in gcal.
+          await createGCalEvent(
+            event.name,
+            event.description,
+            new Date(event.starts_at),
+            new Date(event.ends_at),
+            client,
+          );
+        }),
+      );
     }
   }
 }
