@@ -1,12 +1,7 @@
 /* eslint-disable operator-linebreak */
 /* eslint-disable implicit-arrow-linebreak */
 
-import {
-  ApplicationCommandOptionType,
-  ApplicationCommandOptionChoiceData,
-  GuildScheduledEvent,
-  GuildScheduledEventStatus,
-} from 'discord.js';
+import { ApplicationCommandOptionType, ApplicationCommandOptionChoiceData } from 'discord.js';
 import dayjs from 'dayjs';
 import { config } from 'gfc-vault-config';
 import {
@@ -14,7 +9,7 @@ import {
   NOTION_PAGE_ID_DELIMITER,
   THREAD_START_MESSAGE_SLICE_INDEX,
 } from './constants';
-import { GFCEvent, GitFitCodeEventOptions } from './types';
+import { GitFitCodeEventOptions } from './types';
 
 /**
  * Function to build a list containing current and next year.
@@ -148,26 +143,4 @@ export function addHoursToDate(date: Date, hours: number): Date {
   const dateToMilliseconds = date.getTime();
   const addedHour = dateToMilliseconds + 60 * 60 * 1000 * hours;
   return new Date(addedHour);
-}
-
-/**
- * Function to process a discord event into a GFC event.
- * @param eventData Event data to be processed.
- * @returns GFCEvent
- */
-export function processDiscordEventIntoGFCEvent(
-  eventData: GuildScheduledEvent<GuildScheduledEventStatus>,
-): GFCEvent {
-  return {
-    name: eventData.name,
-    description: eventData.description ?? '',
-    id_discord: eventData.id,
-    url_discord: eventData.url,
-    id_gcal: eventData.id_gcal,
-    url_gcal: eventData.url_gcal,
-    status: eventData.status,
-    type: eventData.entityType,
-    starts_at: eventData.scheduledStartTimestamp,
-    ends_at: eventData.scheduledEndTimestamp,
-  };
 }
