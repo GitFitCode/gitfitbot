@@ -11,6 +11,7 @@ import {
   Collection,
 } from 'discord.js';
 import { config } from 'gfc-vault-config';
+import * as Sentry from '@sentry/node';
 import { createGCalEvent, deleteGCalEvent, updateGCalEvent } from './gcal';
 import { addHoursToDate } from './helpers';
 import {
@@ -21,6 +22,8 @@ import {
   updateEvent,
 } from './supabase';
 import { GCalEventDetails, GFCEvent } from './types';
+
+require('@sentry/tracing');
 
 /**
  * Function to create events in the DB and Google calendar.
@@ -70,6 +73,9 @@ export async function handleEventCreationInDBAndGCal(
   // Add an entry for the event in the DB.
   if (!(await insertEvent(eventDetails))) {
     console.error('ERROR: Failed to insert event into the DB.');
+    Sentry.captureException(
+      'handleEventCreationInDBAndGCal ERROR: Failed to insert event into the DB.',
+    );
   }
 }
 
@@ -89,7 +95,10 @@ async function handleEventDeletionInDBAndGCal(eventFromDB: GFCEvent, client: Cli
 
   // Delete the event from the DB.
   if (!(await deleteEvent(eventFromDB))) {
-    console.error("ERROR: Couldn't delete event from the DB.");
+    console.error('ERROR: Failed to delete event from the DB.');
+    Sentry.captureException(
+      'handleEventDeletionInDBAndGCal ERROR: Failed to delete event from the DB.',
+    );
   }
 }
 
@@ -107,8 +116,6 @@ export async function deleteEventFromBDAndGCalUsingGuildScheduledEvent(
 
   if (eventFromDB != null) {
     await handleEventDeletionInDBAndGCal(eventFromDB, client);
-  } else {
-    console.error("ERROR: Couldn't find event in the DB.");
   }
 }
 
@@ -117,15 +124,11 @@ export async function deleteEventFromBDAndGCalUsingGuildScheduledEvent(
  * @param scheduledEvent The event that needs to be deleted from database.
  * @param client The bot client.
  */
-export async function deleteEventFromBDAndGCalUsingGFCEvent(
+export async function deleteEventFromDBAndGCalUsingGFCEvent(
   scheduledEvent: GFCEvent,
   client: Client<boolean>,
 ) {
-  if (scheduledEvent != null) {
-    await handleEventDeletionInDBAndGCal(scheduledEvent, client);
-  } else {
-    console.error("ERROR: Couldn't find event in the DB.");
-  }
+  await handleEventDeletionInDBAndGCal(scheduledEvent, client);
 }
 
 /**
@@ -185,10 +188,14 @@ export async function handleEventUpdatesInDBAndGCal(
 
     // Update event in the DB.
     if (!(await updateEvent(eventFromDB))) {
-      console.error("ERROR: Couldn't update event in the DB.");
+      console.error('ERROR: Failed to update event in the DB.');
+      Sentry.captureException(
+        'handleEventUpdatesInDBAndGCal ERROR: Failed to update event in the DB.',
+      );
     }
   } else {
-    console.error("ERROR: Couldn't find event in the DB.");
+    console.error('ERROR: Failed to find event in the DB.');
+    Sentry.captureException('handleEventUpdatesInDBAndGCal ERROR: Failed to find event in the DB.');
   }
 }
 
@@ -219,7 +226,7 @@ export async function syncEvents(client: Client) {
       // Instead of using foreach aysnc, we execute all the promises in parallel at once.
       await Promise.all(
         stragglerEventsOnDB.map(async (event) => {
-          await deleteEventFromBDAndGCalUsingGFCEvent(event, client);
+          await deleteEventFromDBAndGCalUsingGFCEvent(event, client);
         }),
       );
     }

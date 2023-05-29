@@ -11,6 +11,8 @@ import { calendar_v3, auth, calendar } from '@googleapis/calendar';
 import { Client } from 'discord.js';
 import { GCalEventDetails, GFCEvent } from './types';
 
+require('@sentry/tracing');
+
 const SCOPES: string[] = [
   'https://www.googleapis.com/auth/calendar',
   'https://www.googleapis.com/auth/calendar.events',
