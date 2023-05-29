@@ -237,7 +237,13 @@ export async function syncEvents(client: Client) {
     > = eventsFromDiscord.filter((discordEvent) =>
       eventsFromDB.find(
         (DBEvent) =>
-          DBEvent.id_discord === discordEvent.id && DBEvent.status !== discordEvent.status,
+          DBEvent.id_discord === discordEvent.id &&
+          (DBEvent.name !== discordEvent.name ||
+            DBEvent.description !== discordEvent.description ||
+            DBEvent.status !== discordEvent.status ||
+            DBEvent.type !== discordEvent.entityType ||
+            DBEvent.starts_at !== discordEvent.scheduledStartTimestamp ||
+            DBEvent.ends_at !== discordEvent.scheduledEndTimestamp),
       ),
     );
 
