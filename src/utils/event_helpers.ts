@@ -23,26 +23,6 @@ import {
 import { GCalEventDetails, GFCEvent } from './types';
 
 /**
- * Function to check if the event is a GFCEvent.
- * @param scheduledEvent The event to check.
- * @returns True if the event is a GFCEvent, False otherwise.
- */
-function isGFCEvent(scheduledEvent: any): scheduledEvent is GFCEvent {
-  return (scheduledEvent as GFCEvent) !== undefined;
-}
-
-/**
- * Function to check if the event is a GuildScheduledEvent.
- * @param scheduledEvent The event to check.
- * @returns True if the event is a GuildScheduledEvent, False otherwise.
- */
-function isGuildScheduledEvent(
-  scheduledEvent: any,
-): scheduledEvent is GuildScheduledEvent<GuildScheduledEventStatus> {
-  return (scheduledEvent as GuildScheduledEvent<GuildScheduledEventStatus>) !== undefined;
-}
-
-/**
  * Function to create events in the DB and Google calendar.
  * @param scheduledEvent The event that was created.
  * @param client The bot client.
@@ -95,37 +75,54 @@ export async function handleEventCreationInDBAndGCal(
 
 /**
  * Function to delete events from the DB and Google calendar.
- * @param scheduledEvent The event that was deleted.
+ * @param eventFromDB The event that was deleted from discord or needs to be deleted from DB.
  * @param client The bot client.
  */
-export async function handleEventDeletionInDBAndGCal(
-  scheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus> | GFCEvent,
+async function handleEventDeletionInDBAndGCal(eventFromDB: GFCEvent, client: Client) {
+  const gCalEventDetails: GCalEventDetails = {
+    eventID: eventFromDB.id_gcal,
+    eventLink: eventFromDB.url_gcal,
+  };
+
+  // Delete event from Google calendar.
+  await deleteGCalEvent(gCalEventDetails, client);
+
+  // Delete the event from the DB.
+  if (!(await deleteEvent(eventFromDB))) {
+    console.error("ERROR: Couldn't delete event from the DB.");
+  }
+}
+
+/**
+ * Function to delete events from the DB and Google calendar.
+ * @param scheduledEvent The event that was deleted from discord.
+ * @param client The bot client.
+ */
+export async function deleteEventFromBDAndGCalUsingGuildScheduledEvent(
+  scheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus>,
   client: Client<boolean>,
 ) {
-  let eventFromDB: GFCEvent | null = null;
-
-  if (isGFCEvent(scheduledEvent)) {
-    eventFromDB = scheduledEvent;
-  }
-
-  if (isGuildScheduledEvent(scheduledEvent)) {
-    // Get event from the DB.
-    eventFromDB = await retrieveEvent(scheduledEvent.id);
-  }
+  // Get event from the DB.
+  const eventFromDB = await retrieveEvent(scheduledEvent.id);
 
   if (eventFromDB != null) {
-    const gCalEventDetails: GCalEventDetails = {
-      eventID: eventFromDB.id_gcal,
-      eventLink: eventFromDB.url_gcal,
-    };
+    await handleEventDeletionInDBAndGCal(eventFromDB, client);
+  } else {
+    console.error("ERROR: Couldn't find event in the DB.");
+  }
+}
 
-    // Delete event from Google calendar.
-    await deleteGCalEvent(gCalEventDetails, client);
-
-    // Delete the event from the DB.
-    if (!(await deleteEvent(eventFromDB))) {
-      console.error("ERROR: Couldn't delete event from the DB.");
-    }
+/**
+ * Function to delete events from the DB and Google calendar.
+ * @param scheduledEvent The event that needs to be deleted from database.
+ * @param client The bot client.
+ */
+export async function deleteEventFromBDAndGCalUsingGFCEvent(
+  scheduledEvent: GFCEvent,
+  client: Client<boolean>,
+) {
+  if (scheduledEvent != null) {
+    await handleEventDeletionInDBAndGCal(scheduledEvent, client);
   } else {
     console.error("ERROR: Couldn't find event in the DB.");
   }
@@ -222,7 +219,7 @@ export async function syncEvents(client: Client) {
       // Instead of using foreach aysnc, we execute all the promises in parallel at once.
       await Promise.all(
         stragglerEventsOnDB.map(async (event) => {
-          await handleEventDeletionInDBAndGCal(event, client);
+          await deleteEventFromBDAndGCalUsingGFCEvent(event, client);
         }),
       );
     }
