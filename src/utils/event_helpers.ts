@@ -215,6 +215,7 @@ export async function syncEvents(client: Client) {
 
   // We can have straggler events only if there are events present in the DB.
   if (eventsFromDB.length > 0) {
+    // STEP 1
     // Get events that are present in the DB but not in discord (ie probably deleted from discord).
     const stragglerEventsOnDB: GFCEvent[] = eventsFromDB.filter(
       (DBEvent) =>
@@ -234,6 +235,7 @@ export async function syncEvents(client: Client) {
 
   // We can have updated events only if there are events present in the DB AND discord.
   if (eventsFromDB.length > 0 && eventsFromDiscord.size > 0) {
+    // STEP 2
     // Get events that are present in both the DB and discord and have been updated on discord.
     const eventsUpdatedOnDiscord: Collection<
       string,
@@ -262,6 +264,7 @@ export async function syncEvents(client: Client) {
 
   // We can have newly created events only if there are events present in discord.
   if (eventsFromDiscord.size > 0) {
+    // STEP 3
     // Get events that are present in discord but not in the DB (ie newly created on discord).
     const newEventsCreatedOnDiscord: Collection<
       string,
