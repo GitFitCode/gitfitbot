@@ -1,7 +1,12 @@
 /* eslint-disable operator-linebreak */
 /* eslint-disable implicit-arrow-linebreak */
 
-import { ApplicationCommandOptionType, ApplicationCommandOptionChoiceData } from 'discord.js';
+import {
+  ApplicationCommandOptionType,
+  ApplicationCommandOptionChoiceData,
+  GuildScheduledEvent,
+  GuildScheduledEventStatus,
+} from 'discord.js';
 import dayjs from 'dayjs';
 import { config } from 'gfc-vault-config';
 import {
@@ -150,17 +155,19 @@ export function addHoursToDate(date: Date, hours: number): Date {
  * @param eventData Event data to be processed.
  * @returns GFCEvent
  */
-export function processDiscordEventIntoGFCEvent(eventData: { [x: string]: any }): GFCEvent {
+export function processDiscordEventIntoGFCEvent(
+  eventData: GuildScheduledEvent<GuildScheduledEventStatus>,
+): GFCEvent {
   return {
     name: eventData.name,
-    description: eventData.description,
-    id_discord: eventData.id_discord,
-    url_discord: eventData.url_discord,
+    description: eventData.description ?? '',
+    id_discord: eventData.id,
+    url_discord: eventData.url,
     id_gcal: eventData.id_gcal,
     url_gcal: eventData.url_gcal,
     status: eventData.status,
-    type: eventData.type,
-    starts_at: eventData.starts_at,
-    ends_at: eventData.ends_at,
+    type: eventData.entityType,
+    starts_at: eventData.scheduledStartTimestamp,
+    ends_at: eventData.scheduledEndTimestamp,
   };
 }
