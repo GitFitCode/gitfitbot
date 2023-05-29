@@ -1,4 +1,5 @@
 /* eslint-disable operator-linebreak */
+
 /**
  * "guildScheduledEventUpdate" event listener for the bot.
  */

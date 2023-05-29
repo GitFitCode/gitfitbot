@@ -1,5 +1,6 @@
 /* eslint-disable implicit-arrow-linebreak */
 /* eslint-disable operator-linebreak */
+
 /**
  * Slash command that open a support ticket when triggered.
  *

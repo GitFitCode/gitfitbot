@@ -1,4 +1,5 @@
 /* eslint-disable object-curly-newline */
+
 /**
  * "interactionCreate" event listener for the bot.
  */

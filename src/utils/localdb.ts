@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */
+
 import PouchDB from 'pouchdb-node';
 import { Attendee } from './types';
 

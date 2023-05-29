@@ -1,4 +1,5 @@
 /* eslint-disable object-curly-newline */
+
 /**
  * "guildScheduledEventDelete" event listener for the bot.
  */
