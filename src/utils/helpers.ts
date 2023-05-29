@@ -1,13 +1,7 @@
 /* eslint-disable operator-linebreak */
 /* eslint-disable implicit-arrow-linebreak */
-/* eslint-disable @typescript-eslint/indent */
-import {
-  ApplicationCommandOptionType,
-  ApplicationCommandOptionData,
-  ApplicationCommandSubGroupData,
-  ApplicationCommandSubCommandData,
-  ApplicationCommandOptionChoiceData,
-} from 'discord.js';
+
+import { ApplicationCommandOptionType, ApplicationCommandOptionChoiceData } from 'discord.js';
 import dayjs from 'dayjs';
 import { config } from 'gfc-vault-config';
 import {
@@ -15,11 +9,7 @@ import {
   NOTION_PAGE_ID_DELIMITER,
   THREAD_START_MESSAGE_SLICE_INDEX,
 } from './constants';
-
-type GitFitCodeEventOptions = Exclude<
-  ApplicationCommandOptionData,
-  ApplicationCommandSubGroupData | ApplicationCommandSubCommandData
->[];
+import { GFCEvent, GitFitCodeEventOptions } from './types';
 
 /**
  * Function to build a list containing current and next year.
@@ -153,4 +143,24 @@ export function addHoursToDate(date: Date, hours: number): Date {
   const dateToMilliseconds = date.getTime();
   const addedHour = dateToMilliseconds + 60 * 60 * 1000 * hours;
   return new Date(addedHour);
+}
+
+/**
+ * Function to process a discord event into a GFC event.
+ * @param eventData Event data to be processed.
+ * @returns GFCEvent
+ */
+export function processDiscordEventIntoGFCEvent(eventData: { [x: string]: any }): GFCEvent {
+  return {
+    name: eventData.name,
+    description: eventData.description,
+    id_discord: eventData.id_discord,
+    url_discord: eventData.url_discord,
+    id_gcal: eventData.id_gcal,
+    url_gcal: eventData.url_gcal,
+    status: eventData.status,
+    type: eventData.type,
+    starts_at: eventData.starts_at,
+    ends_at: eventData.ends_at,
+  };
 }

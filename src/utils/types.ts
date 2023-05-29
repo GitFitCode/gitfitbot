@@ -1,4 +1,11 @@
-import { GuildScheduledEventEntityType, GuildScheduledEventStatus } from 'discord.js';
+/* eslint-disable @typescript-eslint/indent */
+import {
+  ApplicationCommandOptionData,
+  ApplicationCommandSubCommandData,
+  ApplicationCommandSubGroupData,
+  GuildScheduledEventEntityType,
+  GuildScheduledEventStatus,
+} from 'discord.js';
 
 export type Attendee = { discordID: string; retroDone: boolean };
 
@@ -16,3 +23,8 @@ export type GFCEvent = {
 };
 
 export type GCalEventDetails = { eventID: string; eventLink: string };
+
+export type GitFitCodeEventOptions = Exclude<
+  ApplicationCommandOptionData,
+  ApplicationCommandSubGroupData | ApplicationCommandSubCommandData
+>[];

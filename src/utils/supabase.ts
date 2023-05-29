@@ -1,11 +1,11 @@
+/* eslint-disable object-curly-newline */
+
 import { config } from 'gfc-vault-config';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import { GFCEvent } from './types';
+import { processDiscordEventIntoGFCEvent } from './helpers';
+import { DELETED_COLUMN, EVENTS_TABLE, FIVE_DAYS_IN_MS, ID_DISCORD_COLUMN } from './constants';
 
-const EVENTS_TABLE = 'events';
-const DELETED_COLUMN = 'deleted';
-const ID_DISCORD_COLUMN = 'id_discord';
-const FIVE_DAYS_IN_MS = 5 * 24 * 60 * 60 * 1000;
 let supabase: SupabaseClient<any, 'public', any>;
 
 function openEventsDatabase() {
@@ -42,18 +42,7 @@ export async function retrieveEvent(id: string): Promise<GFCEvent | null> {
 
   if (!error && data.length > 0) {
     const eventData = data[0];
-    const event: GFCEvent = {
-      name: eventData.name,
-      description: eventData.description,
-      id_discord: eventData.id_discord,
-      url_discord: eventData.url_discord,
-      id_gcal: eventData.id_gcal,
-      url_gcal: eventData.url_gcal,
-      status: eventData.status,
-      type: eventData.type,
-      starts_at: eventData.starts_at,
-      ends_at: eventData.ends_at,
-    };
+    const event: GFCEvent = processDiscordEventIntoGFCEvent(eventData);
 
     return event;
   }
@@ -72,18 +61,7 @@ export async function retrieveAllEvents(): Promise<GFCEvent[]> {
 
   if (!error && data.length > 0) {
     const events: GFCEvent[] = data.map((eventData) => {
-      const event: GFCEvent = {
-        name: eventData.name,
-        description: eventData.description,
-        id_discord: eventData.id_discord,
-        url_discord: eventData.url_discord,
-        id_gcal: eventData.id_gcal,
-        url_gcal: eventData.url_gcal,
-        status: eventData.status,
-        type: eventData.type,
-        starts_at: eventData.starts_at,
-        ends_at: eventData.ends_at,
-      };
+      const event: GFCEvent = processDiscordEventIntoGFCEvent(eventData);
 
       return event;
     });
