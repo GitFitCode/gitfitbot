@@ -56,7 +56,6 @@ export async function retrieveEvent(id: string): Promise<GFCEvent | null> {
 export async function retrieveAllEvents(): Promise<GFCEvent[]> {
   openEventsDatabase();
 
-  // TODO unsure if we need to filter out "completed" events here
   const { data, error } = await supabase.from(EVENTS_TABLE).select().eq(DELETED_COLUMN, false);
 
   if (!error && data.length > 0) {

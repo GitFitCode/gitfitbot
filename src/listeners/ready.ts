@@ -1,45 +1,98 @@
+/* eslint-disable object-curly-newline */
+/* eslint-disable function-paren-newline */
+/* eslint-disable implicit-arrow-linebreak */
+/* eslint-disable @typescript-eslint/indent */
+
 /**
  * "ready" event listener for the bot.
  */
 
-import { ActivityType, Client } from 'discord.js';
-// import { config } from 'gfc-vault-config';
-// import { retrieveAllEvents } from 'src/utils';
+import {
+  ActivityType,
+  Client,
+  Collection,
+  GuildScheduledEvent,
+  GuildScheduledEventStatus,
+} from 'discord.js';
+import { config } from 'gfc-vault-config';
+import {
+  AUTOBOT,
+  GFCEvent,
+  GITFITBOT,
+  deleteEvent,
+  insertEvent,
+  processDiscordEventIntoGFCEvent,
+  retrieveAllEvents,
+  updateEvent,
+} from '../utils';
 import Commands from '../Commands';
 
-const GITFITBOT = 'gitfitbot';
-const AUTOBOT = 'autobot';
+async function syncEvents(client: Client) {
+  // Supabase db maintains a list of events that have been synced between gcal from discord.
 
-// async function syncEvents(client: Client) {
-//   // TODO get events from discord, update db, update gcal
-//   // supabase db maintains a list of events that have been synced between gcal from discord
+  // Get all events from discord.
+  const guild = await client.guilds.fetch(config.discordServerID);
+  const eventsFromDiscord = await guild.scheduledEvents.fetch();
 
-//   // get all events from discord
-//   const guild = await client.guilds.fetch(config.discordServerID);
-//   const eventsFromDiscord = await guild.scheduledEvents.fetch();
-//   console.log(eventsFromDiscord);
+  // Get all events from the DB.
+  const eventsFromDB = await retrieveAllEvents();
 
-//   // get all events from db
-//   const eventsFromDB = await retrieveAllEvents();
-//   if (eventsFromDB && eventsFromDB.length > 0) {
-//     console.log(eventsFromDB);
-//   }
+  // We can have straggler events only if there are events present in the DB.
+  if (eventsFromDB.length > 0) {
+    // Get events that are present in the DB but not in discord (ie probably deleted on discord).
+    const stragglerEventsOnDB: GFCEvent[] = eventsFromDB.filter(
+      (DBEvent) =>
+        !eventsFromDiscord.find((discordEvent) => discordEvent.id === DBEvent.id_discord),
+    );
 
-//   // if count(eventsFromDiscord) > count(eventsFromDB) => new events present
-//   // if count(eventsFromDiscord) < count(eventsFromDB) => straggler events present
+    if (stragglerEventsOnDB.length > 0) {
+      // https://gist.github.com/joeytwiddle/37d2085425c049629b80956d3c618971#process-all-the-players-in-parallel
+      // Instead of using foreach aysnc, we execute all the promises in parallel at once.
+      await Promise.all(stragglerEventsOnDB.map(async (event) => deleteEvent(event)));
+    }
+  }
 
-//   // for every event from discord, check if it exists in db
-//   const newlyCreatedEventsOnDiscord = eventsFromDiscord.filter(
-//     (event) => !eventsFromDB.find((e) => e.id_discord === event.id),
-//   );
-//   // if it does, check if it needs to be updated
-//   // if it doesn't, create it in db and gcal
+  // We can have updated events only if there are events present in the DB AND discord.
+  if (eventsFromDB.length > 0 && eventsFromDiscord.size > 0) {
+    // Get events that are present in both the DB and discord and have been updated on discord.
+    const eventsUpdatedOnDiscord: Collection<
+      string,
+      GuildScheduledEvent<GuildScheduledEventStatus>
+    > = eventsFromDiscord.filter((discordEvent) =>
+      eventsFromDB.find(
+        (DBEvent) =>
+          DBEvent.id_discord === discordEvent.id && DBEvent.status !== discordEvent.status,
+      ),
+    );
 
-//   // compare events with status from discord to those from db
-//   // create 2 lists: events to add; events to update (including delete)
-//   // execute on those 2 lists against db and gcal
-//   // we may lose events which were created and deleted/completed when the bot was offline
-// }
+    if (eventsUpdatedOnDiscord.size > 0) {
+      const processedEvents: GFCEvent[] = eventsUpdatedOnDiscord.map((event) =>
+        processDiscordEventIntoGFCEvent(event),
+      );
+
+      await Promise.all(processedEvents.map(async (event) => updateEvent(event)));
+    }
+  }
+
+  // We can have newly created events only if there are events present in discord.
+  if (eventsFromDiscord.size > 0) {
+    // Get events that are present in discord but not in the DB (ie newly created on discord).
+    const newEventsCreatedOnDiscord: Collection<
+      string,
+      GuildScheduledEvent<GuildScheduledEventStatus>
+    > = eventsFromDiscord.filter(
+      (discordEvent) => !eventsFromDB.find((DBEvent) => DBEvent.id_discord === discordEvent.id),
+    );
+
+    if (newEventsCreatedOnDiscord.size > 0) {
+      const processedEvents: GFCEvent[] = newEventsCreatedOnDiscord.map((event) =>
+        processDiscordEventIntoGFCEvent(event),
+      );
+
+      await Promise.all(processedEvents.map(async (event) => insertEvent(event)));
+    }
+  }
+}
 
 export default (client: Client): void => {
   client.on('ready', async () => {
@@ -59,8 +112,8 @@ export default (client: Client): void => {
       client.user.setActivity('the world slowly 🔥 itself', { type: ActivityType.Watching });
     }
 
-    // TODO Sync events with the database.
-    // await syncEvents(client);
+    // Sync discord events with the database.
+    await syncEvents(client);
 
     // Register slash commands with the client.
     await client.application.commands.set(Commands);
