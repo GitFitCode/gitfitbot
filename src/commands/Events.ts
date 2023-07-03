@@ -1,4 +1,5 @@
 /* eslint-disable operator-linebreak */
+
 /**
  * Helper slash command for managing GFC events.
  *

@@ -1,13 +1,7 @@
 /* eslint-disable operator-linebreak */
 /* eslint-disable implicit-arrow-linebreak */
-/* eslint-disable @typescript-eslint/indent */
-import {
-  ApplicationCommandOptionType,
-  ApplicationCommandOptionData,
-  ApplicationCommandSubGroupData,
-  ApplicationCommandSubCommandData,
-  ApplicationCommandOptionChoiceData,
-} from 'discord.js';
+
+import { ApplicationCommandOptionType, ApplicationCommandOptionChoiceData } from 'discord.js';
 import dayjs from 'dayjs';
 import { config } from 'gfc-vault-config';
 import {
@@ -15,11 +9,7 @@ import {
   NOTION_PAGE_ID_DELIMITER,
   THREAD_START_MESSAGE_SLICE_INDEX,
 } from './constants';
-
-type GitFitCodeEventOptions = Exclude<
-  ApplicationCommandOptionData,
-  ApplicationCommandSubGroupData | ApplicationCommandSubCommandData
->[];
+import { GitFitCodeEventOptions } from './types';
 
 /**
  * Function to build a list containing current and next year.

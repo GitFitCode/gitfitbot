@@ -1,11 +1,10 @@
+/* eslint-disable object-curly-newline */
+
 import { config } from 'gfc-vault-config';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import { GFCEvent } from './types';
+import { DELETED_COLUMN, EVENTS_TABLE, FIVE_DAYS_IN_MS, ID_DISCORD_COLUMN } from './constants';
 
-const EVENTS_TABLE = 'events';
-const DELETED_COLUMN = 'deleted';
-const ID_DISCORD_COLUMN = 'id_discord';
-const FIVE_DAYS_IN_MS = 5 * 24 * 60 * 60 * 1000;
 let supabase: SupabaseClient<any, 'public', any>;
 
 function openEventsDatabase() {
@@ -64,10 +63,9 @@ export async function retrieveEvent(id: string): Promise<GFCEvent | null> {
  * Function to retrieve all non-deleted events from the Events database.
  * @returns All events from the Events database.
  */
-export async function retrieveAllEvents(): Promise<GFCEvent[] | null> {
+export async function retrieveAllEvents(): Promise<GFCEvent[]> {
   openEventsDatabase();
 
-  // TODO unsure if we need to filter out "completed" events here
   const { data, error } = await supabase.from(EVENTS_TABLE).select().eq(DELETED_COLUMN, false);
 
   if (!error && data.length > 0) {
@@ -89,7 +87,7 @@ export async function retrieveAllEvents(): Promise<GFCEvent[] | null> {
     });
     return events;
   }
-  return null;
+  return [];
 }
 
 /**

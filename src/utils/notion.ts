@@ -3,6 +3,8 @@ import { config } from 'gfc-vault-config';
 import { Client } from '@notionhq/client';
 import { NOTION_STATUS_DONE, NOTION_STATUS_OPEN } from './constants';
 
+require('@sentry/tracing');
+
 const notion = new Client({ auth: config.notionKey });
 const databaseId = config.notionSupportTicketsDatabaseId;
 

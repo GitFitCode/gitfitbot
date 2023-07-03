@@ -1,4 +1,5 @@
 export * from './constants';
+export * from './event_helpers';
 export * from './gcal';
 export * from './helpers';
 export * from './localdb';

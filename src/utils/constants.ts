@@ -1,5 +1,7 @@
 /* eslint-disable operator-linebreak */
 
+export const GITFITBOT = 'gitfitbot';
+export const AUTOBOT = 'autobot';
 export const THREAD_CLOSING_MESSAGE = 'OK, closing/archiving the thread.';
 export const THREAD_CLOSING_SUCCESSFUL_MESSAGE =
   'Thread closed. It can still be re-opened manually.';
@@ -32,6 +34,10 @@ export const OPEN_AI_CONFIG = {
   PRECISION: 0.5,
   STOP: ['GFC Community Member:'],
 };
+export const EVENTS_TABLE = 'events';
+export const DELETED_COLUMN = 'deleted';
+export const ID_DISCORD_COLUMN = 'id_discord';
+export const FIVE_DAYS_IN_MS = 5 * 24 * 60 * 60 * 1000;
 
 // Events command constants
 export const COMMAND_EVENT = {
