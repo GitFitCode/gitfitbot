@@ -9,9 +9,7 @@
     "publish": false
   },
   "github": {
-    "assets": ["dist/*.mjs", "dist/*.js"],
     "release": true,
-    "releaseName": "v${version}",
     "web": true
   },
   "plugins": {
