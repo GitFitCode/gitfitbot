@@ -3,7 +3,7 @@
 import { config } from 'gfc-vault-config';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import { GFCEvent } from './types';
-import { DELETED_COLUMN, EVENTS_TABLE, FIVE_DAYS_IN_MS, ID_DISCORD_COLUMN } from './constants';
+import { DELETED_COLUMN, EVENTS_TABLE, TWO_DAYS_IN_MS, ID_DISCORD_COLUMN } from './constants';
 
 let supabase: SupabaseClient<any, 'public', any>;
 
@@ -128,8 +128,8 @@ export async function keepDBAlive() {
   openEventsDatabase();
 
   async function selectZeroRows() {
-    await supabase.from(EVENTS_TABLE).select().eq(DELETED_COLUMN, false).limit(0);
+    await supabase.from(EVENTS_TABLE).select().eq(DELETED_COLUMN, false).limit(1);
   }
 
-  setInterval(selectZeroRows, FIVE_DAYS_IN_MS);
+  setInterval(selectZeroRows, TWO_DAYS_IN_MS);
 }
