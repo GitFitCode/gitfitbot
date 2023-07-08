@@ -39,6 +39,29 @@ const getCalendarID = (botName: string) =>
   botName === GITFITBOT_NAME ? GOOGLE_CALENDAR_ID : GOOGLE_TEST_CALENDAR_ID;
 
 /**
+ * Function to check if an event exists in Google Calendar.
+ * @param gCalEventDetails GCalEventDetails
+ * @param client Discord client
+ */
+async function checkIfGCalEventExists(
+  gCalEventDetails: GCalEventDetails,
+  client: Client,
+): Promise<boolean> {
+  const botName = client?.user?.username.toLowerCase() ?? '';
+
+  try {
+    await googleCalendar.events.get({
+      calendarId: getCalendarID(botName),
+      eventId: gCalEventDetails.eventID,
+    });
+
+    return true;
+  } catch (error: any) {
+    return false;
+  }
+}
+
+/**
  * Function to create a new event in Google Calendar.
  * @param summary Event summary
  * @param description Event description
@@ -132,11 +155,16 @@ export async function updateGCalEvent(
     },
   };
 
-  await googleCalendar.events.update({
-    calendarId: getCalendarID(botName),
-    eventId: gCalEventDetails.eventID,
-    requestBody: eventBody,
-  });
+  try {
+    await googleCalendar.events.update({
+      calendarId: getCalendarID(botName),
+      eventId: gCalEventDetails.eventID,
+      requestBody: eventBody,
+    });
+  } catch (error: any) {
+    Sentry.captureException(error);
+    console.error(error);
+  }
 }
 
 /**
@@ -147,8 +175,15 @@ export async function updateGCalEvent(
 export async function deleteGCalEvent(gCalEventDetails: GCalEventDetails, client: Client) {
   const botName = client?.user?.username.toLowerCase() ?? '';
 
-  await googleCalendar.events.delete({
-    calendarId: getCalendarID(botName),
-    eventId: gCalEventDetails.eventID,
-  });
+  if (await checkIfGCalEventExists(gCalEventDetails, client)) {
+    try {
+      await googleCalendar.events.delete({
+        calendarId: getCalendarID(botName),
+        eventId: gCalEventDetails.eventID,
+      });
+    } catch (error: any) {
+      Sentry.captureException(error);
+      console.error(error);
+    }
+  }
 }
