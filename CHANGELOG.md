@@ -1,5 +1,18 @@
 
 
+# [1.12.0](https://github.com/GitFitCode/gitfitbot/compare/v1.11.0...v1.12.0) (2023-07-12)
+
+
+### Bug Fixes
+
+* fixed crash when updating and deleting gcal events ([1216a4e](https://github.com/GitFitCode/gitfitbot/commit/1216a4e5493575d27d7a7f5747e5c2edd8d75d42))
+* fixed incorrect bot version ([ea816ab](https://github.com/GitFitCode/gitfitbot/commit/ea816ab99ca0eb004208836d130b22f13aeabd1c))
+
+
+### Features
+
+* sync events on bot startup ([#36](https://github.com/GitFitCode/gitfitbot/issues/36)) ([67e6408](https://github.com/GitFitCode/gitfitbot/commit/67e640897921c468872055c90ea4e8b1a3318fc4))
+
 ## [1.10.4](https://github.com/GitFitCode/gitfitbot/compare/v1.10.3...v1.10.4) (2023-03-26)
 
 ## [1.10.3](https://github.com/GitFitCode/gitfitbot/compare/v1.10.2...v1.10.3) (2023-03-11)
