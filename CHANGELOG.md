@@ -1,5 +1,14 @@
 
 
+## [1.12.1](https://github.com/GitFitCode/gitfitbot/compare/v1.12.0...v1.12.1) (2023-11-20)
+
+
+### Bug Fixes
+
+* fixed type error on jokeJSON ([b5ad96a](https://github.com/GitFitCode/gitfitbot/commit/b5ad96a31b61cb193d544d03db1d4e188da67f07))
+* fixed type error when deleting a scheduled event ([8ca8e18](https://github.com/GitFitCode/gitfitbot/commit/8ca8e18d8962127b2caeb3426616dab459d7614a))
+* updated dependencies to fix commitlint inconsistencies ([3487902](https://github.com/GitFitCode/gitfitbot/commit/34879020635c684e138e9d8e9ceaa0cadefe5586))
+
 # [1.12.0](https://github.com/GitFitCode/gitfitbot/compare/v1.11.0...v1.12.0) (2023-07-12)
 
 
