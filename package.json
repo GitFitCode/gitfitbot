@@ -37,9 +37,9 @@
     "undici": "latest"
   },
   "devDependencies": {
-    "@commitlint/cli": "latest",
-    "@commitlint/config-conventional": "latest",
-    "@release-it/conventional-changelog": "latest",
+    "@commitlint/cli": "17.6.6",
+    "@commitlint/config-conventional": "17.6.6",
+    "@release-it/conventional-changelog": "7.0.0",
     "@types/express": "latest",
     "@types/node": "latest",
     "@typescript-eslint/eslint-plugin": "latest",
@@ -48,7 +48,7 @@
     "eslint-config-airbnb-base": "latest",
     "eslint-config-airbnb-typescript": "latest",
     "husky": "latest",
-    "release-it": "latest",
+    "release-it": "16.0.0",
     "ts-node": "latest",
     "tslib": "latest",
     "typescript": "latest"
