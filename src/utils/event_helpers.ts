@@ -9,6 +9,7 @@ import {
   GuildScheduledEventStatus,
   GuildScheduledEventEntityType,
   Collection,
+  PartialGuildScheduledEvent,
 } from 'discord.js';
 import { config } from 'gfc-vault-config';
 import * as Sentry from '@sentry/node';
@@ -108,7 +109,7 @@ async function handleEventDeletionInDBAndGCal(eventFromDB: GFCEvent, client: Cli
  * @param client The bot client.
  */
 export async function deleteEventFromBDAndGCalUsingGuildScheduledEvent(
-  scheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus>,
+  scheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus> | PartialGuildScheduledEvent,
   client: Client<boolean>,
 ) {
   // Get event from the DB.
