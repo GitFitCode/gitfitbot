@@ -23,7 +23,7 @@ async function sendJoke(interaction: CommandInteraction, chosenCategory: string)
 
   // Make a request to URL and grab the response.
   const response = await request(URL);
-  const jokeJSON = await response.body.json();
+  const jokeJSON: any = await response.body.json();
   let content = "I'm back!";
 
   // Check if the joke is twopart.
