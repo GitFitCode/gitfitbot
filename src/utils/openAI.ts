@@ -1,4 +1,4 @@
-import { Configuration, OpenAIApi } from 'openai';
+import OpenAI from 'openai';
 import { config } from 'gfc-vault-config';
 import { getFormattedPrompt } from './helpers';
 import { OPEN_AI_CONFIG } from './constants';
@@ -9,12 +9,11 @@ import { OPEN_AI_CONFIG } from './constants';
  * @returns OpenAI response.
  */
 export async function getChatOpenAIPromptResponse(prompt: string): Promise<string> {
-  const configuration = new Configuration({
-    apiKey: config.openAIApiKey,
+  const openai = new OpenAI({
+    apiKey: config.openAIApiKey, // This is also the default, can be omitted
   });
-  const openai = new OpenAIApi(configuration);
 
-  const response = await openai.createCompletion({
+  const response = await openai.completions.create({
     model: OPEN_AI_CONFIG.MODEL,
     prompt: getFormattedPrompt(prompt),
     temperature: OPEN_AI_CONFIG.TEMPERATURE,
@@ -25,7 +24,7 @@ export async function getChatOpenAIPromptResponse(prompt: string): Promise<strin
     stop: OPEN_AI_CONFIG.STOP,
   });
 
-  return response?.data?.choices?.[0]?.text || 'Unable to get response from OpenAI';
+  return response.choices[0].text || 'Unable to get response from OpenAI';
 }
 
 export default { getChatOpenAIPromptResponse };
