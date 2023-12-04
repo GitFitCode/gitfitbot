@@ -18,7 +18,7 @@ const handleSlashCommand = async (
   }
 
   // Ensure interaction token remains valid for long running tasks.
-  // https://discordjs.guide/interactions/slash-commands.html#deferred-responses
+  // https://discordjs.guide/slash-commands/response-methods.html#deferred-responses
   await interaction.deferReply();
 
   slashCommand.run(client, interaction);

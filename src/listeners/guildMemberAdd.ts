@@ -34,7 +34,7 @@ Feel free to get to know the other members of the server as well. Head over to t
 If you have any questions or concerns please don’t hesitate to reach out to **<@${Admin1ID}>** or **<@${Admin2ID}>**.
 
 Please also ensure to update your **GitFitCode** server profile (nickname field) with your name (and optionally add your timezone abbreviation) so it is easier for the community to address you.
-Note that updating the name in the server profile **does not** require a Nitro subscription. More info here - https://support.discord.com/hc/en-us/articles/4409388345495-Server-Profiles#h_01FGCPPE37QG92W7XCVV53NVC3.
+Note that updating the name in the server profile **does not** require a Nitro subscription. More info here - https://support.discord.com/hc/en-us/articles/4409388345495-Server-Profiles.
 
 Add the community's Google calendar to be informed about scheduled events - https://calendar.google.com/calendar/u/0/r?cid=Z2l0Zml0Ym90QGdpdGZpdGNvZGUuY29t!
 

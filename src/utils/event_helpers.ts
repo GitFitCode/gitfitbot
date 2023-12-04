@@ -224,6 +224,7 @@ export async function syncEvents(client: Client) {
     );
 
     if (stragglerEventsOnDB.length > 0) {
+      // https://gist.github.com/joeytwiddle/37d2085425c049629b80956d3c618971
       // https://gist.github.com/joeytwiddle/37d2085425c049629b80956d3c618971#process-all-the-players-in-parallel
       // Instead of using foreach aysnc, we execute all the promises in parallel at once.
       await Promise.all(
