@@ -26,12 +26,7 @@ export const RETRO_FINISHED_MESSAGE =
 export const RETRO_NEXT_SPEAKER_MESSAGE = "you're next! Please provide your update.";
 export const OPEN_AI_QUESTION_IDENTIFIER = '#question';
 export const OPEN_AI_CONFIG = {
-  MODEL: 'gpt-3.5-turbo',
   TEMPERATURE: 0.7,
-  TOP_P: 1.0,
-  MAX_TOKENS: 4000,
-  FREQ_PENALTY: 0.5,
-  PRECISION: 0.5,
   STOP: ['GFC Community Member:'],
 };
 export const EVENTS_TABLE = 'events';
