@@ -4,7 +4,7 @@ Table of Contents:
 
 - [Setting up the project](#setting-up-the-project)
   - [What you'll need](#what-youll-need)
-  - [Installing Dependencies](#installing-dependencies)
+  - [Installing dependencies](#installing-dependencies)
     - [Setting up husky pre-commit hooks](#setting-up-husky-pre-commit-hooks)
   - [Setting up .env](#setting-up-env)
   - [Setting up service.json (Google Cloud)](#setting-up-servicejson-google-cloud)
@@ -12,8 +12,9 @@ Table of Contents:
   - [Run the bot](#run-the-bot)
 - [Development](#development)
   - [Commit message](#commit-message)
-  - [Slash commands](#slash-commands)
-  - [Discord Event Listeners](#discord-event-listeners)
+  - [Currently supported commands](#currently-supported-commands)
+  - [Create new slash commands](#create-new-slash-commands)
+  - [Create new discord event listeners](#create-new-discord-event-listeners)
 - [\[OPTIONAL\] Local Docker Setup](#optional-local-docker-setup)
 
 ## Setting up the project
@@ -25,7 +26,7 @@ Table of Contents:
 
 **Note**: You **_DO NOT_** need docker to run the bot locally.
 
-### Installing Dependencies
+### Installing dependencies
 
 ```sh
 npm i
@@ -84,7 +85,7 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
   - Inside Files, look for team -> gitfitcode -> discord bot secrets -> autobot -> `.env`.
   - Download or copy contents into your local `.env` file.
 
-- Get access to the `Digital Junkyard` development server on Discord from Sirrele, Pratik, Robert, Felix or Von.
+- Get access to the `Digital Junkyard` development server on Discord from Pratik.
 
 ### Setting up service.json (Google Cloud)
 
@@ -109,7 +110,11 @@ npm run dev
 
 When committing code to the repo, please follow the commit message guidelines/patterns set [here](https://github.com/conventional-changelog/commitlint#what-is-commitlint) and [here](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#type).
 
-### Slash commands
+### Currently supported commands
+
+[Supported Commands](/docs/COMMANDS)
+
+### Create new slash commands
 
 - Create a new `.ts` file in `src/commands` directory.
 - Name it same as the slash command (e.g. `Info.ts`).
@@ -147,7 +152,7 @@ When committing code to the repo, please follow the commit message guidelines/pa
 
 Your newly added slash commands are now ready to be used on discord!
 
-### Discord Event Listeners
+### Create new discord event listeners
 
 - Create a new `.ts` file in `src/listeners` directory.
 - Name it according to the event you want to listen to from [here](https://discord.js.org/docs/packages/discord.js/main/Client:Class) (e.g. `ready.ts`).
