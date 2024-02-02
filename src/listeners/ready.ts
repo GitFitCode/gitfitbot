@@ -3,7 +3,7 @@
  */
 
 import { ActivityType, Client } from 'discord.js';
-import { AUTOBOT, GITFITBOT, syncEvents } from '../utils';
+import { AUTOBOT, GITFITBOT } from '../utils';
 import Commands from '../Commands';
 
 export default (client: Client): void => {
@@ -23,9 +23,6 @@ export default (client: Client): void => {
     if (client.user.username.toLowerCase() === AUTOBOT) {
       client.user.setActivity('the world slowly 🔥 itself', { type: ActivityType.Watching });
     }
-
-    // Sync discord events with the database.
-    await syncEvents(client);
 
     // Register slash commands with the client.
     await client.application.commands.set(Commands);

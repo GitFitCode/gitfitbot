@@ -29,10 +29,6 @@ export const OPEN_AI_CONFIG = {
   TEMPERATURE: 0.7,
   STOP: ['GFC Community Member:'],
 };
-export const EVENTS_TABLE = 'events';
-export const DELETED_COLUMN = 'deleted';
-export const ID_DISCORD_COLUMN = 'id_discord';
-export const TWO_DAYS_IN_MS = 2 * 24 * 60 * 60 * 1000;
 
 // Events command constants
 export const COMMAND_EVENT = {

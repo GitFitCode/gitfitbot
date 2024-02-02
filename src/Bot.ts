@@ -5,13 +5,9 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import { config } from 'gfc-vault-config';
 import guildMemberAdd from './listeners/guildMemberAdd';
-import guildScheduledEventCreate from './listeners/guildScheduledEventCreate';
-import guildScheduledEventDelete from './listeners/guildScheduledEventDelete';
-import guildScheduledEventUpdate from './listeners/guildScheduledEventUpdate';
 import interactionCreate from './listeners/interactionCreate';
 import messageCreate from './listeners/messageCreate';
 import ready from './listeners/ready';
-import { keepDBAlive } from './utils';
 
 // A new instance of `Client`.
 const client = new Client({
@@ -30,19 +26,12 @@ const client = new Client({
 function start() {
   // Register the bot client with listeners.
   guildMemberAdd(client);
-  guildScheduledEventCreate(client);
-  guildScheduledEventDelete(client);
-  guildScheduledEventUpdate(client);
   interactionCreate(client);
   messageCreate(client);
   ready(client);
 
   // Call login on client for authenticating the bot with Discord.
   client.login(config.discordBotToken);
-
-  // TODO remove this if and when we move to supabase paid tier.
-  // Keep the DB alive.
-  keepDBAlive();
 }
 
 function stop(code: NodeJS.Signals) {

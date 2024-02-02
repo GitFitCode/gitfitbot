@@ -18,13 +18,11 @@
   "license": "GNU GPLv3",
   "dependencies": {
     "@discordjs/rest": "latest",
-    "@googleapis/calendar": "latest",
     "@notionhq/client": "latest",
     "@sentry/integrations": "latest",
     "@sentry/node": "latest",
     "@sentry/tracing": "latest",
     "@sentry/types": "latest",
-    "@supabase/supabase-js": "latest",
     "@types/pouchdb-node": "latest",
     "app-root-path": "latest",
     "dayjs": "latest",

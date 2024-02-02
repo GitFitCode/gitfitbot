@@ -7,8 +7,6 @@ Table of Contents:
   - [Installing dependencies](#installing-dependencies)
     - [Setting up husky pre-commit hooks](#setting-up-husky-pre-commit-hooks)
   - [Setting up .env](#setting-up-env)
-  - [Setting up service.json (Google Cloud)](#setting-up-servicejson-google-cloud)
-  - [Ensure the Supabase project is running](#ensure-the-supabase-project-is-running)
   - [Run the bot](#run-the-bot)
 - [Development](#development)
   - [Commit message](#commit-message)
@@ -72,9 +70,6 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
 
   - `OPENAI_API_KEY` - (Optional) - API Key for accessing OpenAI functionality.
 
-  - `SUPABASE_URL` - (Required) - URL of the Supabase project.
-  - `SUPABASE_ANON_KEY` - (Required) - Anon key to access the Supabase project.
-
   </details>
 
 - Populate fields in the `.env` file.
@@ -86,17 +81,6 @@ npx husky add .husky/commit-msg 'npx commitlint --edit'
   - Download or copy contents into your local `.env` file.
 
 - Get access to the `Digital Junkyard` development server on Discord from Pratik.
-
-### Setting up service.json (Google Cloud)
-
-- In Keybase, inside the autobot directory, look for `service.json` and download it into `/configurations` directory.
-
-### Ensure the Supabase project is running
-
-- We currently use supabase to information regarding store community events.
-- Supabase pauses this (free tier) project after 7 days of inactivity.
-- Restore this project before contributing to the bot.
-- Reach out to @borolepratik or @gitfitbro to receive access (you can alternatively ping them to restore it).
 
 ### Run the bot
 

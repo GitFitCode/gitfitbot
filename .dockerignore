@@ -1,5 +1,4 @@
 .env
-configurations/service.json
 dist/
 node_modules/
 .github/
