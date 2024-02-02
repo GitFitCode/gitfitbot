@@ -9,6 +9,7 @@
     "dev": "npm i && ts-node ./src/index.ts",
     "lint": "eslint .",
     "pre-build": "rm -rf ./dist",
+    "prepare": "husky",
     "release": "release-it",
     "release-dry": "release-it --dry-run",
     "start": "npm run build && node ./dist/src/index.js",

@@ -135,9 +135,6 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Husky pre-commit hooks
-.husky/
-
 # PouchDB
 attendees_db/
 events_db/

@@ -5,7 +5,6 @@ Table of Contents:
 - [Setting up the project](#setting-up-the-project)
   - [What you'll need](#what-youll-need)
   - [Installing dependencies](#installing-dependencies)
-    - [Setting up husky pre-commit hooks](#setting-up-husky-pre-commit-hooks)
   - [Setting up .env](#setting-up-env)
   - [Run the bot](#run-the-bot)
 - [Development](#development)
@@ -28,13 +27,6 @@ Table of Contents:
 
 ```sh
 npm i
-```
-
-#### Setting up husky pre-commit hooks
-
-```sh
-npx husky install
-npx husky add .husky/commit-msg 'npx commitlint --edit'
 ```
 
 ### Setting up .env
