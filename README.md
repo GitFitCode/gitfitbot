@@ -174,14 +174,13 @@ Your newly added slash commands are now ready to be used on discord!
   - [Docker Desktop](https://docs.docker.com/desktop/) (Windows/macOS)
 - Build image:
   ```shell
-  docker build -t gitfitbot .
+  docker build --tag gitfitbot .
   ```
 - Run the bot:
-  ```shell
-    docker run --env-file ./.env -v <absolute_path>/configurations:/usr/src/bot/configurations -d gitfitbot
-  ```
 
-**Note**: Replace `<absolute_path>` with the full path on your system to the `configurations` directory.
+  ```shell
+    docker run --detach --name gitfitbot-container --env-file ./.env gitfitbot
+  ```
 
 - Stop/Restart the bot
 

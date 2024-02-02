@@ -1,4 +1,4 @@
-FROM node:lts-bullseye-slim
+FROM node:bookworm-slim
 
 # Create the bot's directory
 RUN mkdir -p /usr/src/bot
@@ -18,5 +18,5 @@ RUN npm run build
 # Run the bot
 CMD [ "node", "./dist/src/index.js" ]
 
-# docker build -t gitfitbot .
-# docker run --env-file ./.env -d gitfitbot
+# docker build --tag gitfitbot .
+# docker run --detach --name gitfitbot-container --env-file ./.env gitfitbot
