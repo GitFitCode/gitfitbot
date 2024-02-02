@@ -1,5 +1,14 @@
 
 
+# [1.13.0](https://github.com/GitFitCode/gitfitbot/compare/v1.12.2...v1.13.0) (2024-2-2)
+
+
+### Features
+
+* removed gcal and supabase event syncing ([5013c69](https://github.com/GitFitCode/gitfitbot/commit/5013c695f0301d1407c3c4ec478a66d74d40f162))
+* updated husky to v9 ([b6da8e2](https://github.com/GitFitCode/gitfitbot/commit/b6da8e26e4535254931a20b7cfc76f54dd97003b))
+* updated library for openai ([#34](https://github.com/GitFitCode/gitfitbot/issues/34)) ([7449cf4](https://github.com/GitFitCode/gitfitbot/commit/7449cf4e535607a3e67e320d4e610203958e4742))
+
 ## [1.12.2](https://github.com/GitFitCode/gitfitbot/compare/v1.12.1...v1.12.2) (2023-12-04)
 
 ## [1.12.1](https://github.com/GitFitCode/gitfitbot/compare/v1.12.0...v1.12.1) (2023-11-20)
