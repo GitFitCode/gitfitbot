@@ -85,6 +85,12 @@ export const COMMAND_JOKE = {
   ],
 };
 
+// Dadjoke command constants
+export const COMMAND_DADJOKE = {
+  COMMAND_NAME: 'dadjoke',
+  COMMAND_DESCRIPTION: 'Replies with a dad joke',
+};
+
 // Info command constants
 export const COMMAND_INFO = {
   COMMAND_NAME: 'info',
