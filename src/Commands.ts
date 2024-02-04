@@ -4,6 +4,7 @@
 
 import { SlashCommand } from './Command';
 import ChangeManagement from './commands/ChangeManagement';
+import Dadjoke from './commands/Dadjoke';
 import Events from './commands/Events';
 import Info from './commands/Info';
 import Joke from './commands/Joke';
@@ -15,6 +16,7 @@ import TicTacToe from './commands/TicTacToe';
 
 const Commands: SlashCommand[] = [
   ChangeManagement,
+  Dadjoke,
   Events,
   Info,
   Joke,
