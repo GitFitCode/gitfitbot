@@ -94,6 +94,7 @@ export const COMMAND_DADJOKE = {
 // Info command constants
 export const COMMAND_INFO = {
   COMMAND_NAME: 'info',
+  COMMAND_DESCRIPTION: 'Displays info about yourself and the server.',
 };
 
 // Feature / Change Management command constants
