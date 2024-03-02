@@ -1,3 +1,9 @@
+/**
+ * Slash command that replies with a dad joke.
+ *
+ * To trigger, type `/dadjoke` in the discord server.
+ */
+
 import * as Sentry from '@sentry/node';
 import { Client, CommandInteraction } from 'discord.js';
 import { request } from 'undici';

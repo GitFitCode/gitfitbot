@@ -72,7 +72,7 @@ npm i
   - Inside Files, look for team -> gitfitcode -> discord bot secrets -> autobot -> `.env`.
   - Download or copy contents into your local `.env` file.
 
-- Get access to the `Digital Junkyard` development server on Discord from Pratik.
+- Get access to the [Digital Junkyard](https://discord.gg/4cJFTdGMBY) development server on Discord.
 
 ### Run the bot
 
@@ -92,16 +92,45 @@ When committing code to the repo, please follow the commit message guidelines/pa
 
 ### Create new slash commands
 
+- Add command constants in `src/utils/constants.ts` file.
+  ```typescript
+  // Info command constants
+  export const COMMAND_INFO = {
+    COMMAND_NAME: 'info',
+    COMMAND_DESCRIPTION: 'Displays info about yourself and the server.',
+  };
+  ```
 - Create a new `.ts` file in `src/commands` directory.
 - Name it same as the slash command (e.g. `Info.ts`).
 - Follow the example format below to create a new slash command:
 
   ```typescript
+  /**
+   * Slash command that replies with the information of the server and the user who
+   * triggered the command.
+   *
+   * To trigger, type `/info` in the discord server.
+   */
+
+  import * as Sentry from '@sentry/node';
   import { CommandInteraction, Client } from 'discord.js';
+  import { version } from '../../package.json';
+  import { COMMAND_INFO } from '../utils';
   import { SlashCommand } from '../Command';
 
+  require('@sentry/tracing');
+
   async function executeRun(interaction: CommandInteraction) {
-  const content = `\`Your username\`: ${interaction.user.username}
+    Sentry.setUser({
+      id: interaction.user.id,
+      username: interaction.user.username,
+    });
+    const transaction = Sentry.startTransaction({
+      op: 'transaction',
+      name: `/${COMMAND_INFO.COMMAND_NAME}`,
+    });
+
+    const content = `\`Your username\`: ${interaction.user.username}
   \`Your ID\`: ${interaction.user.id}
   \`Server name\`: ${interaction.guild?.name}
   \`Total members\`: ${interaction.guild?.memberCount}
@@ -115,7 +144,7 @@ When committing code to the repo, please follow the commit message guidelines/pa
 
   const Info: SlashCommand = {
     name: COMMAND_INFO.COMMAND_NAME,
-    description: 'Displays info about yourself and the server.',
+    description: COMMAND_INFO.COMMAND_DESCRIPTION,
     run: async (_client: Client, interaction: CommandInteraction) => {
       await executeRun(interaction);
     },
@@ -124,7 +153,20 @@ When committing code to the repo, please follow the commit message guidelines/pa
   export default Info;
   ```
 
-- Import the command in `src/Commands.ts` file.
+- Update the code for the required logic.
+
+- Import the command in `src/Commands.ts` file to register the command on discord.
+
+  ```typescript
+  import Info from './commands/Info';
+
+  const Commands: SlashCommand[] = [
+    //...
+    Info,
+    //...
+  ];
+  ```
+
 - Run the bot:
 
   ```shell

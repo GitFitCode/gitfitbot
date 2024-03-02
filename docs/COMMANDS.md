@@ -1,5 +1,6 @@
 ## List of commands, subcommands and options supported by the bot. <!-- omit from toc -->
 
+- [`/dadjokes` - A test command where the bot will respond with `dadjokes.`](#dadjokes---a-test-command-where-the-bot-will-respond-with-dadjokes)
 - [`/events` - Create community and custom events quickly](#events---create-community-and-custom-events-quickly)
 - [`/feature-cm` - Feature / Change Management requests for community processes](#feature-cm---feature--change-management-requests-for-community-processes)
 - [`/info` - Information about you, server and the bot](#info---information-about-you-server-and-the-bot)
@@ -11,6 +12,8 @@
 - [`/tictactoe` - Tic Tac Toe game that can be playes with AI or a human opponent](#tictactoe---tic-tac-toe-game-that-can-be-playes-with-ai-or-a-human-opponent)
 
 ---
+
+### `/dadjokes` - A test command where the bot will respond with `dadjokes.`
 
 ### `/events` - Create community and custom events quickly
 

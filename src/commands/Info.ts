@@ -37,7 +37,7 @@ async function executeRun(interaction: CommandInteraction) {
 
 const Info: SlashCommand = {
   name: COMMAND_INFO.COMMAND_NAME,
-  description: 'Displays info about yourself and the server.',
+  description: COMMAND_INFO.COMMAND_DESCRIPTION,
   run: async (_client: Client, interaction: CommandInteraction) => {
     await executeRun(interaction);
   },
