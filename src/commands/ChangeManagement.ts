@@ -86,49 +86,24 @@ async function executeRun(interaction: CommandInteraction) {
 
 const ChangeManagement: SlashCommand = {
   name: COMMAND_FEATURE_CHANGE_MANAGEMENT.COMMAND_NAME,
-  description: 'Helper slash command for raising feature/change management requests.',
+  description: COMMAND_FEATURE_CHANGE_MANAGEMENT.COMMAND_DESCRIPTION,
   options: [
     {
       name: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_CATEGORY,
-      description: 'Category where to apply feature/change management requests.',
+      description: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_CATEGORY_DESCRIPTION,
       type: ApplicationCommandOptionType.String,
       required: true,
-      choices: [
-        {
-          name: 'GitFitCode (general)',
-          value: 'gitfitcode-general',
-        },
-        {
-          name: 'Discord Server',
-          value: 'discord-server',
-        },
-        {
-          name: 'Discord Bot',
-          value: 'discord-bot',
-        },
-        {
-          name: 'Notion',
-          value: 'notion',
-        },
-        {
-          name: 'GitHub',
-          value: 'github',
-        },
-        {
-          name: 'Other',
-          value: 'other',
-        },
-      ],
+      choices: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_CATEGORY_CHOICES,
     },
     {
       name: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TITLE,
-      description: 'Title of the feature/change management request.',
+      description: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TITLE_DESCRIPTION,
       type: ApplicationCommandOptionType.String,
       required: true,
     },
     {
       name: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_DESCRIPTION,
-      description: 'Description of the feature/change management request.',
+      description: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_DESCRIPTION_DESCRIPTION,
       type: ApplicationCommandOptionType.String,
       required: true,
     },

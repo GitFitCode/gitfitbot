@@ -236,16 +236,16 @@ async function executeRun(interaction: CommandInteraction) {
 
 const Support: SlashCommand = {
   name: COMMAND_SUPPORT.COMMAND_NAME,
-  description: 'Helper slash command for managing GFC support tickets.',
+  description: COMMAND_SUPPORT.COMMAND_DESCRIPTION,
   options: [
     {
       name: COMMAND_SUPPORT.OPTION_CREATE,
-      description: 'Create a support ticket.',
+      description: COMMAND_SUPPORT.OPTION_CREATE_DESCRIPTION,
       type: ApplicationCommandOptionType.Subcommand,
       options: [
         {
           name: COMMAND_SUPPORT.OPTION_ISSUE,
-          description: 'Issue summary (max length = 100).',
+          description: COMMAND_SUPPORT.OPTION_ISSUE_DESCRIPTION,
           type: ApplicationCommandOptionType.String,
           required: true,
           maxLength: 200,
@@ -254,7 +254,7 @@ const Support: SlashCommand = {
     },
     {
       name: COMMAND_SUPPORT.OPTION_CLOSE,
-      description: 'Close a support ticket.',
+      description: COMMAND_SUPPORT.OPTION_CLOSE_DESCRIPTION,
       type: ApplicationCommandOptionType.Subcommand,
     },
   ],

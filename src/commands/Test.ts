@@ -30,7 +30,7 @@ async function executeRun(interaction: CommandInteraction) {
 
 const Test: SlashCommand = {
   name: COMMAND_TEST.COMMAND_NAME,
-  description: 'Helper slash command for dev mode that does nothing in live.',
+  description: COMMAND_TEST.COMMAND_DESCRIPTION,
   run: async (_client: Client, interaction: CommandInteraction) => {
     await executeRun(interaction);
   },

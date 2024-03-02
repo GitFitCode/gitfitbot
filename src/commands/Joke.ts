@@ -81,11 +81,11 @@ async function executeRun(interaction: CommandInteraction) {
 
 const Joke: SlashCommand = {
   name: COMMAND_JOKE.COMMAND_NAME,
-  description: 'Replies with a joke from https://jokeapi.dev/',
+  description: COMMAND_JOKE.COMMAND_DESCRIPTION,
   options: [
     {
       name: COMMAND_JOKE.OPTION_CATEGORY,
-      description: 'choose a category',
+      description: COMMAND_JOKE.OPTION_CATEGORY_DESCRIPTION,
       type: ApplicationCommandOptionType.String,
       choices: COMMAND_JOKE.OPTION_CATEGORY_CHOICES,
     },

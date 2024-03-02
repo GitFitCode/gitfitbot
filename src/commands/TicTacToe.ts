@@ -45,11 +45,11 @@ async function executeRun(interaction: CommandInteraction) {
 
 const TicTacToe: SlashCommand = {
   name: COMMAND_TICTACTOE.COMMAND_NAME,
-  description: 'Starts a game of TicTacToe.',
+  description: COMMAND_TICTACTOE.COMMAND_DESCRIPTION,
   options: [
     {
       name: COMMAND_TICTACTOE.OPTION_OPPONENT,
-      description: '@ your opponent',
+      description: COMMAND_TICTACTOE.OPTION_OPPONENT_DESCRIPTION,
       type: ApplicationCommandOptionType.User,
     },
   ],

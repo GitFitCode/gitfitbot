@@ -357,28 +357,28 @@ async function executeRun(client: Client, interaction: CommandInteraction) {
 
 const Events: SlashCommand = {
   name: COMMAND_EVENT.COMMAND_NAME,
-  description: 'Helper slash command for managing GFC events.',
+  description: COMMAND_EVENT.COMMAND_DESCRIPTION,
   options: [
     {
       name: COMMAND_EVENT.OPTION_CUSTOM,
-      description: 'Schedule a custom event.',
+      description: COMMAND_EVENT.OPTION_CUSTOM_DESCRIPTION,
       type: ApplicationCommandOptionType.Subcommand,
       options: [
         {
           name: COMMAND_EVENT.OPTION_NAME,
-          description: 'Name of the custom event.',
+          description: COMMAND_EVENT.OPTION_NAME_DESCRIPTION,
           type: ApplicationCommandOptionType.String,
           required: true,
         },
         {
           name: COMMAND_EVENT.OPTION_DESCRIPTION,
-          description: 'Description of the custom event.',
+          description: COMMAND_EVENT.OPTION_DESCRIPTION_DESCRIPTION,
           type: ApplicationCommandOptionType.String,
           required: true,
         },
         {
           name: COMMAND_EVENT.OPTION_VOICE_CHANNEL,
-          description: 'Name of the channel to schedule the custom event in.',
+          description: COMMAND_EVENT.OPTION_VOICE_CHANNEL_DESCRIPTION,
           type: ApplicationCommandOptionType.Channel,
           required: true,
         },
@@ -387,24 +387,24 @@ const Events: SlashCommand = {
     },
     {
       name: COMMAND_EVENT.OPTION_LIST,
-      description: 'List all scheduled events.',
+      description: COMMAND_EVENT.OPTION_LIST_DESCRIPTION,
       type: ApplicationCommandOptionType.Subcommand,
     },
     {
       name: COMMAND_EVENT.OPTION_RETRO,
-      description: 'Schedule a GFC retrospective event.',
+      description: COMMAND_EVENT.OPTION_RETRO_DESCRIPTION,
       type: ApplicationCommandOptionType.Subcommand,
       options: buildEventOptions(COMMAND_EVENT.OPTION_RETRO),
     },
     {
       name: COMMAND_EVENT.OPTION_CODEWARS,
-      description: 'Schedule a GFC codewars event.',
+      description: COMMAND_EVENT.OPTION_CODEWARS_DESCRIPTION,
       type: ApplicationCommandOptionType.Subcommand,
       options: buildEventOptions(COMMAND_EVENT.OPTION_CODEWARS),
     },
     {
       name: COMMAND_EVENT.OPTION_CLEAR,
-      description: 'Clear all scheduled events (admins only).',
+      description: COMMAND_EVENT.OPTION_CLEAR_DESCRIPTION,
       type: ApplicationCommandOptionType.Subcommand,
     },
   ],
