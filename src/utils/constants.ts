@@ -33,14 +33,23 @@ export const OPEN_AI_CONFIG = {
 // Events command constants
 export const COMMAND_EVENT = {
   COMMAND_NAME: 'events',
+  COMMAND_DESCRIPTION: 'Helper slash command for managing GFC events.',
   OPTION_CUSTOM: 'custom',
+  OPTION_CUSTOM_DESCRIPTION: 'Schedule a custom event.',
   OPTION_LIST: 'list',
+  OPTION_LIST_DESCRIPTION: 'List all scheduled events.',
   OPTION_RETRO: 'retro',
+  OPTION_RETRO_DESCRIPTION: 'Schedule a GFC retrospective event.',
   OPTION_CODEWARS: 'codewars',
+  OPTION_CODEWARS_DESCRIPTION: 'Schedule a GFC codewars event.',
   OPTION_CLEAR: 'clear',
+  OPTION_CLEAR_DESCRIPTION: 'Clear all scheduled events (admins only).',
   OPTION_NAME: 'name',
+  OPTION_NAME_DESCRIPTION: 'Name of the custom event.',
   OPTION_DESCRIPTION: 'desc',
+  OPTION_DESCRIPTION_DESCRIPTION: 'Description of the custom event.',
   OPTION_VOICE_CHANNEL: 'voice-channel',
+  OPTION_VOICE_CHANNEL_DESCRIPTION: 'Name of the channel to schedule the custom event in.',
   OPTION_YEAR: 'year',
   OPTION_MONTH: 'month',
   OPTION_DAY: 'day',
@@ -53,28 +62,35 @@ export const COMMAND_EVENT = {
 // TicTacToe command constants
 export const COMMAND_TICTACTOE = {
   COMMAND_NAME: 'tictactoe',
+  COMMAND_DESCRIPTION: 'Starts a game of TicTacToe.',
   OPTION_OPPONENT: 'opponent',
+  OPTION_OPPONENT_DESCRIPTION: '@ your opponent',
 };
 
 // Test command constants
 export const COMMAND_TEST = {
   COMMAND_NAME: 'test',
+  COMMAND_DESCRIPTION: 'Helper slash command for dev mode that does nothing in live.',
 };
 
 // Ping command constants
 export const COMMAND_PING = {
   COMMAND_NAME: 'ping',
+  COMMAND_DESCRIPTION: 'Check whether the bot is working.',
 };
 
 // Next-Speaker command constants
 export const COMMAND_NEXT_SPEAKER = {
   COMMAND_NAME: 'next-speaker',
+  COMMAND_DESCRIPTION: 'Randomly picks a user in the Check-Ins Channel.',
 };
 
 // Joke command constants
 export const COMMAND_JOKE = {
   COMMAND_NAME: 'joke',
+  COMMAND_DESCRIPTION: 'Replies with a joke from https://jokeapi.dev/',
   OPTION_CATEGORY: 'category',
+  OPTION_CATEGORY_DESCRIPTION: 'choose a category',
   OPTION_CATEGORY_CHOICES: [
     { name: 'Programming', value: 'programming' },
     { name: 'Miscellaneous', value: 'misc' },
@@ -100,17 +116,51 @@ export const COMMAND_INFO = {
 // Feature / Change Management command constants
 export const COMMAND_FEATURE_CHANGE_MANAGEMENT = {
   COMMAND_NAME: 'feature-cm',
+  COMMAND_DESCRIPTION: 'Helper slash command for raising feature/change management requests.',
   OPTION_CATEGORY: 'category',
+  OPTION_CATEGORY_DESCRIPTION: 'Category where to apply feature/change management requests.',
+  OPTION_CATEGORY_CHOICES: [
+    {
+      name: 'GitFitCode (general)',
+      value: 'gitfitcode-general',
+    },
+    {
+      name: 'Discord Server',
+      value: 'discord-server',
+    },
+    {
+      name: 'Discord Bot',
+      value: 'discord-bot',
+    },
+    {
+      name: 'Notion',
+      value: 'notion',
+    },
+    {
+      name: 'GitHub',
+      value: 'github',
+    },
+    {
+      name: 'Other',
+      value: 'other',
+    },
+  ],
   OPTION_TITLE: 'title',
+  OPTION_TITLE_DESCRIPTION: 'Title of the feature/change management request.',
   OPTION_DESCRIPTION: 'description',
+  OPTION_DESCRIPTION_DESCRIPTION: 'Description of the feature/change management request.',
 };
 
 // Support command constants
 export const COMMAND_SUPPORT = {
   COMMAND_NAME: 'support',
+  COMMAND_DESCRIPTION: 'Helper slash command for managing GFC support tickets.',
   OPTION_CREATE: 'create',
+  OPTION_CREATE_DESCRIPTION: 'Create a support ticket.',
   OPTION_CLOSE: 'close',
+  OPTION_CLOSE_DESCRIPTION: 'Close a support ticket.',
   OPTION_ISSUE: 'issue',
+  OPTION_ISSUE_DESCRIPTION: 'Issue summary (max length = 100).',
 };
 
 export const GENERAL_GFC_SYSTEM_PROMPT =

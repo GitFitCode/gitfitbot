@@ -119,7 +119,7 @@ async function executeRun(interaction: CommandInteraction) {
 
 const NextSpeaker: SlashCommand = {
   name: COMMAND_NEXT_SPEAKER.COMMAND_NAME,
-  description: 'Randomly picks a user in the Check-Ins Channel.',
+  description: COMMAND_NEXT_SPEAKER.COMMAND_DESCRIPTION,
   run: async (_client: Client, interaction: CommandInteraction) => {
     try {
       await executeRun(interaction);
