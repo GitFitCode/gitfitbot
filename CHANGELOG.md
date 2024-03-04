@@ -1,5 +1,12 @@
 
 
+# [1.14.0](https://github.com/GitFitCode/gitfitbot/compare/v1.13.0...v1.14.0) (2024-3-4)
+
+
+### Features
+
+* added /dadjoke command ([057c2ae](https://github.com/GitFitCode/gitfitbot/commit/057c2ae893d5ed26da668cff6f4c10dd58362a00))
+
 # [1.13.0](https://github.com/GitFitCode/gitfitbot/compare/v1.12.2...v1.13.0) (2024-2-2)
 
 
