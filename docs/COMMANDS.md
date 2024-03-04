@@ -1,6 +1,6 @@
 ## List of commands, subcommands and options supported by the bot. <!-- omit from toc -->
 
-- [`/dadjokes` - A test command where the bot will respond with `dadjokes.`](#dadjokes---a-test-command-where-the-bot-will-respond-with-dadjokes)
+- [`/dadjokes` - Jokes from icanhazdadjoke.com/](#dadjokes---jokes-from-icanhazdadjokecom)
 - [`/events` - Create community and custom events quickly](#events---create-community-and-custom-events-quickly)
 - [`/feature-cm` - Feature / Change Management requests for community processes](#feature-cm---feature--change-management-requests-for-community-processes)
 - [`/info` - Information about you, server and the bot](#info---information-about-you-server-and-the-bot)
@@ -13,7 +13,7 @@
 
 ---
 
-### `/dadjokes` - A test command where the bot will respond with `dadjokes.`
+### `/dadjokes` - Jokes from [icanhazdadjoke.com/](https://icanhazdadjoke.com/)
 
 ### `/events` - Create community and custom events quickly
 
