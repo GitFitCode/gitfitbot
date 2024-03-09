@@ -1,22 +1,28 @@
-FROM node:bookworm-slim
+FROM node:bookworm-slim AS base
 
-# Create the bot's directory
-RUN mkdir -p /usr/src/bot
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 
-# Set it as the current working directory
-WORKDIR /usr/src/bot
+# Enable pnpm
+RUN corepack enable pnpm
 
 # Copy contents of the local source directory to the bot's directory
-COPY . /usr/src/bot
+COPY . /app
 
-# Update npm
-RUN npm install --global npm
+# Set it as the current working directory
+WORKDIR /app
 
-# Build the bot (installs dependencies and compiles TypeScript)
-RUN npm run build
+# Install main dependencies only
+FROM base AS prod-deps
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+
+# Build the app
+FROM base AS build
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm run build
 
 # Run the bot
-CMD [ "node", "./dist/src/index.js" ]
+CMD [ "pnpm", "start" ]
 
-# docker build --tag gitfitbot .
-# docker run --detach --name gitfitbot-container --env-file ./.env gitfitbot
+# docker build --tag autobot .
+# docker run --detach --name autobot-container --env-file ./.env autobot

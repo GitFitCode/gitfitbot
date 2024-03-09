@@ -5,3 +5,6 @@ node_modules/
 .vscode/
 attendees_db/
 .husky/
+.git
+.gitignore
+*.md

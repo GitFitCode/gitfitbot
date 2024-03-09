@@ -20,13 +20,14 @@ Table of Contents:
 
 - [VSCode](https://code.visualstudio.com/) / [Intellij WebStorm](https://www.jetbrains.com/webstorm/)
 - [Nodejs LTS](https://nodejs.org/en/) (Please check package.json for the latest supported Node version)
+- [PnPM](https://pnpm.io) package manager
 
 **Note**: You **_DO NOT_** need docker to run the bot locally.
 
 ### Installing dependencies
 
 ```sh
-npm i
+pnpm i
 ```
 
 ### Setting up .env
@@ -77,7 +78,7 @@ npm i
 ### Run the bot
 
 ```shell
-npm run dev
+pnpm dev
 ```
 
 ## Development
@@ -170,7 +171,7 @@ When committing code to the repo, please follow the commit message guidelines/pa
 - Run the bot:
 
   ```shell
-  npm run dev
+  pnpm dev
   ```
 
 Your newly added slash commands are now ready to be used on discord!
@@ -208,7 +209,7 @@ Your newly added slash commands are now ready to be used on discord!
 
 - Run the bot:
   ```shell
-  npm run dev
+  pnpm dev
   ```
 
 **Note**: If you're having issues listening to events, ensure the intents are accurately provided in `src/Bot.ts` file.
