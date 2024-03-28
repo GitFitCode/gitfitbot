@@ -1,0 +1,41 @@
+{
+  "name": "gitfitbot-devcontainer",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "21"
+    },
+    "ghcr.io/devcontainers-contrib/features/zsh-plugins:0": {
+      "omzPlugins": [
+        "https://github.com/zsh-users/zsh-autosuggestions",
+        "https://github.com/zsh-users/zsh-syntax-highlighting"
+      ]
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
+        "files.autoSave": "off",
+        "prettier.requireConfig": true,
+        "prettier.configPath": "./.prettierrc",
+        "python.terminal.activateEnvironment": false
+      },
+      "extensions": [
+        "aaron-bond.better-comments",
+        "christian-kohler.path-intellisense",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "Gruntfuggly.todo-tree",
+        "naumovs.color-highlight",
+        "kisstkondoros.vscode-gutter-preview",
+        "ms-vsliveshare.vsliveshare",
+        "yzhang.markdown-all-in-one",
+        "mikestead.dotenv"
+      ]
+    }
+  },
+  "postCreateCommand": "pnpm install"
+}
