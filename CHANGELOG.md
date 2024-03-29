@@ -1,5 +1,12 @@
 
 
+# [1.15.0](https://github.com/GitFitCode/gitfitbot/compare/v1.14.0...v1.15.0) (2024-03-29)
+
+
+### Features
+
+* added devcontainer ([5fd1f03](https://github.com/GitFitCode/gitfitbot/commit/5fd1f0370381dfae74003f7f049155e59f37412f))
+
 # [1.14.0](https://github.com/GitFitCode/gitfitbot/compare/v1.13.0...v1.14.0) (2024-3-4)
 
 
