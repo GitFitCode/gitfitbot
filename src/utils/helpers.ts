@@ -113,6 +113,12 @@ export function buildEventOptions(eventName: string): GitFitCodeEventOptions {
         { name: 'UTC (Coordinated Universal Time)', value: 'UTC' },
       ],
     },
+    {
+      name: COMMAND_EVENT.OPTION_ROLE,
+      description: COMMAND_EVENT.OPTION_ROLE_DESCRIPTION,
+      type: ApplicationCommandOptionType.Role,
+      required: false,
+    },
   ];
 }
 

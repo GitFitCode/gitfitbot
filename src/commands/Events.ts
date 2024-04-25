@@ -54,6 +54,7 @@ async function handleEventCreation(
   const { value: minute } = interaction.options.get(COMMAND_EVENT.OPTION_MINUTE, true);
   const { value: ampm } = interaction.options.get(COMMAND_EVENT.OPTION_AMPM, true);
   const { value: timezone } = interaction.options.get(COMMAND_EVENT.OPTION_TIMEZONE, true);
+  const role = interaction.options.get(COMMAND_EVENT.OPTION_ROLE, false);
 
   const retrievedDate = `${year}-${month}-${day} ${hour}:${minute} ${ampm} ${timezone}`;
 
@@ -89,7 +90,10 @@ async function handleEventCreation(
       try {
         const discordEvent = await guildScheduledEventManger?.create(eventOptions);
         const eventLink = discordEvent?.url;
-        const content = `\`${eventName}\` event scheduled!`;
+        let content = `\`${eventName}\` event scheduled!`;
+        if (role) {
+          content += ` Notified <@&${role.value}>`;
+        }
         const eventComponents: any = [
           {
             type: ComponentType.Button,
