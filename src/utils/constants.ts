@@ -57,6 +57,8 @@ export const COMMAND_EVENT = {
   OPTION_MINUTE: 'minute',
   OPTION_AMPM: 'ampm',
   OPTION_TIMEZONE: 'timezone',
+  OPTION_ROLE: 'role',
+  OPTION_ROLE_DESCRIPTION: 'The role to notify for the event.',
 };
 
 // TicTacToe command constants
