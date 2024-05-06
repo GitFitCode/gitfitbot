@@ -53,7 +53,7 @@
     "typescript": "latest"
   },
   "engines": {
-    "node": "21.x",
+    "node": "22.x",
     "pnpm": "9.x"
   }
 }
