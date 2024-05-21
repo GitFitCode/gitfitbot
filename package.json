@@ -19,6 +19,8 @@
   "license": "GNU GPLv3",
   "dependencies": {
     "@discordjs/rest": "latest",
+    "@langchain/core": "0.2.0",
+    "@langchain/openai": "0.0.33",
     "@notionhq/client": "latest",
     "@types/pouchdb-node": "latest",
     "app-root-path": "latest",
@@ -27,7 +29,7 @@
     "discord-tictactoe": "latest",
     "discord.js": "latest",
     "gfc-vault-config": "github:GitFitCode/gfc-vault-config",
-    "langchain": "0.0.214",
+    "langchain": "0.2.0",
     "pouchdb-node": "latest",
     "undici": "latest"
   },
