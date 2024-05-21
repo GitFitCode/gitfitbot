@@ -4,23 +4,11 @@
  * To trigger, type `/ping` in the discord server.
  */
 
-import * as Sentry from '@sentry/node';
 import { CommandInteraction, Client } from 'discord.js';
 import { COMMAND_PING } from '../utils';
 import { SlashCommand } from '../Command';
 
-require('@sentry/tracing');
-
 async function executeRun(client: Client, interaction: CommandInteraction) {
-  Sentry.setUser({
-    id: interaction.user.id,
-    username: interaction.user.username,
-  });
-  const transaction = Sentry.startTransaction({
-    op: 'transaction',
-    name: `/${COMMAND_PING.COMMAND_NAME}`,
-  });
-
   const sent = await interaction.followUp({
     ephemeral: true,
     content: 'Pinging...',
@@ -32,9 +20,6 @@ async function executeRun(client: Client, interaction: CommandInteraction) {
       sent.createdTimestamp - interaction.createdTimestamp
     }ms`,
   );
-
-  transaction.finish();
-  Sentry.setUser(null);
 }
 
 const Ping: SlashCommand = {

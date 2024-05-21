@@ -7,7 +7,6 @@
  * To trigger, type `/support` in the discord server.
  */
 
-import * as Sentry from '@sentry/node';
 import {
   CommandInteraction,
   Client,
@@ -37,8 +36,6 @@ import {
   THREAD_CLOSING_MESSAGE,
 } from '../utils';
 import { SlashCommand } from '../Command';
-
-require('@sentry/tracing');
 
 /**
  * Function to create a thread.
@@ -176,15 +173,6 @@ async function handleThreadClosing(
 }
 
 async function executeRun(interaction: CommandInteraction) {
-  Sentry.setUser({
-    id: interaction.user.id,
-    username: interaction.user.username,
-  });
-  const transaction = Sentry.startTransaction({
-    op: 'transaction',
-    name: `/${COMMAND_SUPPORT.COMMAND_NAME}`,
-  });
-
   // Can be a public/private text/voice-text channel or public/private thread channel.
   const { channel } = interaction;
   const isThread = channel?.isThread();
@@ -230,8 +218,6 @@ async function executeRun(interaction: CommandInteraction) {
     // Create a thread to handle the support ticket request.
     await handleThreadCreation(String(issueText), interaction);
   }
-  transaction.finish();
-  Sentry.setUser(null);
 }
 
 const Support: SlashCommand = {

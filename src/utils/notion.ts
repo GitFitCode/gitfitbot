@@ -1,9 +1,6 @@
-import * as Sentry from '@sentry/node';
 import { config } from 'gfc-vault-config';
 import { Client } from '@notionhq/client';
 import { NOTION_STATUS_DONE, NOTION_STATUS_OPEN } from './constants';
-
-require('@sentry/tracing');
 
 const notion = new Client({ auth: config.notionKey });
 const databaseId = config.notionSupportTicketsDatabaseId;
@@ -106,7 +103,6 @@ export async function updateNotionSupportTicketsDBEntry(
   } catch (error: any) {
     // https://github.com/makenotion/notion-sdk-js#handling-errors
     console.error(error);
-    Sentry.captureException(error);
   }
 }
 
@@ -169,7 +165,6 @@ export async function createNotionSupportTicketsDBEntry(
   } catch (error: any) {
     // https://github.com/makenotion/notion-sdk-js#handling-errors
     console.error(error);
-    Sentry.captureException(error);
     return '';
   }
 }
@@ -242,7 +237,6 @@ export async function createNotionBacklogDBEntry(
   } catch (error: any) {
     // https://github.com/makenotion/notion-sdk-js#handling-errors
     console.error(error);
-    Sentry.captureException(error);
     return '';
   }
 }

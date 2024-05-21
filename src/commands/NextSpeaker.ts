@@ -4,7 +4,6 @@
  * To trigger, type `/next-speaker` in the discord server.
  */
 
-import * as Sentry from '@sentry/node';
 import { CommandInteraction, Client, ChannelType } from 'discord.js';
 import { config } from 'gfc-vault-config';
 import {
@@ -20,8 +19,6 @@ import {
 } from '../utils';
 import { SlashCommand } from '../Command';
 
-require('@sentry/tracing');
-
 /**
  * Function to pick the next attendee randomly.
  * @param attendees Array of attendees from which to pick a random one.
@@ -33,15 +30,6 @@ function getRandomAttendee(attendees: (string | undefined)[]) {
 }
 
 async function executeRun(interaction: CommandInteraction) {
-  Sentry.setUser({
-    id: interaction.user.id,
-    username: interaction.user.username,
-  });
-  const transaction = Sentry.startTransaction({
-    op: 'transaction',
-    name: `/${COMMAND_NEXT_SPEAKER.COMMAND_NAME}`,
-  });
-
   // Get the Check-Ins Channel instance.
   const voiceChannel = interaction.guild?.channels.cache.find(
     (channel) => channel.id === config.checkinsVoiceChannelId,
@@ -61,9 +49,6 @@ async function executeRun(interaction: CommandInteraction) {
 
     // Get all stored attendees.
     const allAttendees = await fetchAllAttendees();
-
-    transaction.setData('total_attendees_count', allAttendees.length);
-    transaction.setTag('total_attendees_count', allAttendees.length);
 
     // Get all attendees who have completed their retro.
     const attendeesCompletedRetro = await fetchRetroCompletedAttendees();
@@ -113,8 +98,6 @@ async function executeRun(interaction: CommandInteraction) {
     const content = 'Error! No attendees in the checkins voice channel!';
     interaction.followUp({ ephemeral: true, content });
   }
-  transaction.finish();
-  Sentry.setUser(null);
 }
 
 const NextSpeaker: SlashCommand = {
@@ -125,7 +108,6 @@ const NextSpeaker: SlashCommand = {
       await executeRun(interaction);
     } catch (error: any) {
       console.error(error);
-      Sentry.captureException(error);
     }
   },
 };

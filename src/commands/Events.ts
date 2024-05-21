@@ -6,7 +6,6 @@
  * To trigger, type `/events` in the discord server.
  */
 
-import * as Sentry from '@sentry/node';
 import {
   CommandInteraction,
   Client,
@@ -22,12 +21,9 @@ import {
 } from 'discord.js';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import { Transaction } from '@sentry/types';
 import { config } from 'gfc-vault-config';
 import { SlashCommand } from '../Command';
 import { buildEventOptions, COMMAND_EVENT } from '../utils';
-
-require('@sentry/tracing');
 
 dayjs.extend(duration);
 
@@ -43,7 +39,6 @@ async function handleEventCreation(
   eventName: string,
   eventDescription: string,
   eventChannelID: string,
-  sentryTransaction: Transaction,
 ) {
   // Snowflake structure received from get(), destructured and renamed.
   // https://discordjs.guide/slash-commands/parsing-options.html
@@ -57,9 +52,6 @@ async function handleEventCreation(
   const role = interaction.options.get(COMMAND_EVENT.OPTION_ROLE, false);
 
   const retrievedDate = `${year}-${month}-${day} ${hour}:${minute} ${ampm} ${timezone}`;
-
-  sentryTransaction.setData('date', retrievedDate);
-  sentryTransaction.setTag('date', retrievedDate);
 
   // Check if the date provided by user is valid.
   if (dayjs(retrievedDate).isValid()) {
@@ -113,9 +105,6 @@ async function handleEventCreation(
             },
           ],
         });
-
-        sentryTransaction.setData('success', true);
-        sentryTransaction.setTag('success', true);
       } catch (err) {
         console.error(err);
 
@@ -123,27 +112,18 @@ async function handleEventCreation(
           ephemeral: true,
           content: 'Unable to schedule the event due to an error.',
         });
-
-        sentryTransaction.setData('success', false);
-        sentryTransaction.setTag('success', false);
       }
     } else {
       // DATE FORMAT IS VALID BUT INTO THE PAST
 
       const content = `The date you gave me is ${formattedDifference} into the past.`;
       await interaction.followUp({ content });
-
-      sentryTransaction.setData('success', false);
-      sentryTransaction.setTag('success', false);
     }
   } else {
     // DATE FORMAT IS NOT VALID
 
     const content = 'Invalid date provided!';
     await interaction.followUp({ content });
-
-    sentryTransaction.setData('success', false);
-    sentryTransaction.setTag('success', false);
   }
 }
 
@@ -152,11 +132,6 @@ async function handleEventCreation(
  * @param interaction CommandInteraction
  */
 async function handleListEvent(interaction: CommandInteraction) {
-  const transactionForList = Sentry.startTransaction({
-    op: 'transaction',
-    name: `/${COMMAND_EVENT.COMMAND_NAME} list`,
-  });
-
   const discordEventManager = interaction.guild?.scheduledEvents;
   const scheduledEvents = await discordEventManager?.fetch();
 
@@ -186,7 +161,6 @@ async function handleListEvent(interaction: CommandInteraction) {
     const content = 'No events have been scheduled currently.';
     interaction.followUp({ ephemeral: true, content });
   }
-  transactionForList.finish();
 }
 
 /**
@@ -194,25 +168,12 @@ async function handleListEvent(interaction: CommandInteraction) {
  * @param interaction CommandInteraction
  */
 async function handleRetroEvent(_client: Client, interaction: CommandInteraction) {
-  const transactionForRetro = Sentry.startTransaction({
-    op: 'transaction',
-    name: `/${COMMAND_EVENT.COMMAND_NAME} retro`,
-  });
-
   const eventName = 'GitFitCode Retrospective';
   const eventDescription =
     "Let's reflect on your last week's EBIs & WWWs and create some tangible action items!";
   const eventChannelID = config.checkinsVoiceChannelId;
 
-  await handleEventCreation(
-    interaction,
-    eventName,
-    eventDescription,
-    eventChannelID,
-    transactionForRetro,
-  );
-
-  transactionForRetro.finish();
+  await handleEventCreation(interaction, eventName, eventDescription, eventChannelID);
 }
 
 /**
@@ -220,24 +181,11 @@ async function handleRetroEvent(_client: Client, interaction: CommandInteraction
  * @param interaction CommandInteraction
  */
 async function handleCodewarsEvent(_client: Client, interaction: CommandInteraction) {
-  const transactionForCodewars = Sentry.startTransaction({
-    op: 'transaction',
-    name: `/${COMMAND_EVENT.COMMAND_NAME} codewars`,
-  });
-
   const eventName = 'GitFitCode Codewars';
   const eventDescription = "Let's solve some katas on https://www.codewars.com !";
   const eventChannelID = config.virtualOfficeVoiceChannelId;
 
-  await handleEventCreation(
-    interaction,
-    eventName,
-    eventDescription,
-    eventChannelID,
-    transactionForCodewars,
-  );
-
-  transactionForCodewars.finish();
+  await handleEventCreation(interaction, eventName, eventDescription, eventChannelID);
 }
 
 /**
@@ -245,11 +193,6 @@ async function handleCodewarsEvent(_client: Client, interaction: CommandInteract
  * @param interaction CommandInteraction
  */
 async function handleCustomEvent(_client: Client, interaction: CommandInteraction) {
-  const transactionForCodewars = Sentry.startTransaction({
-    op: 'transaction',
-    name: `/${COMMAND_EVENT.COMMAND_NAME} custom`,
-  });
-
   // Snowflake structure received from get(), destructured and renamed.
   // https://discordjs.guide/slash-commands/parsing-options.html
   const { value: name } = interaction.options.get(COMMAND_EVENT.OPTION_NAME, true);
@@ -264,16 +207,8 @@ async function handleCustomEvent(_client: Client, interaction: CommandInteractio
 
     interaction.followUp({ ephemeral: true, content });
   } else {
-    await handleEventCreation(
-      interaction,
-      String(name),
-      String(description),
-      String(channel),
-      transactionForCodewars,
-    );
+    await handleEventCreation(interaction, String(name), String(description), String(channel));
   }
-
-  transactionForCodewars.finish();
 }
 
 /**
@@ -281,11 +216,6 @@ async function handleCustomEvent(_client: Client, interaction: CommandInteractio
  * @param interaction CommandInteraction
  */
 async function handleClearEvent(interaction: CommandInteraction) {
-  const transactionForCodewars = Sentry.startTransaction({
-    op: 'transaction',
-    name: `/${COMMAND_EVENT.COMMAND_NAME} clear`,
-  });
-
   const roles = interaction.member?.roles.valueOf() as Collection<string, Role>;
   const foundAdminRole = roles.find((role) => role.id === config.adminRoleID);
 
@@ -311,20 +241,9 @@ async function handleClearEvent(interaction: CommandInteraction) {
 
     interaction.followUp({ ephemeral: true, content });
   }
-
-  transactionForCodewars.finish();
 }
 
 async function executeRun(client: Client, interaction: CommandInteraction) {
-  Sentry.setUser({
-    id: interaction.user.id,
-    username: interaction.user.username,
-  });
-  const transactionForEvents = Sentry.startTransaction({
-    op: 'transaction',
-    name: `/${COMMAND_EVENT.COMMAND_NAME}`,
-  });
-
   // /<command> <subcommand> [<arg>:<value>]
   const commandInput = String(interaction)
     .replace(`/${COMMAND_EVENT.COMMAND_NAME}`, '')
@@ -354,9 +273,6 @@ async function executeRun(client: Client, interaction: CommandInteraction) {
   if (commandInput.startsWith(COMMAND_EVENT.OPTION_CLEAR)) {
     handleClearEvent(interaction);
   }
-
-  transactionForEvents.finish();
-  Sentry.setUser(null);
 }
 
 const Events: SlashCommand = {

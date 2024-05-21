@@ -4,24 +4,12 @@
  * To trigger, type `/dadjoke` in the discord server.
  */
 
-import * as Sentry from '@sentry/node';
 import { Client, CommandInteraction } from 'discord.js';
 import { request } from 'undici';
 import { SlashCommand } from '../Command';
 import { COMMAND_DADJOKE } from '../utils';
 
-require('@sentry/tracing');
-
 async function executeRun(interaction: CommandInteraction) {
-  Sentry.setUser({
-    id: interaction.user.id,
-    username: interaction.user.username,
-  });
-  const transaction = Sentry.startTransaction({
-    op: 'transaction',
-    name: `/${COMMAND_DADJOKE.COMMAND_NAME}`,
-  });
-
   const URL = 'https://icanhazdadjoke.com';
 
   const response = await request(URL, { headers: { Accept: 'application/json' } });
@@ -34,9 +22,6 @@ async function executeRun(interaction: CommandInteraction) {
     const content = 'something went wrong';
     await interaction.followUp({ ephemeral: true, content });
   }
-
-  transaction.finish();
-  Sentry.setUser(null);
 }
 
 const Dadjoke: SlashCommand = {
