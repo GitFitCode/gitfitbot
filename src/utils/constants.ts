@@ -26,6 +26,7 @@ export const RETRO_FINISHED_MESSAGE =
 export const RETRO_NEXT_SPEAKER_MESSAGE = "you're next! Please provide your update.";
 export const OPEN_AI_QUESTION_IDENTIFIER = '#question';
 export const OPEN_AI_CONFIG = {
+  MODEL: 'gpt-4o',
   TEMPERATURE: 0.7,
   STOP: ['GFC Community Member:'],
 };
