@@ -1,10 +1,6 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import { config } from 'gfc-vault-config';
-
-function delay(ms: number) {
-  // eslint-disable-next-line no-promise-executor-return
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+import { delay } from '../utils';
 
 // A new instance of `Client`.
 const client = new Client({

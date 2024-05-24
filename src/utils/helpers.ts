@@ -12,8 +12,36 @@ import {
 import { GitFitCodeEventOptions } from './types';
 
 /**
- * Function to build a list containing current and next year.
- * @returns ApplicationCommandOptionChoiceData<number>[]
+ * Formats the user provided prompt to include a prefix and a suffix indicating the roles of the conversation participants.
+ * @param {string} userProvidedPrompt - The prompt provided by the user.
+ * @returns {string} The formatted prompt with added context for the GFC Community Member and the Software Sparring Partner.
+ */
+export const getFormattedPrompt = (userProvidedPrompt: string) =>
+  `GFC Community Member: ${userProvidedPrompt} \n\n GFC Community Software Sparring Partner: `;
+
+/**
+ * Extracts the Notion page ID from a thread's starter message if the message was created by the GFC bot.
+ * This function assumes that the thread's starter message contains a specific delimiter indicating the Notion page ID.
+ * @param {any} clientChannel - The channel object from which to fetch the starter message.
+ * @returns {Promise<string>} The extracted Notion page ID if available, otherwise an empty string.
+ */
+export async function extractNotionPageIdFromTreadByChannel(clientChannel: any): Promise<string> {
+  const starterMessage = await clientChannel.fetchStarterMessage();
+  // Message comes from a tread which was originally created by the gfc bot
+  const isMessageInAThread = clientChannel?.isThread();
+  const isAuthorAGFCBot =
+    starterMessage?.author?.id === config?.botId &&
+    starterMessage?.content?.includes(NOTION_PAGE_ID_DELIMITER);
+  if (starterMessage && isMessageInAThread && isAuthorAGFCBot) {
+    const notionPageID = String(starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX));
+    return notionPageID;
+  }
+  return '';
+}
+
+/**
+ * Generates a list of choices for the current and next year.
+ * @returns {ApplicationCommandOptionChoiceData<number>[]} An array of choices with year names and values.
  */
 function generateYears(): ApplicationCommandOptionChoiceData<number>[] {
   const now = dayjs();
@@ -26,8 +54,8 @@ function generateYears(): ApplicationCommandOptionChoiceData<number>[] {
 }
 
 /**
- * Function to build a list containing months of the year.
- * @returns ApplicationCommandOptionChoiceData<number>[]
+ * Generates a list of choices for the months of the year.
+ * @returns {ApplicationCommandOptionChoiceData<number>[]} An array of choices with month names and values.
  */
 function generateMonths(): ApplicationCommandOptionChoiceData<number>[] {
   return [
@@ -47,9 +75,9 @@ function generateMonths(): ApplicationCommandOptionChoiceData<number>[] {
 }
 
 /**
- * Function to build options for GFC discord events.
- * @param eventName Name of the event to be scheduled.
- * @returns GitFitCodeEventOptions
+ * Builds the command options for a specific event.
+ * @param eventName The name of the event for which the options are being built.
+ * @returns {GitFitCodeEventOptions} An array of options for the event command.
  */
 export function buildEventOptions(eventName: string): GitFitCodeEventOptions {
   return [
@@ -122,31 +150,24 @@ export function buildEventOptions(eventName: string): GitFitCodeEventOptions {
   ];
 }
 
-export const getFormattedPrompt = (userProvidedPrompt: string) =>
-  `GFC Community Member: ${userProvidedPrompt} \n\n GFC Community Software Sparring Partner: `;
-
-export const extractNotionPageIdFromTreadByChannel = async (clientChannel: any) => {
-  const starterMessage = await clientChannel.fetchStarterMessage();
-  // Message comes from a tread which was originally created by the gfc bot
-  const isMessageInAThread = clientChannel?.isThread();
-  const isAuthorAGFCBot =
-    starterMessage?.author?.id === config?.botId &&
-    starterMessage?.content?.includes(NOTION_PAGE_ID_DELIMITER);
-  if (starterMessage && isMessageInAThread && isAuthorAGFCBot) {
-    const notionPageID = String(starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX));
-    return notionPageID;
-  }
-  return '';
-};
-
 /**
- * Function to add hours to a date.
- * @param date Date to add hours to.
- * @param hours Hours to add.
- * @returns Date
+ * Adds a specified number of hours to a given date.
+ * @param date The original date to which hours will be added.
+ * @param hours The number of hours to add to the date.
+ * @returns A new Date object with the added hours.
  */
 export function addHoursToDate(date: Date, hours: number): Date {
   const dateToMilliseconds = date.getTime();
   const addedHour = dateToMilliseconds + 60 * 60 * 1000 * hours;
   return new Date(addedHour);
+}
+
+/**
+ * Creates a promise that resolves after a specified number of milliseconds.
+ * @param ms The number of milliseconds to delay.
+ * @returns A promise that resolves after the delay.
+ */
+export function delay(ms: number) {
+  // eslint-disable-next-line no-promise-executor-return
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
