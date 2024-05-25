@@ -16,18 +16,10 @@ client.on('ready', async () => {
   // Clear out all commands from the server.
   const commands: SlashCommand[] = [];
   await client.application.commands.set(commands);
-});
-
-(async () => {
-  // Call login on client for authenticating the bot with Discord.
-  client.login(config.discordBotToken);
-
-  // Give some time to discord for clearing registered commands.
-  await delay(5000);
 
   // Log out, terminate connection to Discord and destroy the client.
   client.destroy();
+});
 
-  // Exit the script.
-  process.exit();
-})();
+// Call login on client for authenticating the bot with Discord.
+client.login(config.discordBotToken);
