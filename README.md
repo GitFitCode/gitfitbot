@@ -19,7 +19,7 @@ Table of Contents:
 ### What you'll need
 
 - [VSCode](https://code.visualstudio.com/) / [Intellij WebStorm](https://www.jetbrains.com/webstorm/)
-- [Nodejs LTS](https://nodejs.org/en/) (Please check package.json for the latest supported Node version)
+- [Nodejs](https://nodejs.org/en/) (Please check package.json for the latest supported Node version)
 - [PnPM](https://pnpm.io) package manager
 
 **Note**: You **_DO NOT_** need docker to run the bot locally.
