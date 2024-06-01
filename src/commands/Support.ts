@@ -90,9 +90,9 @@ async function handleThreadCreation(issueText: string, interaction: CommandInter
   // Send a message in the newly created thread.
   thread.send(`
     If you check out the Notion link above, you can see that your question has been initially answered by our bot.
-  If you have any follow up questions, please ask them by using \`# question\` (without the space) in the thread.
+  If you have any follow up questions, please ask them by using \`#question\` in the thread.
 
-    Also, if you couldn't type out all of your question in the original command, you can type it out in the thread with \`# question\` (without the space).
+    Also, if you couldn't type out all of your question in the original command, you can type it out in the thread with \`#question\`.
   The bot will pick it up and respond in the notion document.
 
   Notion: ${notionURL}
