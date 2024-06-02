@@ -150,3 +150,16 @@ export function addHoursToDate(date: Date, hours: number): Date {
   const addedHour = dateToMilliseconds + 60 * 60 * 1000 * hours;
   return new Date(addedHour);
 }
+
+/**
+ * Creates a promise that resolves after a specified delay.
+ *
+ * This function is useful when you need to pause execution of an asynchronous function for a certain period of time.
+ *
+ * @param ms - The number of milliseconds to delay.
+ * @returns A promise that resolves after the specified delay.
+ */
+export function delay(ms: number) {
+  // eslint-disable-next-line no-promise-executor-return
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
