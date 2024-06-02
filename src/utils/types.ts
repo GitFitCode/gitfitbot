@@ -11,4 +11,4 @@ export type Attendee = { discordID: string; retroDone: boolean };
 export type GitFitCodeEventOptions = Exclude<
   ApplicationCommandOptionData,
   ApplicationCommandSubGroupData | ApplicationCommandSubCommandData
->[];
+>;

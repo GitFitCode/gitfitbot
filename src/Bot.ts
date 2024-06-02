@@ -9,8 +9,16 @@ import interactionCreate from './listeners/interactionCreate';
 import messageCreate from './listeners/messageCreate';
 import ready from './listeners/ready';
 
-// A new instance of `Client`.
+/**
+ * Creates a new Discord Client with specific intents and allowed mentions.
+ *
+ * Intents are used to specify which events the client should receive.
+ * Allowed mentions are used to control who can be mentioned by the bot.
+ *
+ * @see {@link https://discord.js.org/docs/packages/discord.js/main/Client:Class}
+ */
 const client = new Client({
+  // Intents that the bot client should subscribe to
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
@@ -20,9 +28,18 @@ const client = new Client({
     GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.MessageContent,
   ],
+  // Control who can be mentioned by the bot
   allowedMentions: { parse: ['users', 'roles', 'everyone'] },
 });
 
+/**
+ * Starts the bot by registering listeners and logging into Discord.
+ *
+ * The listeners handle various events such as a new guild member being added,
+ * an interaction being created, a message being created, and the bot being ready.
+ *
+ * After registering the listeners, the bot logs into Discord using the bot token.
+ */
 function start() {
   // Register the bot client with listeners.
   guildMemberAdd(client);
@@ -34,6 +51,11 @@ function start() {
   client.login(config.discordBotToken);
 }
 
+/**
+ * Stops the bot by destroying the client and logging the exit code.
+ *
+ * @param code - The signal code that triggered the stop.
+ */
 function stop(code: NodeJS.Signals) {
   // Log out, terminate connection to Discord and destroy the client.
   client.destroy();
