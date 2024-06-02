@@ -155,6 +155,22 @@ export const COMMAND_FEATURE_CHANGE_MANAGEMENT = {
   OPTION_TITLE_DESCRIPTION: 'Title of the feature/change management request.',
   OPTION_DESCRIPTION: 'description',
   OPTION_DESCRIPTION_DESCRIPTION: 'Description of the feature/change management request.',
+  OPTION_TYPE: 'type',
+  OPTION_TYPE_DESCRIPTION: 'Identify if an item is a bug, feature or documentation',
+  OPTION_TYPE_CHOICES: [
+    {
+      name: 'Bug',
+      value: 'bug',
+    },
+    {
+      name: 'Feature Request',
+      value: 'feature-request',
+    },
+    {
+      name: 'Documentation',
+      value: 'documentation',
+    },
+  ],
 };
 
 // Support command constants
