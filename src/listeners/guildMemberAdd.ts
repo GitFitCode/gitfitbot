@@ -23,7 +23,7 @@ Hey @everyone, <@${member.id}> has joined the community! Give them a warm welcom
     const Admin2ID = config.admin2DiscordId;
     const userMessage = `Hey <@${member.id}>, welcome to **GitFitCode**!
 
-Before you jump in, can you quickly fill this out: ${GFCIntroSurveyLink}?
+Before you dive in, can you quickly fill this out: ${GFCIntroSurveyLink}?
 
 In GitFitCode, you will find a group of like-minded life-long learners, channels to nerd out about your favorite topics, help each other out, share progress in your development journey, and to have a good time making this a home for yourself!
 
@@ -35,8 +35,6 @@ If you have any questions or concerns please don’t hesitate to reach out to **
 
 Please also ensure to update your **GitFitCode** server profile (nickname field) with your name (and optionally add your timezone abbreviation) so it is easier for the community to address you.
 Note that updating the name in the server profile **does not** require a Nitro subscription. More info here - https://support.discord.com/hc/en-us/articles/4409388345495-Server-Profiles.
-
-Add the community's Google calendar to be informed about scheduled events - https://calendar.google.com/calendar/u/0/r?cid=Z2l0Zml0Ym90QGdpdGZpdGNvZGUuY29t!
 
 Looking forward to seeing your positive impact within our community! 😊`;
 

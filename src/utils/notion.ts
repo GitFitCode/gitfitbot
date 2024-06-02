@@ -53,9 +53,11 @@ function buildNotionSupportTicketsBlockChildren(
 }
 
 /**
- * Function to update an entry of the Notion Support Ticket DB with the provided data.
- * @param notionPageID ID of the Notion page.
- * @param data Data to be sent to Notion.
+ * Updates an entry in the Notion Support Ticket Database with the provided data.
+ *
+ * @param {string} notionPageID - The ID of the Notion page to update.
+ * @param {Array<{message: string, author: string}>} data - An array of objects containing the message and author details.
+ * @param {boolean} isDone - A boolean indicating whether the support ticket is marked as done.
  */
 export async function updateNotionSupportTicketsDBEntry(
   notionPageID: string,
@@ -95,9 +97,6 @@ export async function updateNotionSupportTicketsDBEntry(
         block_id: notionPageID,
         children: buildNotionSupportTicketsBlockChildren(data),
       });
-    } else {
-      // STATUS OF THE SUPPORT TICKET IS DONE
-      // NO-OP
     }
   } catch (error: any) {
     // https://github.com/makenotion/notion-sdk-js#handling-errors
@@ -106,11 +105,12 @@ export async function updateNotionSupportTicketsDBEntry(
 }
 
 /**
- * Function to create a new entry in the Notion Support Ticket DB with the data provided.
- * @param issueText The message.
- * @param authorUsername Username of the discord user who generated this message.
- * @param channelID Discord Channel ID where the message was generated.
- * @returns ID of the newly created entry in Notion DB.
+ * Creates a new entry in the Notion Support Ticket Database with the provided data.
+ *
+ * @param {string} issueText - The message content.
+ * @param {string} authorUsername - The username of the Discord user who generated the message.
+ * @param {string} channelID - The Discord Channel ID where the message was generated.
+ * @returns {Promise<string>} - A promise that resolves to the ID of the newly created entry in the Notion database.
  */
 export async function createNotionSupportTicketsDBEntry(
   issueText: string,
@@ -169,19 +169,20 @@ export async function createNotionSupportTicketsDBEntry(
 }
 
 /**
- * Function to create a new entry in the Notion Backlog DB with the data provided.
- * @param summary Summary of the change management.
- * @param authorUsername Username of the discord user who generated this message.
- * @param category Category where change management is to be applied.
- * @param description Description of the change management.
- * @returns
+ * Creates a new entry in the Notion Backlog Database with the provided data.
+ *
+ * @param summary - A brief summary of the change management.
+ * @param authorUsername - The Discord username of the user who generated this message.
+ * @param category - The category where the change management is to be applied.
+ * @param description - A detailed description of the change management.
+ * @returns {Promise<string>} - The ID of the created Notion page, or an empty string if an error occurs.
  */
 export async function createNotionBacklogDBEntry(
   summary: string,
   authorUsername: string,
   category: string,
   description: string,
-) {
+): Promise<string> {
   try {
     // Create a new page in notion.
     const response = await notion.pages.create({

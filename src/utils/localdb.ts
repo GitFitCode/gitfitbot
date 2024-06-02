@@ -6,23 +6,23 @@ import { Attendee } from './types';
 let attendeesDB: PouchDB.Database<Attendee>;
 
 /**
- * Function to open a new connection to Attendees database.
+ * Opens a new connection to the Attendees database.
  */
 export function openAttendeesDatabase() {
   attendeesDB = new PouchDB<Attendee>('attendees_db');
 }
 
 /**
- * Function to close the current connection to Attendees database.
+ * Closes the current connection to the Attendees database.
  */
-export async function closeAttendeesDatabase() {
+async function closeAttendeesDatabase() {
   if (attendeesDB) {
     await attendeesDB.close();
   }
 }
 
 /**
- * Function to delete all documents and destroy the Attendees database.
+ * Deletes all documents and destroys the Attendees database.
  */
 export async function resetAttendeesDatabase() {
   try {
@@ -34,10 +34,11 @@ export async function resetAttendeesDatabase() {
 }
 
 /**
- * Function to fetch all documents from the Attendees database.
- * @returns Attendees ID array retrieved from the database.
+ * Fetches all documents from the Attendees database.
+ *
+ * @returns {Promise<(string | undefined)[]>} A promise that resolves to an array of attendee IDs retrieved from the database.
  */
-export async function fetchAllAttendees() {
+export async function fetchAllAttendees(): Promise<(string | undefined)[]> {
   openAttendeesDatabase();
 
   const result = await attendeesDB.allDocs({ include_docs: true });
@@ -46,10 +47,11 @@ export async function fetchAllAttendees() {
 }
 
 /**
- * Function to fetch all documents with retroDone = true from the Attendees database.
- * @returns Attendees ID array retrieved from the database.
+ * Fetches all documents with retroDone set to true from the Attendees database.
+ *
+ * @returns {Promise<(string | undefined)[]>} A promise that resolves to an array of attendee IDs with retroDone set to true.
  */
-export async function fetchRetroCompletedAttendees() {
+export async function fetchRetroCompletedAttendees(): Promise<(string | undefined)[]> {
   openAttendeesDatabase();
 
   const result = await attendeesDB.allDocs({ include_docs: true });
@@ -60,10 +62,11 @@ export async function fetchRetroCompletedAttendees() {
 }
 
 /**
- * Function to fetch all documents with retroDone = false from the Attendees database.
- * @returns Attendees ID array retrieved from the database.
+ * Fetches all documents with retroDone set to false from the Attendees database.
+ *
+ * @returns {Promise<(string | undefined)[]>} A promise that resolves to an array of attendee IDs with retroDone set to false.
  */
-export async function fetchRetroNotCompletedAttendees() {
+export async function fetchRetroNotCompletedAttendees(): Promise<(string | undefined)[]> {
   openAttendeesDatabase();
 
   const result = await attendeesDB.allDocs({ include_docs: true });
@@ -74,9 +77,11 @@ export async function fetchRetroNotCompletedAttendees() {
 }
 
 /**
- * Function to add multiple documents into the Attendees database.
+ * Adds multiple documents into the Attendees database.
+ *
+ * @param {string[]} attendees - An array of attendee IDs to be added to the database.
  */
-export async function bulkAddAttendees(attendees: string[]) {
+async function bulkAddAttendees(attendees: string[]) {
   openAttendeesDatabase();
 
   const attendeesDocs: Attendee[] = attendees.map((attendee) => ({
@@ -89,8 +94,11 @@ export async function bulkAddAttendees(attendees: string[]) {
 }
 
 /**
- * Function to add multiple documents ignoring duplicates.
- * @param attendees Array of attendees to be added to the database.
+ * Inserts new attendees into the database.
+ * If the database is empty, all attendees are added.
+ * If the database already has some attendees, only new attendees are added.
+ *
+ * @param {string[]} attendees - An array of attendees to be inserted.
  */
 export async function insertAttendees(attendees: string[]) {
   openAttendeesDatabase();
@@ -109,7 +117,10 @@ export async function insertAttendees(attendees: string[]) {
 }
 
 /**
- * Function to update retro status of a document from the Attendees database.
+ * Updates the retrospective status of an attendee in the database.
+ * The function sets the 'retroDone' field of the attendee document to true.
+ *
+ * @param {string} attendee - The name of the attendee whose status is to be updated.
  */
 export async function updateAttendeeRetroStatus(attendee: string) {
   openAttendeesDatabase();

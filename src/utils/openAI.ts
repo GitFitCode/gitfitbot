@@ -8,9 +8,10 @@ import {
 } from './constants';
 
 /**
- * Function to get response from OpenAI for a given prompt.
- * @param prompt Prompt to be sent to OpenAI.
- * @returns OpenAI response.
+ * Fetches a response from OpenAI based on the provided prompt.
+ *
+ * @param {string} prompt - The input prompt to be sent to OpenAI.
+ * @returns {Promise<string>} - A promise that resolves to the response from OpenAI.
  */
 export async function getChatOpenAIPromptResponse(prompt: string): Promise<string> {
   const chatModel = new ChatOpenAI({

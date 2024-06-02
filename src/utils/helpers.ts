@@ -12,8 +12,13 @@ import {
 import { GitFitCodeEventOptions } from './types';
 
 /**
- * Function to build a list containing current and next year.
- * @returns ApplicationCommandOptionChoiceData<number>[]
+ * Generates an array of choices for the current year and the next year.
+ *
+ * This function is used to generate choices for a command option that requires a year.
+ * The choices are represented as objects with a name and a value.
+ * The name is a string representation of the year, and the value is the year as a number.
+ *
+ * @returns {ApplicationCommandOptionChoiceData<number>[]} An array of ApplicationCommandOptionChoiceData objects representing the current year and the next year.
  */
 function generateYears(): ApplicationCommandOptionChoiceData<number>[] {
   const now = dayjs();
@@ -26,8 +31,13 @@ function generateYears(): ApplicationCommandOptionChoiceData<number>[] {
 }
 
 /**
- * Function to build a list containing months of the year.
- * @returns ApplicationCommandOptionChoiceData<number>[]
+ * Generates an array of choices for all months of the year.
+ *
+ * This function is used to generate choices for a command option that requires a month.
+ * The choices are represented as objects with a name and a value.
+ * The name is the name of the month, and the value is the month as a number (1 for January, 2 for February, etc.).
+ *
+ * @returns {ApplicationCommandOptionChoiceData<number>[]} An array of ApplicationCommandOptionChoiceData objects representing all months of the year.
  */
 function generateMonths(): ApplicationCommandOptionChoiceData<number>[] {
   return [
@@ -47,11 +57,13 @@ function generateMonths(): ApplicationCommandOptionChoiceData<number>[] {
 }
 
 /**
- * Function to build options for GFC discord events.
- * @param eventName Name of the event to be scheduled.
- * @returns GitFitCodeEventOptions
+ * Builds an array of options for a GitFitCode event command.
+ * Each option represents a parameter that can be provided when the command is invoked.
+ *
+ * @param eventName - The name of the event for which the options are being built.
+ * @returns {GitFitCodeEventOptions[]} An array of GitFitCodeEventOptions, each representing a command option.
  */
-export function buildEventOptions(eventName: string): GitFitCodeEventOptions {
+export function buildEventOptions(eventName: string): GitFitCodeEventOptions[] {
   return [
     {
       name: COMMAND_EVENT.OPTION_YEAR,
@@ -125,7 +137,19 @@ export function buildEventOptions(eventName: string): GitFitCodeEventOptions {
 export const getFormattedPrompt = (userProvidedPrompt: string) =>
   `GFC Community Member: ${userProvidedPrompt} \n\n GFC Community Software Sparring Partner: `;
 
-export const extractNotionPageIdFromTreadByChannel = async (clientChannel: any) => {
+/**
+ * Extracts the Notion page ID from a thread started by the bot in a given channel.
+ *
+ * This function fetches the starter message of the thread, checks if the message is in a thread and if the author is the bot,
+ * and if the message content includes the Notion page ID delimiter.
+ * If all these conditions are met, it extracts the Notion page ID from the message content and returns it.
+ *
+ * @param clientChannel - The channel where the thread is located.
+ * @returns {Promise<string>} The Notion page ID if it can be extracted, or an empty string otherwise.
+ */
+export const extractNotionPageIdFromTreadByChannel = async (
+  clientChannel: any,
+): Promise<string> => {
   const starterMessage = await clientChannel.fetchStarterMessage();
   // Message comes from a tread which was originally created by the gfc bot
   const isMessageInAThread = clientChannel?.isThread();
@@ -140,10 +164,11 @@ export const extractNotionPageIdFromTreadByChannel = async (clientChannel: any) 
 };
 
 /**
- * Function to add hours to a date.
- * @param date Date to add hours to.
- * @param hours Hours to add.
- * @returns Date
+ * Adds a specified number of hours to a given date.
+ *
+ * @param date - The initial date.
+ * @param hours - The number of hours to add to the date.
+ * @returns {Date} A new Date object representing the original date plus the added hours.
  */
 export function addHoursToDate(date: Date, hours: number): Date {
   const dateToMilliseconds = date.getTime();
