@@ -1,10 +1,12 @@
 import { config } from 'gfc-vault-config';
 import { Client } from '@notionhq/client';
 import {
+  COMMAND_FEATURE_CHANGE_MANAGEMENT,
   NOTION_MAX_CHAR_LIMIT_IN_RICH_TEXT_BLOCK,
   NOTION_STATUS_DONE,
   NOTION_STATUS_OPEN,
 } from './constants';
+import { NotionBacklogBDEntry } from './types';
 
 const notion = new Client({ auth: config.notionKey });
 const databaseId = config.notionSupportTicketsDatabaseId;
@@ -175,6 +177,7 @@ export async function createNotionSupportTicketsDBEntry(
  * @param authorUsername - The Discord username of the user who generated this message.
  * @param category - The category where the change management is to be applied.
  * @param description - A detailed description of the change management.
+ * @param type - A ticket type of the change management. Optional parameter.
  * @returns {Promise<string>} - The ID of the created Notion page, or an empty string if an error occurs.
  */
 export async function createNotionBacklogDBEntry(
@@ -182,10 +185,10 @@ export async function createNotionBacklogDBEntry(
   authorUsername: string,
   category: string,
   description: string,
+  type?: string | undefined,
 ): Promise<string> {
   try {
-    // Create a new page in notion.
-    const response = await notion.pages.create({
+    let data: NotionBacklogBDEntry = {
       parent: { database_id: config.notionBacklogDatabaseId },
       properties: {
         title: {
@@ -197,7 +200,6 @@ export async function createNotionBacklogDBEntry(
             },
           ],
         },
-        // Add the user's username.
         Requestor: {
           rich_text: [
             {
@@ -207,7 +209,6 @@ export async function createNotionBacklogDBEntry(
             },
           ],
         },
-        // Add the category.
         Category: {
           rich_text: [
             {
@@ -231,7 +232,24 @@ export async function createNotionBacklogDBEntry(
           },
         },
       ],
-    });
+    };
+
+    if (type) {
+      const option = COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TYPE_CHOICES.find(
+        (option) => option.value === type,
+      );
+
+      if (option) {
+        data.properties.Type = {
+          select: {
+            name: option.name,
+          },
+        };
+      }
+    }
+
+    // Create a new page in notion.
+    const response = await notion.pages.create(data);
 
     return response.id;
   } catch (error: any) {

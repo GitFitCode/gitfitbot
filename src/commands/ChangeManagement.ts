@@ -30,7 +30,7 @@ async function executeRun(interaction: CommandInteraction) {
     COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_DESCRIPTION,
     true,
   );
-
+  const type = interaction.options.get(COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TYPE, false);
   const authorUsername = interaction.user.username;
 
   // Create an entry in the notion database and grab the page id.
@@ -39,6 +39,7 @@ async function executeRun(interaction: CommandInteraction) {
     authorUsername,
     String(category),
     String(description),
+    type ? String(type.value) : undefined,
   );
 
   // Notion link uses pageID without hyphens.
@@ -88,6 +89,13 @@ const ChangeManagement: SlashCommand = {
       description: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_DESCRIPTION_DESCRIPTION,
       type: ApplicationCommandOptionType.String,
       required: true,
+    },
+    {
+      name: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TYPE,
+      description: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TYPE_DESCRIPTION,
+      type: ApplicationCommandOptionType.String,
+      required: false,
+      choices: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TYPE_CHOICES,
     },
   ],
   run: async (_client: Client, interaction: CommandInteraction) => {
