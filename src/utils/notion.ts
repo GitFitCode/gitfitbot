@@ -1,6 +1,10 @@
 import { config } from 'gfc-vault-config';
 import { Client } from '@notionhq/client';
-import { NOTION_STATUS_DONE, NOTION_STATUS_OPEN } from './constants';
+import {
+  NOTION_MAX_CHAR_LIMIT_IN_RICH_TEXT_BLOCK,
+  NOTION_STATUS_DONE,
+  NOTION_STATUS_OPEN,
+} from './constants';
 
 const notion = new Client({ auth: config.notionKey });
 const databaseId = config.notionSupportTicketsDatabaseId;
@@ -10,44 +14,39 @@ type NotionParagraph = {
 };
 
 /**
- * Function to build a formatted notion structure with the provided data.
- * @param data Data to be sent to Notion.
- * @returns Formatted Notion data structure.
+ * Builds a formatted Notion structure with the provided data.
+ *
+ * Note: Each Notion rich text block has a character limit defined by NOTION_MAX_CHAR_LIMIT_IN_RICH_TEXT_BLOCK.
+ *
+ * @param {Array<{message: string, author: string}>} data - Array of objects containing message and author.
+ * @returns {NotionParagraph[]} Formatted Notion data structure.
  */
 function buildNotionSupportTicketsBlockChildren(
   data: {
     message: string;
     author: string;
   }[],
-) {
+): NotionParagraph[] {
   // Create an empty array.
   const children: NotionParagraph[] = [];
   data.forEach((datum) => {
-    // Push an instance of the formatted notion structure with the provided data.
-    children.push({
-      paragraph: {
-        rich_text: [
-          {
-            text: {
-              content: `${datum.author}`,
+    let content = `${datum.author} ${datum.message}`;
+    while (content.length > 0) {
+      const chunk = content.slice(0, NOTION_MAX_CHAR_LIMIT_IN_RICH_TEXT_BLOCK);
+      content = content.slice(NOTION_MAX_CHAR_LIMIT_IN_RICH_TEXT_BLOCK);
+
+      children.push({
+        paragraph: {
+          rich_text: [
+            {
+              text: {
+                content: chunk,
+              },
             },
-            annotations: {
-              code: true,
-            },
-          },
-          {
-            text: {
-              content: ' ',
-            },
-          },
-          {
-            text: {
-              content: `${datum.message}`,
-            },
-          },
-        ],
-      },
-    });
+          ],
+        },
+      });
+    }
   });
 
   return children;

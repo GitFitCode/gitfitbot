@@ -24,12 +24,15 @@ export const NOTION_STATUS_OPEN = 'Open';
 export const RETRO_FINISHED_MESSAGE =
   "We're done here! All attendees have provided their update. See you next week!";
 export const RETRO_NEXT_SPEAKER_MESSAGE = "you're next! Please provide your update.";
+// https://developers.notion.com/reference/request-limits#limits-for-property-values
+export const NOTION_MAX_CHAR_LIMIT_IN_RICH_TEXT_BLOCK = 2000;
 export const OPEN_AI_QUESTION_IDENTIFIER = '#question';
 export const OPEN_AI_CONFIG = {
   MODEL: 'gpt-4o',
   TEMPERATURE: 0.7,
   STOP: ['GFC Community Member:'],
 };
+export const DISCORD_MESSAGE_MAX_CHAR_LIMIT = 2000;
 
 // Events command constants
 export const COMMAND_EVENT = {

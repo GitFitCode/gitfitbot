@@ -6,6 +6,7 @@
 
 import { Client, Message } from 'discord.js';
 import {
+  DISCORD_MESSAGE_MAX_CHAR_LIMIT,
   extractNotionPageIdFromTreadByChannel,
   getChatOpenAIPromptResponse,
   getFormattedPrompt,
@@ -39,6 +40,7 @@ export default (client: Client): void => {
           Response: ${openAIResponse}
           --------------------
         `;
+        // Update the Notion database entry with the response.
         await updateNotionSupportTicketsDBEntry(
           notionPageId,
           [
@@ -49,7 +51,19 @@ export default (client: Client): void => {
           ],
           false,
         );
-        await message?.reply(messageWithResponse);
+
+        // Split the message into chunks, even if it's less than 2000 characters.
+        // This way, we only need one loop to send the messages, and we avoid the need for an if-else statement.
+        let chunks = [];
+
+        for (let i = 0; i < messageWithResponse.length; i += DISCORD_MESSAGE_MAX_CHAR_LIMIT) {
+          chunks.push(messageWithResponse.slice(i, i + DISCORD_MESSAGE_MAX_CHAR_LIMIT));
+        }
+
+        for (const chunk of chunks) {
+          // Send the message to discord.
+          await message?.reply(chunk);
+        }
       } catch (error) {
         console.error(error);
       }
