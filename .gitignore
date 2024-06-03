@@ -139,5 +139,6 @@ dist
 attendees_db/
 events_db/
 
-# GCP project service config file
-service.json
+# New Relic
+newrelic_agent.log
+newrelic.js

@@ -19,7 +19,7 @@ Table of Contents:
 ### What you'll need
 
 - [VSCode](https://code.visualstudio.com/) / [Intellij WebStorm](https://www.jetbrains.com/webstorm/)
-- [Nodejs](https://nodejs.org/en/) (Please check package.json for the latest supported Node version)
+- [Nodejs LTS](https://nodejs.org/en/) (Please check package.json for the latest supported Node version)
 - [PnPM](https://pnpm.io) package manager
 
 **Note**: You **_DO NOT_** need docker to run the bot locally.
@@ -74,6 +74,11 @@ pnpm i
   - Download or copy contents into your local `.env` file.
 
 - Get access to the [Digital Junkyard](https://discord.gg/4cJFTdGMBY) development server on Discord.
+
+- Create a new file `newrelic.js` in project root.
+
+  - Look for the `newrelic.js` file in the same location as `.env` in Keybase.
+  - Copy those contents over to the local `newrelic.js` file.
 
 ### Run the bot
 
