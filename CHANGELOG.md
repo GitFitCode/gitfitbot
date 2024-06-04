@@ -1,5 +1,21 @@
 
 
+# [1.16.0](https://github.com/GitFitCode/gitfitbot/compare/v1.15.0...v1.16.0) (2024-06-04)
+
+
+### Bug Fixes
+
+* incorrect bot termination logic ([0b9bfae](https://github.com/GitFitCode/gitfitbot/commit/0b9bfaee24af88d2df799024d641660a2f142ba8))
+* incorrect check for #question ([baa1b16](https://github.com/GitFitCode/gitfitbot/commit/baa1b1674cdb808d411b6fbe5a53e812f7aba0ba))
+* respect notion and discord api limits ([e71227c](https://github.com/GitFitCode/gitfitbot/commit/e71227c6212fdbfcf3b41a1b045a941c672d2a3f))
+
+
+### Features
+
+* add new relic instrumentation ([623228b](https://github.com/GitFitCode/gitfitbot/commit/623228b6a92768976410f69f12cda285e3b7e597))
+* identify if an item is a bug, feature, or description ([c57d599](https://github.com/GitFitCode/gitfitbot/commit/c57d599689a80bffd8cbd01e5495dea301a807fc))
+* optionally notify roles on event creation ([530a0f5](https://github.com/GitFitCode/gitfitbot/commit/530a0f511a48d9944c5a9c7e88a431df0b72005f))
+
 # [1.15.0](https://github.com/GitFitCode/gitfitbot/compare/v1.14.0...v1.15.0) (2024-03-29)
 
 
