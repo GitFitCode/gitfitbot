@@ -16,6 +16,11 @@ const handleSlashCommand = async (
     try {
       // Add the Discord username as a custom attribute to the transaction.
       newrelic.addCustomAttribute('discordUsername', interaction.user.username);
+      // Add the Discord user id as a custom attribute to the transaction.
+      newrelic.addCustomAttribute('discordUserId', interaction.user.id);
+      // Add app version as a custom attribute to the transaction.
+      const appVersion: string = require('../../package.json').version;
+      newrelic.addCustomAttribute('appVersion', appVersion);
 
       const slashCommand = Commands.find((c) => c.name === interaction.commandName);
       if (!slashCommand) {
