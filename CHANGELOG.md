@@ -1,5 +1,12 @@
 
 
+# [1.17.0](https://github.com/GitFitCode/gitfitbot/compare/v1.16.0...v1.17.0) (2024-06-05)
+
+
+### Features
+
+* add /standup command ([ca8ccea](https://github.com/GitFitCode/gitfitbot/commit/ca8cceae886570258957259a47b7813bc3b6706c))
+
 # [1.16.0](https://github.com/GitFitCode/gitfitbot/compare/v1.15.0...v1.16.0) (2024-06-04)
 
 
