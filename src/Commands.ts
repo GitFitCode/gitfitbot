@@ -10,6 +10,7 @@ import Info from './commands/Info';
 import Joke from './commands/Joke';
 import NextSpeaker from './commands/NextSpeaker';
 import Ping from './commands/Ping';
+import Standup from './commands/Standup';
 import Support from './commands/Support';
 import Test from './commands/Test';
 import TicTacToe from './commands/TicTacToe';
@@ -22,6 +23,7 @@ const Commands: SlashCommand[] = [
   Joke,
   NextSpeaker,
   Ping,
+  Standup,
   Support,
   Test,
   TicTacToe,

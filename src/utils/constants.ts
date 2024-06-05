@@ -189,3 +189,17 @@ export const GENERAL_GFC_SYSTEM_PROMPT =
   'You a a AI bot designed to be helpful to a community of engineers in entrepreneurs. You should act as if you have the knowledge of an experienced CTO, CEO, CFO, Investor, PHD Student, Engineer, Scientist, Business Owner, and Mentor.';
 
 export const OPEN_AI_API_RESPONSE_ERROR_MSG = 'Unable to get response from OpenAI';
+
+export const COMMAND_STANDUP = {
+  COMMAND_NAME: 'standup',
+  COMMAND_DESCRIPTION: 'Helper slash command for managing GFC standup updates.',
+  MODAL_CUSTOM_ID: 'standupModal',
+  MODAL_TITLE: 'Standup Update',
+  YESTERDAY_INPUT_CUSTOM_ID: 'yesterdayInput',
+  TODAY_INPUT_CUSTOM_ID: 'todayInput',
+  BLOCKERS_INPUT_CUSTOM_ID: 'blockersInput',
+  YESTERDAY_LABEL: 'What did you do yesterday?',
+  TODAY_LABEL: 'What will you be doing today?',
+  BLOCKERS_LABEL: 'Any blockers?',
+  BLOCKERS_DEFAULT_VALUE: 'None',
+};

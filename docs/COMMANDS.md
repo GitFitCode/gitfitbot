@@ -10,6 +10,7 @@
 - [`/support` - Open a support ticket and converse with GPT-x](#support---open-a-support-ticket-and-converse-with-gpt-x)
 - [`/test` - A test command where the bot will respond with `Test.`](#test---a-test-command-where-the-bot-will-respond-with-test)
 - [`/tictactoe` - Tic Tac Toe game that can be playes with AI or a human opponent](#tictactoe---tic-tac-toe-game-that-can-be-playes-with-ai-or-a-human-opponent)
+- [`/standup` - Provide standup update](#standup---provide-standup-update)
 
 ---
 
@@ -108,3 +109,5 @@
 **Options**:
 
 1. Opponent - **OPTIONAL**
+
+### `/standup` - Provide standup update
