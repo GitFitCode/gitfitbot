@@ -18,6 +18,7 @@ import { COMMAND_STANDUP } from '../utils';
 
 // All commands that invoke a modal should be listed here.
 const dontDeferCommandsList = [COMMAND_STANDUP.COMMAND_NAME];
+
 /**
  * Handles slash command interactions.
  *
@@ -86,20 +87,29 @@ const handleSlashCommand = async (
   });
 };
 
-const handleModalSubmission = async (
-  _client: Client,
-  interaction: ModalSubmitInteraction<CacheType>,
-) => {
+/**
+ * Handles the modal submission for the standup command.
+ *
+ * This function processes the modal submission for the standup command, extracting the user's input
+ * for yesterday's, today's activities, and any blockers. It then formats and sends a reply to the user
+ * with the provided information.
+ *
+ * @param {ModalSubmitInteraction<CacheType>} interaction - The interaction object containing the user's input.
+ */
+const handleModalSubmission = async (interaction: ModalSubmitInteraction<CacheType>) => {
+  // Check if the modal submission is for the standup command.
   if (interaction.customId === COMMAND_STANDUP.MODAL_CUSTOM_ID) {
-    // Get data entered by the user in the modal
+    // Retrieve data entered by the user in the modal's text input fields.
     const yesterday = interaction.fields.getTextInputValue(
       COMMAND_STANDUP.YESTERDAY_INPUT_CUSTOM_ID,
     );
     const today = interaction.fields.getTextInputValue(COMMAND_STANDUP.TODAY_INPUT_CUSTOM_ID);
     const blockers = interaction.fields.getTextInputValue(COMMAND_STANDUP.BLOCKERS_INPUT_CUSTOM_ID);
 
-    // Reply to the user with the data entered in the modal
+    // Format the reply content with the user's updates.
     const content = `<@${interaction.user.id}>'s Update:\n**Yesterday:**\n${yesterday}\n\n**Today:**\n${today}\n\n**Blockers:**\n${blockers}`;
+
+    // Send the formatted content as a reply to the user.
     await interaction.reply(content);
   }
 };
@@ -113,7 +123,7 @@ export default (client: Client): void => {
 
     // Check if interaction is a modal submission and call handleModalSubmission() if so.
     if (interaction.type === InteractionType.ModalSubmit) {
-      await handleModalSubmission(client, interaction);
+      await handleModalSubmission(interaction);
     }
   });
 };
