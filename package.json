@@ -8,6 +8,7 @@
     "clear-events": "pnpm build && node ./dist/src/scripts/clearScheduledEvents.js",
     "dev": "pnpm i && ts-node ./src/index.ts",
     "lint": "eslint .",
+    "pm2": "pnpm build && pm2 start ./dist/src/index.js --name gitfitbot",
     "pre-build": "rm -rf ./dist",
     "prepare": "husky",
     "release": "release-it",
