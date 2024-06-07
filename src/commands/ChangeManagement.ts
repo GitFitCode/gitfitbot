@@ -11,7 +11,7 @@ import {
   ButtonStyle,
   ComponentType,
 } from 'discord.js';
-import { config } from 'gfc-vault-config';
+import 'dotenv/config';
 import { COMMAND_FEATURE_CHANGE_MANAGEMENT, createNotionBacklogDBEntry } from '../utils';
 import { SlashCommand } from '../Command';
 
@@ -44,7 +44,8 @@ async function executeRun(interaction: CommandInteraction) {
 
   // Notion link uses pageID without hyphens.
   const pageIDWithoutHyphens = pageID.replaceAll('-', '');
-  const notionURL = `${config.notionBacklogDatabaseLink}&p=${pageIDWithoutHyphens}`;
+  const notionDatabaseLink = process.env.NOTION_BACKLOG_DATABASE_LINK;
+  const notionURL = `${notionDatabaseLink}&p=${pageIDWithoutHyphens}`;
 
   const content = 'Feature/change management request sent!';
 

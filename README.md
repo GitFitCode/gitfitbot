@@ -32,39 +32,7 @@ pnpm i
 
 ### Setting up .env
 
-- Create a file called `.env` at the root of your project.
-
-  <details>
-  <summary>Here are the required environment variables</summary>
-
-  - `DISCORD_BOT_TOKEN` - (Required) Token provided by Discord when creating the bot.
-  - `BOT_ID` - (Required) ID of the GFC Discord bot.
-  - `GFC_INTRO_SURVEY_LINK` - (Required) - URL of the GFC intro survey link.
-
-  - `ADMIN_1_DISCORD_ID` - (Required) ID of an admin of the GFC discord server.
-  - `ADMIN_2_DISCORD_ID` - (Required) - ID of another admin of the GFC discord server.
-
-  - `DISCORD_SERVER_ID` - (Required) - ID of the server where this bot is invited.
-  - `ADMIN_ROLE_ID` - (Required) - ID of the admin role in the server.
-  - `GENERAL_CHAT_CHANNEL_ID` - (Required) - ID of the general chat channel in the GFC discord server.
-  - `CHECKINS_VOICE_CHANNEL_ID` - (Required) - ID of the check-ins voice channel in the GFC discord server.
-  - `FIRST_RESPONDERS_ROLE_ID` - (Required) - ID of the role `@First-Responders`.
-  - `VIRTUAL_OFFICE_VOICE_CHANNEL_ID` - (Required) - ID of the virtual office voice channel in the GFC discord server.
-
-  - `NOTION_KEY` - (Required) Secret key of the GFC Notion integration.
-  - `NOTION_SUPPORT_TICKETS_DATABASE_ID` - (Required) ID of the GFC Notion database which will store all support tickets.
-  - `NOTION_SUPPORT_TICKETS_DATABASE_STATUS_ID` - (Required) - ID of the status property in the notion support tickets database.
-  - `NOTION_SUPPORT_TICKETS_DATABASE_LINK` - (Required) - URL of the notion support tickets database.
-  - `NOTION_RETRO_DATABASE_ID` - (Required) - ID of the retrospective notion database.
-  - `NOTION_BACKLOG_DATABASE_ID` - (Required) - ID of the backlog notion database.
-  - `NOTION_BACKLOG_DATABASE_LINK` - (Required) - URL of the notion backlog database.
-
-  - `SENTRY_DSN` - (Optional) - DSN of your nodejs project on [sentry.io](https://sentry.io/).
-
-  - `OPENAI_API_KEY` - (Optional) - API Key for accessing OpenAI functionality.
-
-  </details>
-
+- Create a `.env` file at the root of your project.
 - Populate fields in the `.env` file.
 
   - Sign up on [Keybase](https://keybase.io/)!

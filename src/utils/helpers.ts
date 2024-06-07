@@ -9,14 +9,12 @@ import {
   Client,
 } from 'discord.js';
 import dayjs from 'dayjs';
-import { config } from 'gfc-vault-config';
+import 'dotenv/config';
 import {
   COMMAND_EVENT,
-  DAILY_REMINDER_CRON_CONFIG,
+  EMPIRIC_DAILY_REMINDER_CRON_CONFIG,
   NOTION_PAGE_ID_DELIMITER,
   THREAD_START_MESSAGE_SLICE_INDEX,
-  DAILY_REMINDER_THREAD_ID,
-  EMPIRIC_ROLE_ID,
 } from './constants';
 import { GitFitCodeEventOptions } from './types';
 
@@ -159,11 +157,12 @@ export const getFormattedPrompt = (userProvidedPrompt: string) =>
 export const extractNotionPageIdFromTreadByChannel = async (
   clientChannel: any,
 ): Promise<string> => {
+  const botId = process.env.BOT_ID;
   const starterMessage = await clientChannel.fetchStarterMessage();
   // Message comes from a tread which was originally created by the gfc bot
   const isMessageInAThread = clientChannel?.isThread();
   const isAuthorAGFCBot =
-    starterMessage?.author?.id === config?.botId &&
+    starterMessage?.author?.id === botId &&
     starterMessage?.content?.includes(NOTION_PAGE_ID_DELIMITER);
   if (starterMessage && isMessageInAThread && isAuthorAGFCBot) {
     const notionPageID = String(starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX));
@@ -205,31 +204,36 @@ export class DailyReminderAtEmpiric {
 
   constructor(private client: Client) {
     this.standupJob = new CronJob(
-      DAILY_REMINDER_CRON_CONFIG.STANDUP_PATTERN, // cron pattern for standup
-      () => this.sendReminder(DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.STANDUP), // send standup reminder
+      EMPIRIC_DAILY_REMINDER_CRON_CONFIG.STANDUP_PATTERN, // cron pattern for standup
+      () => this.sendReminder(EMPIRIC_DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.STANDUP), // send standup reminder
       null, // onComplete
       false, // start
-      DAILY_REMINDER_CRON_CONFIG.TIMEZONE, // timezone
+      EMPIRIC_DAILY_REMINDER_CRON_CONFIG.TIMEZONE, // timezone
     );
 
     this.codePushJob = new CronJob(
-      DAILY_REMINDER_CRON_CONFIG.CODE_PUSH_PATTERN, // cron pattern for code push
-      () => this.sendReminder(DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.CODE_PUSH), // send code push reminder
+      EMPIRIC_DAILY_REMINDER_CRON_CONFIG.CODE_PUSH_PATTERN, // cron pattern for code push
+      () => this.sendReminder(EMPIRIC_DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.CODE_PUSH), // send code push reminder
       null, // onComplete
       false, // start
-      DAILY_REMINDER_CRON_CONFIG.TIMEZONE, // timezone
+      EMPIRIC_DAILY_REMINDER_CRON_CONFIG.TIMEZONE, // timezone
     );
   }
 
   private async sendReminder(type: string) {
-    const thread = (await this.client.channels.fetch(DAILY_REMINDER_THREAD_ID)) as ThreadChannel;
+    const empiricDailyReminderThreadId = process.env.EMPIRIC_DAILY_REMINDER_THREAD_ID ?? '';
+    const empiricRoleId = process.env.EMPIRIC_ROLE_ID ?? '';
+
+    const thread = (await this.client.channels.fetch(
+      empiricDailyReminderThreadId,
+    )) as ThreadChannel;
     let message = '';
 
     if (
-      type === DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.STANDUP ||
-      type === DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.CODE_PUSH
+      type === EMPIRIC_DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.STANDUP ||
+      type === EMPIRIC_DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.CODE_PUSH
     ) {
-      message = `<@&${EMPIRIC_ROLE_ID}> please provide your standup update and a reminder to push code if you haven't already.`;
+      message = `<@&${empiricRoleId}> please provide your standup update and a reminder to push code if you haven't already.`;
     }
 
     thread.send(message);

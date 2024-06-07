@@ -1,7 +1,6 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import { SlashCommand } from 'src/Command';
-import { config } from 'gfc-vault-config';
-import { delay } from '../utils';
+import 'dotenv/config';
 
 // A new instance of `Client`.
 const client = new Client({
@@ -21,5 +20,7 @@ client.on('ready', async () => {
   client.destroy();
 });
 
+const discordBotToken = process.env.DISCORD_BOT_TOKEN ?? '';
+
 // Call login on client for authenticating the bot with Discord.
-client.login(config.discordBotToken);
+client.login(discordBotToken);

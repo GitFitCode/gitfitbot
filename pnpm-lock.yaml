@@ -41,9 +41,9 @@ importers:
       discord.js:
         specifier: latest
         version: 14.15.3
-      gfc-vault-config:
-        specifier: github:GitFitCode/gfc-vault-config
-        version: https://codeload.github.com/GitFitCode/gfc-vault-config/tar.gz/f1baeb5c0053380ea5da0652a58321e24573921f
+      dotenv:
+        specifier: latest
+        version: 16.4.5
       langchain:
         specifier: 0.2.5
         version: 0.2.5(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.49.0(encoding@0.1.13))(ws@8.17.0)
@@ -1092,10 +1092,6 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  convict@6.2.4:
-    resolution: {integrity: sha512-qN60BAwdMVdofckX7AlohVJ2x9UvjTNoKVXCL2LxFk1l7757EJqf1nySdMkPQer0bt8kQ5lQiyZ9/2NvrFBuwQ==}
-    engines: {node: '>=6'}
-
   core-util-is@1.0.3:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
 
@@ -1129,9 +1125,6 @@ packages:
   crypto-random-string@4.0.0:
     resolution: {integrity: sha512-x8dy3RnvYdlUcPOjkEHqozhiwzKNSq7GcPuXFbnyMOCHxX8V3OgIg/pYuabl2sbUPfIJaeAQB7PMOK8DFIdoRA==}
     engines: {node: '>=12'}
-
-  csstype@3.0.10:
-    resolution: {integrity: sha512-2u44ZG2OcNUO9HDp/Jl8C07x6pU/eTR3ncV91SiK3dhG9TWvRVsCoJw14Ckx5DgWkzGA3waZWO3d7pgqpUI/XA==}
 
   dargs@8.1.0:
     resolution: {integrity: sha512-wAV9QHOsNbwnWdNW2FYvE1P56wtgSbM+3SZcdGiWQILwVjACCXDCI3Ai8QlCjMDB8YK5zySiXZYBiwGmNY3lnw==}
@@ -1588,9 +1581,6 @@ packages:
     resolution: {integrity: sha512-buewHzMvYL29jdeQTVILecSaZKnt/RJWjoZCF5OW60Z67/GmSLBkOFM7qh1PI3zFNtJbaZL5eQu1vLfazOwj4g==}
     engines: {node: '>=12.20.0'}
 
-  free-style@3.1.0:
-    resolution: {integrity: sha512-vJujYSIyT30iDoaoeigNAxX4yB1RUrh+N2ZMhIElMr3BvCuGXOw7XNJMEEJkDUeamK2Rnb/IKFGKRKlTWIGRWA==}
-
   fs-constants@1.0.0:
     resolution: {integrity: sha512-y6OAwoSIf7FyjMIv94u+b5rdheZEjzR63GTyZJm5qh4Bi+2YgwLCcI/fPFZkL5PSixOt6ZNKm+w+Hfp/Bciwow==}
 
@@ -1654,10 +1644,6 @@ packages:
   get-uri@6.0.3:
     resolution: {integrity: sha512-BzUrJBS9EcUb4cFol8r4W3v1cPsSyajLSthNkz5BxbpDcHN5tIrM10E2eNvfnvBn3DaT3DUgx0OpsBKkaOpanw==}
     engines: {node: '>= 14'}
-
-  gfc-vault-config@https://codeload.github.com/GitFitCode/gfc-vault-config/tar.gz/f1baeb5c0053380ea5da0652a58321e24573921f:
-    resolution: {tarball: https://codeload.github.com/GitFitCode/gfc-vault-config/tar.gz/f1baeb5c0053380ea5da0652a58321e24573921f}
-    version: 1.5.0
 
   git-raw-commits@4.0.0:
     resolution: {integrity: sha512-ICsMM1Wk8xSGMowkOmPrzo2Fgmfo4bMHLNX6ytHjajRJUqvHOw/TFapQ+QG75c3X/tTDDhOSRPGC52dDbNM8FQ==}
@@ -2411,9 +2397,6 @@ packages:
 
   lodash.capitalize@4.2.1:
     resolution: {integrity: sha512-kZzYOKspf8XVX5AvmQF94gQW0lejFVgb80G85bU4ZWzoJ6C03PQg3coYAUpSTpQWelrZELd3XWgHzw4Ck5kaIw==}
-
-  lodash.clonedeep@4.5.0:
-    resolution: {integrity: sha512-H5ZhCF25riFd9uB5UCkVKo61m3S/xZk1x4wA6yp/L3RFP6Z/eHH1ymQcGLo7J3GMPfm0V/7m1tryHuGVxpqEBQ==}
 
   lodash.escaperegexp@4.1.2:
     resolution: {integrity: sha512-TM9YBvyC84ZxE3rgfefxUWiQKLilstD6k7PTGt6wfbtXF8ixIJLOL3VYyV/z+ZiPLsVxAsKAFVwWlWeb2Y8Yyw==}
@@ -3461,9 +3444,6 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  typestyle@2.4.0:
-    resolution: {integrity: sha512-/d1BL6Qi+YlMLEydnUEB8KL/CAjAN8cyt3/UyGnOyBrWf7bLGcR/6yhmsaUstO2IcYwZfagjE7AIzuI2vUW9mg==}
-
   uglify-js@3.17.4:
     resolution: {integrity: sha512-T9q82TJI9e/C1TAxYvfb16xO120tMVFZrGA3f9/P4424DNu6ypK103y0GPFVa17yotwSyZW5iYXgjYHkGrJW/g==}
     engines: {node: '>=0.8.0'}
@@ -3663,10 +3643,6 @@ packages:
     resolution: {integrity: sha512-sntgmxj8o7DE7g/Qi60cqpLBA3HG3STcDA0kO+WfB05jEKhZMbY7umNm2rBpQvsmZ16/lPXCJGW2672dgOUkrg==}
     engines: {node: '>= 14'}
     hasBin: true
-
-  yargs-parser@20.2.9:
-    resolution: {integrity: sha512-y11nGElTIV+CT3Zv9t7VKl+Q3hTQoT9a1Qzezhhl6Rp21gJ/IVTW7Z3y9EWXhuUBC2Shnf+DX0antecpAwSP8w==}
-    engines: {node: '>=10'}
 
   yargs-parser@21.1.1:
     resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
@@ -4913,11 +4889,6 @@ snapshots:
       git-semver-tags: 7.0.1
       meow: 12.1.1
 
-  convict@6.2.4:
-    dependencies:
-      lodash.clonedeep: 4.5.0
-      yargs-parser: 20.2.9
-
   core-util-is@1.0.3: {}
 
   cosmiconfig-typescript-loader@5.0.0(@types/node@20.14.2)(cosmiconfig@9.0.0(typescript@5.4.5))(typescript@5.4.5):
@@ -4952,8 +4923,6 @@ snapshots:
   crypto-random-string@4.0.0:
     dependencies:
       type-fest: 1.4.0
-
-  csstype@3.0.10: {}
 
   dargs@8.1.0: {}
 
@@ -5514,8 +5483,6 @@ snapshots:
     dependencies:
       fetch-blob: 3.2.0
 
-  free-style@3.1.0: {}
-
   fs-constants@1.0.0:
     optional: true
 
@@ -5586,12 +5553,6 @@ snapshots:
       fs-extra: 11.2.0
     transitivePeerDependencies:
       - supports-color
-
-  gfc-vault-config@https://codeload.github.com/GitFitCode/gfc-vault-config/tar.gz/f1baeb5c0053380ea5da0652a58321e24573921f:
-    dependencies:
-      convict: 6.2.4
-      dotenv: 16.4.5
-      typestyle: 2.4.0
 
   git-raw-commits@4.0.0:
     dependencies:
@@ -6225,8 +6186,6 @@ snapshots:
   lodash.camelcase@4.3.0: {}
 
   lodash.capitalize@4.2.1: {}
-
-  lodash.clonedeep@4.5.0: {}
 
   lodash.escaperegexp@4.1.2: {}
 
@@ -7436,11 +7395,6 @@ snapshots:
 
   typescript@5.4.5: {}
 
-  typestyle@2.4.0:
-    dependencies:
-      csstype: 3.0.10
-      free-style: 3.1.0
-
   uglify-js@3.17.4:
     optional: true
 
@@ -7633,8 +7587,6 @@ snapshots:
     optional: true
 
   yaml@2.4.3: {}
-
-  yargs-parser@20.2.9: {}
 
   yargs-parser@21.1.1: {}
 

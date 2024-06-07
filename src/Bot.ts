@@ -2,8 +2,8 @@
  * Entrypoint for the bot.
  */
 
+import 'dotenv/config';
 import { Client, GatewayIntentBits } from 'discord.js';
-import { config } from 'gfc-vault-config';
 import guildMemberAdd from './listeners/guildMemberAdd';
 import interactionCreate from './listeners/interactionCreate';
 import messageCreate from './listeners/messageCreate';
@@ -49,7 +49,7 @@ function start() {
   ready(client);
 
   // Call login on client for authenticating the bot with Discord.
-  client.login(config.discordBotToken);
+  client.login(process.env.DISCORD_BOT_TOKEN);
 }
 
 /**
