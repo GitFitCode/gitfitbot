@@ -1,11 +1,18 @@
 /* eslint-disable operator-linebreak */
 /* eslint-disable implicit-arrow-linebreak */
 
-import { ApplicationCommandOptionType, ApplicationCommandOptionChoiceData } from 'discord.js';
+import { CronJob } from 'cron';
+import {
+  ApplicationCommandOptionType,
+  ApplicationCommandOptionChoiceData,
+  ThreadChannel,
+  Client,
+} from 'discord.js';
 import dayjs from 'dayjs';
 import { config } from 'gfc-vault-config';
 import {
   COMMAND_EVENT,
+  CRON_STANDUP_CONFIG,
   NOTION_PAGE_ID_DELIMITER,
   THREAD_START_MESSAGE_SLICE_INDEX,
 } from './constants';
@@ -187,4 +194,43 @@ export function addHoursToDate(date: Date, hours: number): Date {
 export function delay(ms: number) {
   // eslint-disable-next-line no-promise-executor-return
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export class DailyStandupReminder {
+  private static instance: DailyStandupReminder;
+  private job: CronJob;
+
+  constructor(private client: Client) {
+    this.job = new CronJob(
+      CRON_STANDUP_CONFIG.PATTERN, // cron pattern
+      this.sendReminder.bind(this), // send reminder
+      null, // onComplete
+      false, // start
+      CRON_STANDUP_CONFIG.TIMEZONE, // timezone
+    );
+  }
+
+  private async sendReminder() {
+    // Asynchronous Daily Stand-up thread in empiric forums
+    const threadId = '1243253384559984683';
+    const thread = (await this.client.channels.fetch(threadId)) as ThreadChannel;
+
+    // The message mentions the @empiric role
+    thread.send('<@&1240520108116541450> please provide your standup update');
+  }
+
+  public static getInstance(client: Client): DailyStandupReminder {
+    if (!DailyStandupReminder.instance) {
+      DailyStandupReminder.instance = new DailyStandupReminder(client);
+    }
+    return DailyStandupReminder.instance;
+  }
+
+  public start() {
+    this.job.start();
+  }
+
+  public stop() {
+    this.job.stop();
+  }
 }

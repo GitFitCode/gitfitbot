@@ -3,7 +3,7 @@
  */
 
 import { ActivityType, Client } from 'discord.js';
-import { AUTOBOT, GITFITBOT } from '../utils';
+import { AUTOBOT, DailyStandupReminder, GITFITBOT } from '../utils';
 import Commands from '../Commands';
 
 export default (client: Client): void => {
@@ -17,6 +17,10 @@ export default (client: Client): void => {
       client.user.setActivity('"Do Androids Dream of ⚡🐑?" audio book', {
         type: ActivityType.Listening,
       });
+
+      // Start the daily standup reminder.
+      const standupReminder = DailyStandupReminder.getInstance(client);
+      standupReminder.start();
     }
 
     // Set status (i.e. activity) of the "autobot" bot.

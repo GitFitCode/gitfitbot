@@ -33,6 +33,10 @@ export const OPEN_AI_CONFIG = {
   STOP: ['GFC Community Member:'],
 };
 export const DISCORD_MESSAGE_MAX_CHAR_LIMIT = 2000;
+export const CRON_STANDUP_CONFIG = {
+  PATTERN: '0 5 * * 1-5', // At 05:00 on every day-of-week from Monday through Friday.
+  TIMEZONE: 'America/Los_Angeles',
+};
 
 // Events command constants
 export const COMMAND_EVENT = {
