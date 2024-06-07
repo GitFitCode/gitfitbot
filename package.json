@@ -25,6 +25,7 @@
     "@notionhq/client": "latest",
     "@types/pouchdb-node": "latest",
     "app-root-path": "latest",
+    "cron": "latest",
     "dayjs": "latest",
     "discord-api-types": "latest",
     "discord-tictactoe": "latest",
