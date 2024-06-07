@@ -1,6 +1,6 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { config } from 'gfc-vault-config';
+import 'dotenv/config';
 import {
   GENERAL_GFC_SYSTEM_PROMPT,
   OPEN_AI_CONFIG,
@@ -18,7 +18,7 @@ export async function getChatOpenAIPromptResponse(prompt: string): Promise<strin
     modelName: OPEN_AI_CONFIG.MODEL,
     temperature: OPEN_AI_CONFIG.TEMPERATURE,
     stop: OPEN_AI_CONFIG.STOP,
-    openAIApiKey: config.openAIApiKey,
+    openAIApiKey: process.env.OPENAI_API_KEY,
   });
 
   const response = await chatModel.invoke([

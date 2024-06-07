@@ -1,6 +1,9 @@
 import { Client, GatewayIntentBits } from 'discord.js';
-import { config } from 'gfc-vault-config';
-import { delay } from '../utils';
+import 'dotenv/config';
+
+const discordBotToken = process.env.DISCORD_BOT_TOKEN ?? '';
+const discordServerID = process.env.DISCORD_SERVER_ID ?? '';
+const botId = process.env.BOT_ID;
 
 // A new instance of `Client`.
 const client = new Client({
@@ -13,11 +16,11 @@ client.on('ready', async () => {
     return;
   }
 
-  const guild = await client.guilds.fetch(config.discordServerID);
+  const guild = await client.guilds.fetch(discordServerID);
 
   const discordEventManager = guild.scheduledEvents;
   const scheduledEvents = await discordEventManager.fetch();
-  const scheduledEventsByBot = scheduledEvents.filter((event) => event.creatorId === config.botId);
+  const scheduledEventsByBot = scheduledEvents.filter((event) => event.creatorId === botId);
 
   if (scheduledEventsByBot.size > 0) scheduledEventsByBot.forEach(async (event) => event.delete());
 
@@ -26,4 +29,4 @@ client.on('ready', async () => {
 });
 
 // Call login on client for authenticating the bot with Discord.
-client.login(config.discordBotToken);
+client.login(discordBotToken);

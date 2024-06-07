@@ -17,7 +17,7 @@ import {
   ButtonStyle,
   ChannelType,
 } from 'discord.js';
-import { config } from 'gfc-vault-config';
+import 'dotenv/config';
 import {
   CHECK_MARK_EMOJI,
   COMMAND_SUPPORT,
@@ -56,8 +56,9 @@ async function handleThreadCreation(issueText: string, interaction: CommandInter
 
   // Notion link uses pageID without hyphens.
   const pageIDWithoutHyphens = pageID.replaceAll('-', '');
-  const notionURL = `${config.notionSupportTicketsDatabaseLink}&p=${pageIDWithoutHyphens}`;
-
+  const notionSupportTicketsDatabaseLink = process.env.NOTION_SUPPORT_TICKETS_DATABASE_LINK;
+  const notionURL = `${notionSupportTicketsDatabaseLink}&p=${pageIDWithoutHyphens}`;
+  const firstRespondersRoleId = process.env.FIRST_RESPONDERS_ROLE_ID;
   const content = `${THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1}\`${issueText}\`${THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2}${NOTION_PAGE_ID_DELIMITER}${pageID}`;
   const message = await interaction.followUp({
     ephemeral: true,
@@ -99,7 +100,7 @@ async function handleThreadCreation(issueText: string, interaction: CommandInter
     
   If you are satisfied with the answer, please close the thread by using the \`/support close\` command.
 
-  We have also notified <@&${config.firstRespondersRoleId}> that you need help ${author}.
+  We have also notified <@&${firstRespondersRoleId}> that you need help ${author}.
   `);
 
   await updateNotionSupportTicketsDBEntry(
@@ -124,11 +125,12 @@ async function handleThreadClosing(
   interaction: CommandInteraction<CacheType>,
   channel: AnyThreadChannel,
 ) {
+  const botId = process.env.BOT_ID;
   const starterMessage = await channel.fetchStarterMessage();
 
   // Check if the thread was created by the bot and contains NOTION_PAGE_ID_DELIMITER.
   if (
-    starterMessage?.author.id === config.botId &&
+    starterMessage?.author.id === botId &&
     starterMessage?.content.includes(NOTION_PAGE_ID_DELIMITER)
   ) {
     // THREAD WAS CREATED BY THE BOT

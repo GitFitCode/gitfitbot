@@ -21,7 +21,7 @@ import {
 } from 'discord.js';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import { config } from 'gfc-vault-config';
+import 'dotenv/config';
 import { SlashCommand } from '../Command';
 import { buildEventOptions, COMMAND_EVENT } from '../utils';
 
@@ -171,7 +171,7 @@ async function handleRetroEvent(_client: Client, interaction: CommandInteraction
   const eventName = 'GitFitCode Retrospective';
   const eventDescription =
     "Let's reflect on your last week's EBIs & WWWs and create some tangible action items!";
-  const eventChannelID = config.checkinsVoiceChannelId;
+  const eventChannelID = process.env.CHECKINS_VOICE_CHANNEL_ID ?? '';
 
   await handleEventCreation(interaction, eventName, eventDescription, eventChannelID);
 }
@@ -183,7 +183,7 @@ async function handleRetroEvent(_client: Client, interaction: CommandInteraction
 async function handleCodewarsEvent(_client: Client, interaction: CommandInteraction) {
   const eventName = 'GitFitCode Codewars';
   const eventDescription = "Let's solve some katas on https://www.codewars.com !";
-  const eventChannelID = config.virtualOfficeVoiceChannelId;
+  const eventChannelID = process.env.VIRTUAL_OFFICE_VOICE_CHANNEL_ID ?? '';
 
   await handleEventCreation(interaction, eventName, eventDescription, eventChannelID);
 }
@@ -217,7 +217,8 @@ async function handleCustomEvent(_client: Client, interaction: CommandInteractio
  */
 async function handleClearEvent(interaction: CommandInteraction) {
   const roles = interaction.member?.roles.valueOf() as Collection<string, Role>;
-  const foundAdminRole = roles.find((role) => role.id === config.adminRoleID);
+  const adminRoleID = process.env.ADMIN_ROLE_ID;
+  const foundAdminRole = roles.find((role) => role.id === adminRoleID);
 
   if (foundAdminRole) {
     const eventManager = interaction.guild?.scheduledEvents;

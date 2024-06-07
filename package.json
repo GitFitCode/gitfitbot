@@ -30,7 +30,7 @@
     "discord-api-types": "latest",
     "discord-tictactoe": "latest",
     "discord.js": "latest",
-    "gfc-vault-config": "github:GitFitCode/gfc-vault-config",
+    "dotenv": "latest",
     "langchain": "0.2.5",
     "newrelic": "latest",
     "pouchdb-node": "latest",

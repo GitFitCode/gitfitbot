@@ -1,4 +1,4 @@
-import { config } from 'gfc-vault-config';
+import 'dotenv/config';
 import { Client } from '@notionhq/client';
 import {
   COMMAND_FEATURE_CHANGE_MANAGEMENT,
@@ -8,8 +8,10 @@ import {
 } from './constants';
 import { NotionBacklogBDEntry } from './types';
 
-const notion = new Client({ auth: config.notionKey });
-const databaseId = config.notionSupportTicketsDatabaseId;
+const notion = new Client({ auth: process.env.NOTION_KEY });
+const supportTicketsDatabaseID = process.env.NOTION_SUPPORT_TICKETS_DATABASE_ID ?? '';
+const supportTicketsDatabaseStatusID = process.env.NOTION_SUPPORT_TICKETS_DATABASE_STATUS_ID ?? '';
+const backlogDatabaseID = process.env.NOTION_BACKLOG_DATABASE_ID ?? '';
 
 type NotionParagraph = {
   paragraph: { rich_text: { text: { content: string }; annotations?: { code: boolean } }[] };
@@ -73,7 +75,7 @@ export async function updateNotionSupportTicketsDBEntry(
     // Retrieve the value of "Status" property of the support ticket.
     const response: any = await notion.pages.properties.retrieve({
       page_id: notionPageID,
-      property_id: config.notionSupportTicketsDatabaseStatusId,
+      property_id: supportTicketsDatabaseStatusID,
     });
     const status: string = response.status.name;
 
@@ -122,7 +124,7 @@ export async function createNotionSupportTicketsDBEntry(
   try {
     // Create a new page in notion.
     const response = await notion.pages.create({
-      parent: { database_id: databaseId },
+      parent: { database_id: supportTicketsDatabaseID },
       properties: {
         title: {
           title: [
@@ -189,7 +191,7 @@ export async function createNotionBacklogDBEntry(
 ): Promise<string> {
   try {
     let data: NotionBacklogBDEntry = {
-      parent: { database_id: config.notionBacklogDatabaseId },
+      parent: { database_id: backlogDatabaseID },
       properties: {
         title: {
           title: [

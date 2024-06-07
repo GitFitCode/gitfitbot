@@ -5,7 +5,7 @@
  */
 
 import { CommandInteraction, Client, ChannelType } from 'discord.js';
-import { config } from 'gfc-vault-config';
+import 'dotenv/config';
 import {
   COMMAND_NEXT_SPEAKER,
   fetchAllAttendees,
@@ -30,9 +30,10 @@ function getRandomAttendee(attendees: (string | undefined)[]) {
 }
 
 async function executeRun(interaction: CommandInteraction) {
+  const checkinsVoiceChannelId = process.env.CHECKINS_VOICE_CHANNEL_ID;
   // Get the Check-Ins Channel instance.
   const voiceChannel = interaction.guild?.channels.cache.find(
-    (channel) => channel.id === config.checkinsVoiceChannelId,
+    (channel) => channel.id === checkinsVoiceChannelId,
   );
   if (voiceChannel?.type !== ChannelType.GuildVoice) return;
 
