@@ -3,7 +3,7 @@
  */
 
 import { ActivityType, Client } from 'discord.js';
-import { AUTOBOT, DailyStandupReminder, GITFITBOT } from '../utils';
+import { AUTOBOT, DailyReminderAtEmpiric, GITFITBOT } from '../utils';
 import Commands from '../Commands';
 
 export default (client: Client): void => {
@@ -18,9 +18,9 @@ export default (client: Client): void => {
         type: ActivityType.Listening,
       });
 
-      // Start the daily standup reminder.
-      const standupReminder = DailyStandupReminder.getInstance(client);
-      standupReminder.start();
+      // Start the daily reminders.
+      const dailyReminder = DailyReminderAtEmpiric.getInstance(client);
+      dailyReminder.start();
     }
 
     // Set status (i.e. activity) of the "autobot" bot.

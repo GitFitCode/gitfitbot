@@ -12,9 +12,11 @@ import dayjs from 'dayjs';
 import { config } from 'gfc-vault-config';
 import {
   COMMAND_EVENT,
-  CRON_STANDUP_CONFIG,
+  DAILY_REMINDER_CRON_CONFIG,
   NOTION_PAGE_ID_DELIMITER,
   THREAD_START_MESSAGE_SLICE_INDEX,
+  DAILY_REMINDER_THREAD_ID,
+  EMPIRIC_ROLE_ID,
 } from './constants';
 import { GitFitCodeEventOptions } from './types';
 
@@ -196,41 +198,57 @@ export function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export class DailyStandupReminder {
-  private static instance: DailyStandupReminder;
-  private job: CronJob;
+export class DailyReminderAtEmpiric {
+  private static instance: DailyReminderAtEmpiric;
+  private standupJob: CronJob;
+  private codePushJob: CronJob;
 
   constructor(private client: Client) {
-    this.job = new CronJob(
-      CRON_STANDUP_CONFIG.PATTERN, // cron pattern
-      this.sendReminder.bind(this), // send reminder
+    this.standupJob = new CronJob(
+      DAILY_REMINDER_CRON_CONFIG.STANDUP_PATTERN, // cron pattern for standup
+      () => this.sendReminder(DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.STANDUP), // send standup reminder
       null, // onComplete
       false, // start
-      CRON_STANDUP_CONFIG.TIMEZONE, // timezone
+      DAILY_REMINDER_CRON_CONFIG.TIMEZONE, // timezone
+    );
+
+    this.codePushJob = new CronJob(
+      DAILY_REMINDER_CRON_CONFIG.CODE_PUSH_PATTERN, // cron pattern for code push
+      () => this.sendReminder(DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.CODE_PUSH), // send code push reminder
+      null, // onComplete
+      false, // start
+      DAILY_REMINDER_CRON_CONFIG.TIMEZONE, // timezone
     );
   }
 
-  private async sendReminder() {
-    // Asynchronous Daily Stand-up thread in empiric forums
-    const threadId = '1243253384559984683';
-    const thread = (await this.client.channels.fetch(threadId)) as ThreadChannel;
+  private async sendReminder(type: string) {
+    const thread = (await this.client.channels.fetch(DAILY_REMINDER_THREAD_ID)) as ThreadChannel;
+    let message = '';
 
-    // The message mentions the @empiric role
-    thread.send('<@&1240520108116541450> please provide your standup update');
+    if (
+      type === DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.STANDUP ||
+      type === DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.CODE_PUSH
+    ) {
+      message = `<@&${EMPIRIC_ROLE_ID}> please provide your standup update and a reminder to push code if you haven't already.`;
+    }
+
+    thread.send(message);
   }
 
-  public static getInstance(client: Client): DailyStandupReminder {
-    if (!DailyStandupReminder.instance) {
-      DailyStandupReminder.instance = new DailyStandupReminder(client);
+  public static getInstance(client: Client): DailyReminderAtEmpiric {
+    if (!DailyReminderAtEmpiric.instance) {
+      DailyReminderAtEmpiric.instance = new DailyReminderAtEmpiric(client);
     }
-    return DailyStandupReminder.instance;
+    return DailyReminderAtEmpiric.instance;
   }
 
   public start() {
-    this.job.start();
+    this.standupJob.start();
+    this.codePushJob.start();
   }
 
   public stop() {
-    this.job.stop();
+    this.standupJob.stop();
+    this.codePushJob.stop();
   }
 }
