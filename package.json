@@ -3,6 +3,7 @@
   "version": "1.15.0",
   "description": "Discord bot for GitFitCode needs, written in TypeScript.",
   "scripts": {
+    "archive-channels": "pnpm build && node ./dist/src/scripts/archiveChannels.js",
     "build": "pnpm i && tsc -p tsconfig.production.json",
     "clear-commands": "pnpm build && node ./dist/src/scripts/clearRegisteredCommands.js",
     "clear-events": "pnpm build && node ./dist/src/scripts/clearScheduledEvents.js",
