@@ -42,7 +42,7 @@ import { SlashCommand } from '../Command';
  * @param issueText Text entered by the user.
  * @param interaction CommandInteraction
  */
-async function handleThreadCreation(issueText: string, interaction: CommandInteraction) {
+async function handleDiscordThreadCreation(issueText: string, interaction: CommandInteraction) {
   const author = interaction.user;
   const authorUsername = interaction.user.username;
   const channelID = interaction.channel?.id ?? '';
@@ -80,16 +80,16 @@ async function handleThreadCreation(issueText: string, interaction: CommandInter
   });
 
   // Create a thread from the reply sent by the bot.
-  const thread = await message.startThread({
+  const discordThread = await message.startThread({
     name: String(issueText.substring(0, 50)),
     autoArchiveDuration: 60,
     reason: 'Support Ticket',
   });
 
   // We need to send the qtn to the thread so we can pick it up for chatGTP to respond.
-  thread.send(`${OPEN_AI_QUESTION_IDENTIFIER}: ${issueText}`);
+  discordThread.send(`${OPEN_AI_QUESTION_IDENTIFIER}: ${issueText}`);
   // Send a message in the newly created thread.
-  thread.send(`
+  discordThread.send(`
     If you check out the Notion link above, you can see that your question has been initially answered by our bot.
   If you have any follow up questions, please ask them by using \`#question\` in the thread.
 
@@ -107,6 +107,10 @@ async function handleThreadCreation(issueText: string, interaction: CommandInter
     pageID,
     [
       {
+        message: `Discord Thread Url: ${discordThread.url}`,
+        author: authorUsername,
+      },
+      {
         message: `${OPEN_AI_QUESTION_IDENTIFIER}: ${issueText}`,
         author: authorUsername,
       },
@@ -121,7 +125,7 @@ async function handleThreadCreation(issueText: string, interaction: CommandInter
  * @param interaction CommandInteraction
  * @param channel AnyThreadChannel
  */
-async function handleThreadClosing(
+async function handleDiscordThreadClosing(
   interaction: CommandInteraction<CacheType>,
   channel: AnyThreadChannel,
 ) {
@@ -188,7 +192,7 @@ async function executeRun(interaction: CommandInteraction) {
     // COMMAND INVOKED FOR CLOSING A THREAD
 
     // Close/archive the thread i.e. the support ticket.
-    await handleThreadClosing(interaction, channel);
+    await handleDiscordThreadClosing(interaction, channel);
   } else if (isThread && commandInput.startsWith(COMMAND_SUPPORT.OPTION_CREATE)) {
     // COMMAND INVOKED FOR CREATING A SUPPORT TICKET IN A THREAD
 
@@ -218,7 +222,7 @@ async function executeRun(interaction: CommandInteraction) {
     const { value: issueText } = interaction.options.get(COMMAND_SUPPORT.OPTION_ISSUE, true);
 
     // Create a thread to handle the support ticket request.
-    await handleThreadCreation(String(issueText), interaction);
+    await handleDiscordThreadCreation(String(issueText), interaction);
   }
 }
 
