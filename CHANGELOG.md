@@ -1,5 +1,21 @@
 
 
+# [1.18.0](https://github.com/GitFitCode/gitfitbot/compare/v1.17.0...v1.18.0) (2024-06-13)
+
+
+### Bug Fixes
+
+* daily reminders uncoupled from specific bots ([09003a4](https://github.com/GitFitCode/gitfitbot/commit/09003a4f324940e4aa7293c6da86f7e76b1bd631))
+* **support:** duplicate text dump in notion on /support close ([33c2bdb](https://github.com/GitFitCode/gitfitbot/commit/33c2bdb570226e4a5e73bdb7be8f75b3f69dc14f))
+
+
+### Features
+
+* daily code push reminders ([070810e](https://github.com/GitFitCode/gitfitbot/commit/070810edf89547e61996e1756253d92c633d8089))
+* daily standup reminders ([d55c42c](https://github.com/GitFitCode/gitfitbot/commit/d55c42c6c69edba11dede08bce60af79a943aaa6))
+* include discord thread link in notion page when creating a support ticket ([9b56a9a](https://github.com/GitFitCode/gitfitbot/commit/9b56a9a87129d6f6383c85ecaa972ceb43c55b42))
+* **support:** add discord thread link to notion page ([4e49231](https://github.com/GitFitCode/gitfitbot/commit/4e49231efd6a03d05766a020e8e641b4cf477183))
+
 # [1.17.0](https://github.com/GitFitCode/gitfitbot/compare/v1.16.0...v1.17.0) (2024-06-05)
 
 
