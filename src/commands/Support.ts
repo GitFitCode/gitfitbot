@@ -143,22 +143,11 @@ async function handleDiscordThreadClosing(
     // Any replies have to be sent BEFORE closing/archiving a thread.
     await interaction.followUp({ ephemeral: true, content: THREAD_CLOSING_MESSAGE });
 
-    // Get all messages in the thread. Caveats:
-    // 1. Does not fetch emojis automatically if they have not already been cached.
-    // 2. Does not fetch attachments automatically.
-    const messagesInThread = await channel.messages.fetch();
-
-    // Grab `cleanContent`, which is the formatted content, and the message author's username.
-    const data = messagesInThread.map((message) => ({
-      message: message.cleanContent,
-      author: message.author.username,
-    }));
-
     // Update the status of the entry in the notion database.
     const notionPageID = String(starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX));
 
     // messages are ordered newest -> oldest
-    await updateNotionSupportTicketsDBEntry(notionPageID, data.reverse(), true);
+    await updateNotionSupportTicketsDBEntry(notionPageID, [], true);
 
     await interaction.editReply(THREAD_CLOSING_SUCCESSFUL_MESSAGE);
 
