@@ -237,6 +237,7 @@ export async function createNotionBacklogDBEntry(
     };
 
     if (type) {
+      // Find the option name based on the type.
       const option = COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TYPE_CHOICES.find(
         (option) => option.value === type,
       );
@@ -258,5 +259,24 @@ export async function createNotionBacklogDBEntry(
     // https://github.com/makenotion/notion-sdk-js#handling-errors
     console.error(error);
     return '';
+  }
+}
+
+export async function addDiscordThreadLinkToNotionPage(
+  notionPageID: string,
+  discordThreadLink: string,
+): Promise<void> {
+  try {
+    await notion.pages.update({
+      page_id: notionPageID,
+      properties: {
+        'Discord Thread Link': {
+          url: discordThreadLink,
+        },
+      },
+    });
+  } catch (error: any) {
+    // https://github.com/makenotion/notion-sdk-js#handling-errors
+    console.error(error);
   }
 }

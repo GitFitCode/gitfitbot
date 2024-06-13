@@ -34,6 +34,7 @@ import {
   updateNotionSupportTicketsDBEntry,
   NOT_THE_BOT_THREAD_FOR_CLOSING_ERROR_MESSAGE,
   THREAD_CLOSING_MESSAGE,
+  addDiscordThreadLinkToNotionPage,
 } from '../utils';
 import { SlashCommand } from '../Command';
 
@@ -145,9 +146,10 @@ async function handleDiscordThreadClosing(
 
     // Update the status of the entry in the notion database.
     const notionPageID = String(starterMessage?.content.slice(THREAD_START_MESSAGE_SLICE_INDEX));
-
-    // messages are ordered newest -> oldest
     await updateNotionSupportTicketsDBEntry(notionPageID, [], true);
+
+    // Add discord thread url to the notion page.
+    await addDiscordThreadLinkToNotionPage(notionPageID, channel.url);
 
     await interaction.editReply(THREAD_CLOSING_SUCCESSFUL_MESSAGE);
 
