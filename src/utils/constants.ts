@@ -21,6 +21,8 @@ export const NOTION_PAGE_ID_LENGTH = 36;
 export const THREAD_START_MESSAGE_SLICE_INDEX = -NOTION_PAGE_ID_LENGTH;
 export const NOTION_STATUS_DONE = 'Done';
 export const NOTION_STATUS_OPEN = 'Open';
+export const NOTION_STATUS_TO_DO = 'To Do';
+export const NOTION_PRIORITY_MEDIUM = 'Medium';
 export const RETRO_FINISHED_MESSAGE =
   "We're done here! All attendees have provided their update. See you next week!";
 export const RETRO_NEXT_SPEAKER_MESSAGE = "you're next! Please provide your update.";

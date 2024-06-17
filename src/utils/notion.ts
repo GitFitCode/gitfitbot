@@ -3,8 +3,10 @@ import { Client } from '@notionhq/client';
 import {
   COMMAND_FEATURE_CHANGE_MANAGEMENT,
   NOTION_MAX_CHAR_LIMIT_IN_RICH_TEXT_BLOCK,
+  NOTION_PRIORITY_MEDIUM,
   NOTION_STATUS_DONE,
   NOTION_STATUS_OPEN,
+  NOTION_STATUS_TO_DO,
 } from './constants';
 import { NotionBacklogBDEntry } from './types';
 
@@ -228,7 +230,12 @@ export async function createNotionBacklogDBEntry(
         },
         Priority: {
           select: {
-            name: priorityOption?.name || 'Medium',
+            name: priorityOption?.name || NOTION_PRIORITY_MEDIUM,
+          },
+        },
+        Status: {
+          select: {
+            name: NOTION_STATUS_TO_DO,
           },
         },
       },
