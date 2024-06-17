@@ -95,7 +95,7 @@ const ChangeManagement: SlashCommand = {
       name: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TYPE,
       description: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TYPE_DESCRIPTION,
       type: ApplicationCommandOptionType.String,
-      required: false,
+      required: true,
       choices: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TYPE_CHOICES,
     },
   ],

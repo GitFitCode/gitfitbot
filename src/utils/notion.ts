@@ -179,7 +179,7 @@ export async function createNotionSupportTicketsDBEntry(
  * @param authorUsername - The Discord username of the user who generated this message.
  * @param category - The category where the change management is to be applied.
  * @param description - A detailed description of the change management.
- * @param type - A ticket type of the change management. Optional parameter.
+ * @param taskType - A task type of the change management.
  * @returns {Promise<string>} - The ID of the created Notion page, or an empty string if an error occurs.
  */
 export async function createNotionBacklogDBEntry(
@@ -187,7 +187,7 @@ export async function createNotionBacklogDBEntry(
   authorUsername: string,
   category: string,
   description: string,
-  type?: string | undefined,
+  taskType: string | undefined,
 ): Promise<string> {
   try {
     let data: NotionBacklogBDEntry = {
@@ -236,10 +236,11 @@ export async function createNotionBacklogDBEntry(
       ],
     };
 
-    if (type) {
+    //When None is selected, we ignore the task type property when creating the notion page:
+    if (taskType && taskType !== 'none') {
       // Find the option name based on the type.
       const option = COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TYPE_CHOICES.find(
-        (option) => option.value === type,
+        (option) => option.value === taskType,
       );
 
       if (option) {
