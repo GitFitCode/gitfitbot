@@ -184,6 +184,23 @@ export const COMMAND_FEATURE_CHANGE_MANAGEMENT = {
       value: 'none',
     },
   ],
+
+  OPTION_PRIORITY: 'priority',
+  OPTION_PRIORITY_DESCRIPTION: 'Priority level of the feature/change management request',
+  OPTION_PRIORITY_CHOICES: [
+    {
+      name: 'High 🔥',
+      value: 'high',
+    },
+    {
+      name: 'Medium',
+      value: 'medium',
+    },
+    {
+      name: 'Low',
+      value: 'low',
+    },
+  ],
 };
 
 // Support command constants

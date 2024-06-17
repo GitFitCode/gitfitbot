@@ -188,7 +188,13 @@ export async function createNotionBacklogDBEntry(
   category: string,
   description: string,
   taskType: string | undefined,
+  priorityType: string | undefined,
 ): Promise<string> {
+  // Perform reverse lookup to get the priority name
+  const priorityOption = COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_PRIORITY_CHOICES.find(
+    (priorityOption) => priorityOption.value === priorityType,
+  );
+
   try {
     let data: NotionBacklogBDEntry = {
       parent: { database_id: backlogDatabaseID },
@@ -220,6 +226,11 @@ export async function createNotionBacklogDBEntry(
             },
           ],
         },
+        Priority: {
+          select: {
+            name: priorityOption?.name || 'Medium',
+          },
+        },
       },
       children: [
         {
@@ -237,7 +248,7 @@ export async function createNotionBacklogDBEntry(
     };
 
     //When None is selected, we ignore the task type property when creating the notion page:
-    if (taskType && taskType !== 'none') {
+    if (taskType !== 'none') {
       // Find the option name based on the type.
       const option = COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TYPE_CHOICES.find(
         (option) => option.value === taskType,
