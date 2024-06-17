@@ -179,6 +179,10 @@ export const COMMAND_FEATURE_CHANGE_MANAGEMENT = {
       name: 'Documentation',
       value: 'documentation',
     },
+    {
+      name: 'None',
+      value: 'none',
+    },
   ],
 };
 
