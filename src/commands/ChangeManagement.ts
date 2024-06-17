@@ -32,9 +32,14 @@ async function executeRun(interaction: CommandInteraction) {
   );
   const taskType = interaction.options.get(
     COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TASK_TYPE,
-    false,
+    true,
   );
   const authorUsername = interaction.user.username;
+
+  const priorityType = interaction.options.get(
+    COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_PRIORITY,
+    true,
+  );
 
   // Create an entry in the notion database and grab the page id.
   const pageID: string = await createNotionBacklogDBEntry(
@@ -43,6 +48,7 @@ async function executeRun(interaction: CommandInteraction) {
     String(category),
     String(description),
     taskType ? String(taskType.value) : undefined,
+    priorityType ? String(priorityType.value) : undefined,
   );
 
   // Notion link uses pageID without hyphens.
@@ -100,6 +106,13 @@ const ChangeManagement: SlashCommand = {
       type: ApplicationCommandOptionType.String,
       required: true,
       choices: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TYPE_CHOICES,
+    },
+    {
+      name: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_PRIORITY,
+      description: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_PRIORITY_DESCRIPTION,
+      type: ApplicationCommandOptionType.String,
+      required: true,
+      choices: COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_PRIORITY_CHOICES,
     },
   ],
   run: async (_client: Client, interaction: CommandInteraction) => {
