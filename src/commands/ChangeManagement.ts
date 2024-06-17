@@ -47,8 +47,8 @@ async function executeRun(interaction: CommandInteraction) {
     authorUsername,
     String(category),
     String(description),
-    taskType ? String(taskType.value) : undefined,
-    priorityType ? String(priorityType.value) : undefined,
+    String(taskType),
+    String(priorityType),
   );
 
   // Notion link uses pageID without hyphens.

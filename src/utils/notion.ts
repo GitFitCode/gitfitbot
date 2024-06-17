@@ -187,8 +187,8 @@ export async function createNotionBacklogDBEntry(
   authorUsername: string,
   category: string,
   description: string,
-  taskType: string | undefined,
-  priorityType: string | undefined,
+  taskType: string,
+  priorityType: string,
 ): Promise<string> {
   // Perform reverse lookup to get the priority name
   const priorityOption = COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_PRIORITY_CHOICES.find(
