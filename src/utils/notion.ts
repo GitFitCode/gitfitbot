@@ -187,14 +187,18 @@ export async function createNotionSupportTicketsDBEntry(
 export async function createNotionBacklogDBEntry(
   summary: string,
   authorUsername: string,
-  category: string,
+  categoryType: string,
   description: string,
   taskType: string,
   priorityType: string,
 ): Promise<string> {
-  // Perform reverse lookup to get the priority name
+  // Perform reverse lookup to get the priority name and category type
   const priorityOption = COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_PRIORITY_CHOICES.find(
     (priorityOption) => priorityOption.value === priorityType,
+  );
+
+  const categoryOption = COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_CATEGORY_CHOICES.find(
+    (categoryOption) => categoryOption.value === categoryType,
   );
 
   try {
@@ -220,13 +224,9 @@ export async function createNotionBacklogDBEntry(
           ],
         },
         Category: {
-          rich_text: [
-            {
-              text: {
-                content: category,
-              },
-            },
-          ],
+          select: {
+            name: categoryOption?.name || '',
+          },
         },
         Priority: {
           select: {
