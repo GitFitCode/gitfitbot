@@ -18,7 +18,7 @@ import { SlashCommand } from '../Command';
 async function executeRun(interaction: CommandInteraction) {
   // Snowflake structure received from get(), destructured and renamed.
   // https://discordjs.guide/slash-commands/parsing-options.html
-  const { value: category } = interaction.options.get(
+  const { value: categoryType } = interaction.options.get(
     COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_CATEGORY,
     true,
   );
@@ -30,13 +30,13 @@ async function executeRun(interaction: CommandInteraction) {
     COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_DESCRIPTION,
     true,
   );
-  const taskType = interaction.options.get(
+  const { value: taskType } = interaction.options.get(
     COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TASK_TYPE,
     true,
   );
   const authorUsername = interaction.user.username;
 
-  const priorityType = interaction.options.get(
+  const { value: priorityType } = interaction.options.get(
     COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_PRIORITY,
     true,
   );
@@ -45,7 +45,7 @@ async function executeRun(interaction: CommandInteraction) {
   const pageID: string = await createNotionBacklogDBEntry(
     String(title),
     authorUsername,
-    String(category),
+    String(categoryType),
     String(description),
     String(taskType),
     String(priorityType),

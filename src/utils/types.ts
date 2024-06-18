@@ -18,7 +18,8 @@ export type NotionBacklogBDEntry = {
   properties: {
     title: { title: { text: { content: string } }[] };
     Requestor: { rich_text: { text: { content: string } }[] };
-    Category: { rich_text: { text: { content: string } }[] };
+    Priority: { select: { name: string } };
+    Category: { select: { name: string } };
     [key: string]: any;
   };
   children: { paragraph: { rich_text: { text: { content: string } }[] } }[];
