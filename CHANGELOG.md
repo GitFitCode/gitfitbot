@@ -1,5 +1,20 @@
 
 
+# [1.19.0](https://github.com/GitFitCode/gitfitbot/compare/v1.18.0...v1.19.0) (2024-06-18)
+
+
+### Bug Fixes
+
+* refactor the tasktype and priorityType ([cb5b187](https://github.com/GitFitCode/gitfitbot/commit/cb5b18779dd49c79eecafa6e3c0927898538af58))
+
+
+### Features
+
+* accept priority as user input during feature-cm invocation ([3bc8f59](https://github.com/GitFitCode/gitfitbot/commit/3bc8f598e6dc0404cc6eb4d2a58636bbbccbaec5))
+* **feature-cm:** default status is "to do" ([a84bf13](https://github.com/GitFitCode/gitfitbot/commit/a84bf13ef008f374a380a81b7934fd4597c2ff08))
+* reverse lookup for category ([b3156f5](https://github.com/GitFitCode/gitfitbot/commit/b3156f526b34b8ce8c945369a55895891db8990f))
+* task type in feature-cm required ([86906d6](https://github.com/GitFitCode/gitfitbot/commit/86906d6c05de49a00cbce64328ef8c49df1eed5c))
+
 # [1.18.0](https://github.com/GitFitCode/gitfitbot/compare/v1.17.0...v1.18.0) (2024-06-13)
 
 
