@@ -130,12 +130,12 @@ export const COMMAND_INFO = {
   COMMAND_DESCRIPTION: 'Displays info about yourself and the server.',
 };
 
-// Feature / Change Management command constants
-export const COMMAND_FEATURE_CHANGE_MANAGEMENT = {
-  COMMAND_NAME: 'feature-cm',
-  COMMAND_DESCRIPTION: 'Helper slash command for raising feature/change management requests.',
+// Backlog command constants
+export const BACKLOG = {
+  COMMAND_NAME: 'backlog',
+  COMMAND_DESCRIPTION: 'Helper slash command for creating a task in GFC backlog.',
   OPTION_CATEGORY: 'category',
-  OPTION_CATEGORY_DESCRIPTION: 'Category where to apply feature/change management requests.',
+  OPTION_CATEGORY_DESCRIPTION: 'Category to apply for tasks in GFC backlog.',
   OPTION_CATEGORY_CHOICES: [
     {
       name: 'GitFitCode (general)',
@@ -163,9 +163,9 @@ export const COMMAND_FEATURE_CHANGE_MANAGEMENT = {
     },
   ],
   OPTION_TITLE: 'title',
-  OPTION_TITLE_DESCRIPTION: 'Title of the feature/change management request.',
+  OPTION_TITLE_DESCRIPTION: 'Title of the backlog task.',
   OPTION_DESCRIPTION: 'description',
-  OPTION_DESCRIPTION_DESCRIPTION: 'Description of the feature/change management request.',
+  OPTION_DESCRIPTION_DESCRIPTION: 'Description of the backlog task.',
   OPTION_TASK_TYPE: 'type',
   OPTION_TYPE_DESCRIPTION: 'Identify if an item is a bug, feature or documentation',
   OPTION_TYPE_CHOICES: [
@@ -188,7 +188,7 @@ export const COMMAND_FEATURE_CHANGE_MANAGEMENT = {
   ],
 
   OPTION_PRIORITY: 'priority',
-  OPTION_PRIORITY_DESCRIPTION: 'Priority level of the feature/change management request',
+  OPTION_PRIORITY_DESCRIPTION: 'Priority level of the backlog task.',
   OPTION_PRIORITY_CHOICES: [
     {
       name: 'High 🔥',

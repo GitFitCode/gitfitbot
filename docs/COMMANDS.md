@@ -2,7 +2,7 @@
 
 - [`/dadjokes` - Jokes from icanhazdadjoke.com/](#dadjokes---jokes-from-icanhazdadjokecom)
 - [`/events` - Create community and custom events quickly](#events---create-community-and-custom-events-quickly)
-- [`/feature-cm` - Feature / Change Management requests for community processes](#feature-cm---feature--change-management-requests-for-community-processes)
+- [`/backlog` - Tasks to be created in GFC backlog](#backlog---tasks-to-be-created-in-gfc-backlog)
 - [`/info` - Information about you, server and the bot](#info---information-about-you-server-and-the-bot)
 - [`/joke` - Jokes from jokeapi.dev](#joke---jokes-from-jokeapidev)
 - [`/next-speaker` - Choose the next speaker randomly for a meeting (usually, a GFC retrospective)](#next-speaker---choose-the-next-speaker-randomly-for-a-meeting-usually-a-gfc-retrospective)
@@ -59,7 +59,7 @@
 6.  AM/PM
 7.  Timezone
 
-### `/feature-cm` - Feature / Change Management requests for community processes
+### `/backlog` - Tasks to be created in GFC backlog
 
 **Options**:
 
@@ -72,6 +72,15 @@
    6. Other
 2. Title
 3. Description
+4. Task Type
+   1. Bug
+   2. Feature Request
+   3. Documentation
+   4. None
+5. Priority
+   1. High 🔥
+   2. Medium
+   3. Low
 
 ### `/info` - Information about you, server and the bot
 

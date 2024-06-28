@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { Client } from '@notionhq/client';
 import {
-  COMMAND_FEATURE_CHANGE_MANAGEMENT,
+  BACKLOG,
   NOTION_MAX_CHAR_LIMIT_IN_RICH_TEXT_BLOCK,
   NOTION_PRIORITY_MEDIUM,
   NOTION_STATUS_DONE,
@@ -177,11 +177,11 @@ export async function createNotionSupportTicketsDBEntry(
 /**
  * Creates a new entry in the Notion Backlog Database with the provided data.
  *
- * @param summary - A brief summary of the change management.
+ * @param summary - A brief summary of the task.
  * @param authorUsername - The Discord username of the user who generated this message.
- * @param category - The category where the change management is to be applied.
- * @param description - A detailed description of the change management.
- * @param taskType - A task type of the change management.
+ * @param category - The category to apply to the task.
+ * @param description - A detailed description of the task.
+ * @param taskType - A type of task for the backlog.
  * @returns {Promise<string>} - The ID of the created Notion page, or an empty string if an error occurs.
  */
 export async function createNotionBacklogDBEntry(
@@ -193,11 +193,11 @@ export async function createNotionBacklogDBEntry(
   priorityType: string,
 ): Promise<string> {
   // Perform reverse lookup to get the priority name and category type
-  const priorityOption = COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_PRIORITY_CHOICES.find(
+  const priorityOption = BACKLOG.OPTION_PRIORITY_CHOICES.find(
     (priorityOption) => priorityOption.value === priorityType,
   );
 
-  const categoryOption = COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_CATEGORY_CHOICES.find(
+  const categoryOption = BACKLOG.OPTION_CATEGORY_CHOICES.find(
     (categoryOption) => categoryOption.value === categoryType,
   );
 
@@ -257,9 +257,7 @@ export async function createNotionBacklogDBEntry(
     //When None is selected, we ignore the task type property when creating the notion page:
     if (taskType !== 'none') {
       // Find the option name based on the type.
-      const option = COMMAND_FEATURE_CHANGE_MANAGEMENT.OPTION_TYPE_CHOICES.find(
-        (option) => option.value === taskType,
-      );
+      const option = BACKLOG.OPTION_TYPE_CHOICES.find((option) => option.value === taskType);
 
       if (option) {
         data.properties.Type = {
