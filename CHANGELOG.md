@@ -1,5 +1,12 @@
 
 
+## [1.19.1](https://github.com/GitFitCode/gitfitbot/compare/v1.19.0...v1.19.1) (2024-06-28)
+
+
+### Bug Fixes
+
+* **support:** formatting of openai response in discord ([683cace](https://github.com/GitFitCode/gitfitbot/commit/683cace6617545c5fc3786934c931d9798f0d8a3))
+
 # [1.19.0](https://github.com/GitFitCode/gitfitbot/compare/v1.18.0...v1.19.0) (2024-06-18)
 
 
