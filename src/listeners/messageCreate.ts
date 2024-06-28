@@ -52,12 +52,20 @@ export default (client: Client): void => {
           false,
         );
 
-        // Split the message into chunks, even if it's less than 2000 characters.
-        // This way, we only need one loop to send the messages, and we avoid the need for an if-else statement.
+        // This code uses the `lastIndexOf` method to find the last newline character before the 2000 character limit.
+        // If no newline is found within the limit, the message is split at the 2000 character limit.
         let chunks = [];
+        let start = 0;
+        let end = 0;
 
-        for (let i = 0; i < messageWithResponse.length; i += DISCORD_MESSAGE_MAX_CHAR_LIMIT) {
-          chunks.push(messageWithResponse.slice(i, i + DISCORD_MESSAGE_MAX_CHAR_LIMIT));
+        while (end < messageWithResponse.length) {
+          end = start + DISCORD_MESSAGE_MAX_CHAR_LIMIT;
+          if (end < messageWithResponse.length) {
+            let lastNewline = messageWithResponse.lastIndexOf('\n', end);
+            end = lastNewline > start ? lastNewline : end;
+          }
+          chunks.push(messageWithResponse.slice(start, end));
+          start = end;
         }
 
         for (const chunk of chunks) {
