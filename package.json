@@ -20,8 +20,8 @@
   "license": "GNU GPLv3",
   "dependencies": {
     "@discordjs/rest": "latest",
-    "@langchain/core": "0.2.15",
-    "@langchain/openai": "0.2.1",
+    "@langchain/core": "0.2.17",
+    "@langchain/openai": "0.2.4",
     "@notionhq/client": "latest",
     "@types/pouchdb-node": "latest",
     "app-root-path": "latest",
@@ -31,7 +31,7 @@
     "discord-tictactoe": "latest",
     "discord.js": "latest",
     "dotenv": "latest",
-    "langchain": "0.2.7",
+    "langchain": "0.2.10",
     "newrelic": "latest",
     "pouchdb-node": "latest",
     "undici": "latest"
