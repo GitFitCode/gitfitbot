@@ -20,7 +20,7 @@
   "license": "GNU GPLv3",
   "dependencies": {
     "@discordjs/rest": "latest",
-    "@langchain/core": "0.2.17",
+    "@langchain/core": "0.2.18",
     "@langchain/openai": "0.2.4",
     "@notionhq/client": "latest",
     "@types/pouchdb-node": "latest",
