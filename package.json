@@ -19,12 +19,11 @@
   "author": "GitFitCode",
   "license": "GNU GPLv3",
   "dependencies": {
-    "@langchain/core": "^0.2.18",
+    "@langchain/core": "^0.2.20",
     "@langchain/openai": "^0.2.5",
     "@notionhq/client": "latest",
     "cron": "latest",
     "dayjs": "latest",
-    "discord-api-types": "latest",
     "discord-tictactoe": "latest",
     "discord.js": "latest",
     "dotenv": "latest",

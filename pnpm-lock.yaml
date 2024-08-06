@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@langchain/core':
-        specifier: ^0.2.18
-        version: 0.2.18(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))(openai@4.53.2(encoding@0.1.13))
+        specifier: ^0.2.20
+        version: 0.2.20(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))(openai@4.54.0(encoding@0.1.13))
       '@langchain/openai':
         specifier: ^0.2.5
-        version: 0.2.5(encoding@0.1.13)(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))
+        version: 0.2.5(encoding@0.1.13)(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))
       '@notionhq/client':
         specifier: latest
         version: 2.2.15(encoding@0.1.13)
@@ -23,9 +23,6 @@ importers:
       dayjs:
         specifier: latest
         version: 1.11.12
-      discord-api-types:
-        specifier: latest
-        version: 0.37.93
       discord-tictactoe:
         specifier: latest
         version: 4.2.0
@@ -37,7 +34,7 @@ importers:
         version: 16.4.5
       langchain:
         specifier: ^0.2.12
-        version: 0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0)
+        version: 0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0)
       newrelic:
         specifier: latest
         version: 12.0.0
@@ -50,7 +47,7 @@ importers:
     devDependencies:
       '@commitlint/cli':
         specifier: latest
-        version: 19.3.0(@types/node@22.0.2)(typescript@5.5.4)
+        version: 19.3.0(@types/node@22.1.0)(typescript@5.5.4)
       '@commitlint/config-conventional':
         specifier: latest
         version: 19.2.2
@@ -62,25 +59,25 @@ importers:
         version: 9.14.4
       '@types/node':
         specifier: latest
-        version: 22.0.2
+        version: 22.1.0
       '@types/pouchdb-node':
         specifier: latest
         version: 6.1.7
       '@typescript-eslint/eslint-plugin':
         specifier: latest
-        version: 8.0.0(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0)(typescript@5.5.4)
+        version: 8.0.1(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0)(typescript@5.5.4)
       '@typescript-eslint/parser':
         specifier: latest
-        version: 8.0.0(eslint@9.8.0)(typescript@5.5.4)
+        version: 8.0.1(eslint@9.8.0)(typescript@5.5.4)
       eslint:
         specifier: latest
         version: 9.8.0
       eslint-config-airbnb-base:
         specifier: latest
-        version: 15.0.0(eslint-plugin-import@2.29.1(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0))(eslint@9.8.0)
+        version: 15.0.0(eslint-plugin-import@2.29.1(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0))(eslint@9.8.0)
       eslint-config-airbnb-typescript:
         specifier: latest
-        version: 18.0.0(@typescript-eslint/eslint-plugin@8.0.0(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0)(typescript@5.5.4))(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0))(eslint@9.8.0)
+        version: 18.0.0(@typescript-eslint/eslint-plugin@8.0.1(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0)(typescript@5.5.4))(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0))(eslint@9.8.0)
       husky:
         specifier: latest
         version: 9.1.4
@@ -89,7 +86,7 @@ importers:
         version: 17.6.0(typescript@5.5.4)
       ts-node:
         specifier: latest
-        version: 10.9.2(@types/node@22.0.2)(typescript@5.5.4)
+        version: 10.9.2(@types/node@22.1.0)(typescript@5.5.4)
       tslib:
         specifier: latest
         version: 2.6.3
@@ -287,8 +284,8 @@ packages:
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
 
-  '@langchain/core@0.2.18':
-    resolution: {integrity: sha512-ru542BwNcsnDfjTeDbIkFIchwa54ctHZR+kVrC8U9NPS9/36iM8p8ruprOV7Zccj/oxtLE5UpEhV+9MZhVcFlA==}
+  '@langchain/core@0.2.20':
+    resolution: {integrity: sha512-WPBjrzOj79/yqjloDUIw1GDhuRQfHis07TyyDj+qS81nHh0svSasetKcqAZ3L5JoPcBmEL7rRBtM+OcyC3mLVg==}
     engines: {node: '>=18'}
 
   '@langchain/openai@0.2.5':
@@ -386,8 +383,8 @@ packages:
     resolution: {integrity: sha512-YcPQ8a0jwYU9bTdJDpXjMi7Brhkr1mXsXrUJvjqM2mQDgkRiz8jFaQGOdaLxgjtUfQgZhKy/O3cG/YwmgKaxLA==}
     engines: {node: '>=12.22.0'}
 
-  '@pnpm/npm-conf@2.2.2':
-    resolution: {integrity: sha512-UA91GwWPhFExt3IizW6bOeY/pQ0BkuNwKjk9iQW9KqxluGCrg4VenZ0/L+2Y0+ZOtme72EVvg6v0zo3AMQRCeA==}
+  '@pnpm/npm-conf@2.3.0':
+    resolution: {integrity: sha512-DqrO+oXGR7HCuicNy6quk6ALJSDDPKI7RZz1bP5im8mSL8J2e+9w26LdkjuAfpAjOutYUJVbnXnx4IbTQeIgfw==}
     engines: {node: '>=12'}
 
   '@prisma/prisma-fmt-wasm@4.17.0-16.27eb2449f178cd9fe1a4b892d732cc4795f75085':
@@ -501,11 +498,11 @@ packages:
   '@types/node@10.17.60':
     resolution: {integrity: sha512-F0KIgDJfy2nA3zMLmWGKxcH2ZVEtCZXHHdOQs2gSaQ27+lNeEfGxzkIw90aXswATX7AZ33tahPbzy6KAfUreVw==}
 
-  '@types/node@18.19.42':
-    resolution: {integrity: sha512-d2ZFc/3lnK2YCYhos8iaNIYu9Vfhr92nHiyJHRltXWjXUBjEE+A4I58Tdbnw4VhggSW+2j5y5gTrLs4biNnubg==}
+  '@types/node@18.19.43':
+    resolution: {integrity: sha512-Mw/YlgXnyJdEwLoFv2dpuJaDFriX+Pc+0qOBJ57jC1H6cDxIj2xc5yUrdtArDVG0m+KV6622a4p2tenEqB3C/g==}
 
-  '@types/node@22.0.2':
-    resolution: {integrity: sha512-yPL6DyFwY5PiMVEwymNeqUTKsDczQBJ/5T7W/46RwLU/VH+AA8aT5TZkvBviLKLbbm0hlfftEkGrNzfRk/fofQ==}
+  '@types/node@22.1.0':
+    resolution: {integrity: sha512-AOmuRF0R2/5j1knA3c6G3HOk523Ga+l+ZXltX8SF1+5oqcXijjfTd8fY3XRZqSihEu9XhtQnKYLmkFaoxgsJHw==}
 
   '@types/node@8.10.66':
     resolution: {integrity: sha512-tktOkFUA4kXx2hhhrB8bIFb5TbwzS4uOhKEmwiD+NoiL0qtP2OQ9mFldbgD4dV1djrlBYP6eBuQZiWjuHUpqFw==}
@@ -549,8 +546,8 @@ packages:
   '@types/ws@8.5.12':
     resolution: {integrity: sha512-3tPRkv1EtkDpzlgyKyI8pGsGZAGPEaXeu0DOj5DI25Ja91bdAYddYHbADRYVrZMRbfW+1l5YwXVDKohDJNQxkQ==}
 
-  '@typescript-eslint/eslint-plugin@8.0.0':
-    resolution: {integrity: sha512-STIZdwEQRXAHvNUS6ILDf5z3u95Gc8jzywunxSNqX00OooIemaaNIA0vEgynJlycL5AjabYLLrIyHd4iazyvtg==}
+  '@typescript-eslint/eslint-plugin@8.0.1':
+    resolution: {integrity: sha512-5g3Y7GDFsJAnY4Yhvk8sZtFfV6YNF2caLzjrRPUBzewjPCaj0yokePB4LJSobyCzGMzjZZYFbwuzbfDHlimXbQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       '@typescript-eslint/parser': ^8.0.0 || ^8.0.0-alpha.0
@@ -560,8 +557,8 @@ packages:
       typescript:
         optional: true
 
-  '@typescript-eslint/parser@8.0.0':
-    resolution: {integrity: sha512-pS1hdZ+vnrpDIxuFXYQpLTILglTjSYJ9MbetZctrUawogUsPdz31DIIRZ9+rab0LhYNTsk88w4fIzVheiTbWOQ==}
+  '@typescript-eslint/parser@8.0.1':
+    resolution: {integrity: sha512-5IgYJ9EO/12pOUwiBKFkpU7rS3IU21mtXzB81TNwq2xEybcmAZrE9qwDtsb5uQd9aVO9o0fdabFyAmKveXyujg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
@@ -570,25 +567,12 @@ packages:
       typescript:
         optional: true
 
-  '@typescript-eslint/scope-manager@8.0.0':
-    resolution: {integrity: sha512-V0aa9Csx/ZWWv2IPgTfY7T4agYwJyILESu/PVqFtTFz9RIS823mAze+NbnBI8xiwdX3iqeQbcTYlvB04G9wyQw==}
+  '@typescript-eslint/scope-manager@8.0.1':
+    resolution: {integrity: sha512-NpixInP5dm7uukMiRyiHjRKkom5RIFA4dfiHvalanD2cF0CLUuQqxfg8PtEUo9yqJI2bBhF+pcSafqnG3UBnRQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@typescript-eslint/type-utils@8.0.0':
-    resolution: {integrity: sha512-mJAFP2mZLTBwAn5WI4PMakpywfWFH5nQZezUQdSKV23Pqo6o9iShQg1hP2+0hJJXP2LnZkWPphdIq4juYYwCeg==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-    peerDependencies:
-      typescript: '*'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-
-  '@typescript-eslint/types@8.0.0':
-    resolution: {integrity: sha512-wgdSGs9BTMWQ7ooeHtu5quddKKs5Z5dS+fHLbrQI+ID0XWJLODGMHRfhwImiHoeO2S5Wir2yXuadJN6/l4JRxw==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@typescript-eslint/typescript-estree@8.0.0':
-    resolution: {integrity: sha512-5b97WpKMX+Y43YKi4zVcCVLtK5F98dFls3Oxui8LbnmRsseKenbbDinmvxrWegKDMmlkIq/XHuyy0UGLtpCDKg==}
+  '@typescript-eslint/type-utils@8.0.1':
+    resolution: {integrity: sha512-+/UT25MWvXeDX9YaHv1IS6KI1fiuTto43WprE7pgSMswHbn1Jm9GEM4Txp+X74ifOWV8emu2AWcbLhpJAvD5Ng==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       typescript: '*'
@@ -596,21 +580,34 @@ packages:
       typescript:
         optional: true
 
-  '@typescript-eslint/utils@8.0.0':
-    resolution: {integrity: sha512-k/oS/A/3QeGLRvOWCg6/9rATJL5rec7/5s1YmdS0ZU6LHveJyGFwBvLhSRBv6i9xaj7etmosp+l+ViN1I9Aj/Q==}
+  '@typescript-eslint/types@8.0.1':
+    resolution: {integrity: sha512-PpqTVT3yCA/bIgJ12czBuE3iBlM3g4inRSC5J0QOdQFAn07TYrYEQBBKgXH1lQpglup+Zy6c1fxuwTk4MTNKIw==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@typescript-eslint/typescript-estree@8.0.1':
+    resolution: {integrity: sha512-8V9hriRvZQXPWU3bbiUV4Epo7EvgM6RTs+sUmxp5G//dBGy402S7Fx0W0QkB2fb4obCF8SInoUzvTYtc3bkb5w==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
+  '@typescript-eslint/utils@8.0.1':
+    resolution: {integrity: sha512-CBFR0G0sCt0+fzfnKaciu9IBsKvEKYwN9UZ+eeogK1fYHg4Qxk1yf/wLQkLXlq8wbU2dFlgAesxt8Gi76E8RTA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
 
-  '@typescript-eslint/visitor-keys@8.0.0':
-    resolution: {integrity: sha512-oN0K4nkHuOyF3PVMyETbpP5zp6wfyOvm7tWhTMfoqxSSsPmJIh6JNASuZDlODE8eE+0EB9uar+6+vxr9DBTYOA==}
+  '@typescript-eslint/visitor-keys@8.0.1':
+    resolution: {integrity: sha512-W5E+o0UfUcK5EgchLZsyVWqARmsM7v54/qEq6PY3YI5arkgmCzHiuk0zKSJJbm71V0xdRna4BGomkCTXz2/LkQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@tyriar/fibonacci-heap@2.0.9':
     resolution: {integrity: sha512-bYuSNomfn4hu2tPiDN+JZtnzCpSpbJ/PNeulmocDy3xN2X5OkJL65zo6rPZp65cPPhLF9vfT/dgE+RtFRCSxOA==}
 
-  '@vladfrangu/async_event_emitter@2.4.4':
-    resolution: {integrity: sha512-ZL62PFXEIeGUI8btfJ5S8Flc286eU1ZUSjwyFQtIGXfRUDPZKO+CDJMYb1R71LjGWRZ4n202O+a6FGjsgTw58g==}
+  '@vladfrangu/async_event_emitter@2.4.5':
+    resolution: {integrity: sha512-J7T3gUr3Wz0l7Ni1f9upgBZ7+J22/Q1B7dl0X6fG+fTsD+H+31DIosMHj4Um1dWQwqbcQ3oQf+YS2foYkDc9cQ==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
   JSONStream@1.3.5:
@@ -754,8 +751,8 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  axios@1.7.2:
-    resolution: {integrity: sha512-2A8QhOMrbomlDuiLeK9XibIBzuHeRcqqNOHp0Cyp5EoJ1IFDh+XZH3A6BkXtv0K4gFGCI0Y4BM7B1wOEi0Rmgw==}
+  axios@1.7.3:
+    resolution: {integrity: sha512-Ar7ND9pU99eJ9GpoGQKhKf58GpUOgnzuaB7ueNQ5BMi0p+LZ5oaEnfF999fAArcTIBwXTCHAmGcHOZJaWPq9Nw==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -1163,9 +1160,6 @@ packages:
 
   discord-api-types@0.37.83:
     resolution: {integrity: sha512-urGGYeWtWNYMKnYlZnOnDHm8fVRffQs3U0SpE8RHeiuLKb/u92APS8HoQnPTFbnXmY1vVnXjXO4dOxcAn3J+DA==}
-
-  discord-api-types@0.37.93:
-    resolution: {integrity: sha512-M5jn0x3bcXk8EI2c6F6V6LeOWq10B/cJf+YJSyqNmg7z4bdXK+Z7g9zGJwHS0h9Bfgs0nun2LQISFOzwck7G9A==}
 
   discord-tictactoe@4.2.0:
     resolution: {integrity: sha512-cw0vRM9043anbNsIDPI5JVdrpIK4R0uDbWKhFP0Kv5HcgDHkjdGnM79PaBcyptXLfXFAx7U3TC7NsTlYkbjaOg==}
@@ -2203,8 +2197,8 @@ packages:
   langchainhub@0.0.11:
     resolution: {integrity: sha512-WnKI4g9kU2bHQP136orXr2bcRdgz9iiTBpTN0jWt9IlScUKnJBoD0aa2HOzHURQKeQDnt2JwqVmQ6Depf5uDLQ==}
 
-  langsmith@0.1.40:
-    resolution: {integrity: sha512-11E2WLbh/+41+Qc0w8fJJTC/iz91BA+zXRMX/Wz0KSstnfzIPBoiWa++Kp2X8yCIDNywWWLJhy/B8gYzm7VKig==}
+  langsmith@0.1.41:
+    resolution: {integrity: sha512-8R7s/225Pxmv0ipMfd6sqmWVsfHLQivYlQZ0vx5K+ReoknummTenQlVK8gapk3kqRMnzkrouuRHMhWjMR6RgUA==}
     peerDependencies:
       '@langchain/core': '*'
       langchain: '*'
@@ -2600,8 +2594,8 @@ packages:
     resolution: {integrity: sha512-mnkeQ1qP5Ue2wd+aivTD3NHd/lZ96Lu0jgf0pwktLPtx6cTZiH7tyeGRRHs0zX0rbrahXPnXlUnbeXyaBBuIaw==}
     engines: {node: '>=18'}
 
-  openai@4.53.2:
-    resolution: {integrity: sha512-ohYEv6OV3jsFGqNrgolDDWN6Ssx1nFg6JDJQuaBFo4SL2i+MBoOQ16n2Pq1iBF5lH1PKnfCIOfqAGkmzPvdB9g==}
+  openai@4.54.0:
+    resolution: {integrity: sha512-e/12BdtTtj+tXs7iHm+Dm7H7WjEWnw7O52B2wSfCQ6lD5F6cvjzo7cANXy5TJ1Q3/qc8YRPT5wBTTFtP5sBp1g==}
     hasBin: true
 
   openapi-types@12.1.3:
@@ -2793,8 +2787,8 @@ packages:
     resolution: {integrity: sha512-FLpr4flz5xZTSJxSeaheeMKN/EDzMdK7b8PTOC6a5PYFKTucWbdqjgqaEyH0shFiSJrVB1+Qqi4Tk19ccU6Aug==}
     engines: {node: '>=12.20'}
 
-  qs@6.12.3:
-    resolution: {integrity: sha512-AWJm14H1vVaO/iNZ4/hO+HyaTehuy9nRqVdkTqlJt0HWvBiBIEXFmb4C0DGeYo3Xes9rrEW+TxHsaigCbN5ICQ==}
+  qs@6.13.0:
+    resolution: {integrity: sha512-+38qI9SOr8tfZ4QmJNplMUxqjbe7LKvvZgWdExBOmd+egZTtjLB67Gu0HRX3u/XOq7UU2Nx6nsjvS16Z9uwfpg==}
     engines: {node: '>=0.6'}
 
   querystringify@2.2.0:
@@ -2961,8 +2955,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  set-cookie-parser@2.6.0:
-    resolution: {integrity: sha512-RVnVQxTXuerk653XfuliOxBP81Sf0+qfQE73LIYKcyMYHG94AuH0kgrQpRDuTZnSmjpysHmzxJXKNfa6PjFhyQ==}
+  set-cookie-parser@2.7.0:
+    resolution: {integrity: sha512-lXLOiqpkUumhRdFF3k1osNXCy9akgx/dyPZ5p8qAg9seJzXr5ZrlqZuWIMuY6ejOsVLE6flJ5/h3lsn57fQ/PQ==}
 
   set-function-length@1.2.2:
     resolution: {integrity: sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==}
@@ -3266,8 +3260,8 @@ packages:
   undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
-  undici-types@6.11.1:
-    resolution: {integrity: sha512-mIDEX2ek50x0OlRgxryxsenE5XaQD4on5U2inY7RApK3SOJpofyw7uW2AyfMKkhAxXIceo2DeWGVGwyvng1GNQ==}
+  undici-types@6.13.0:
+    resolution: {integrity: sha512-xtFJHudx8S2DSoujjMd1WeWvn7KKWFRESZTMeL1RptAYERu29D6jphMjjY+vn96jvN3kVPDNxU/E13VTaXj6jg==}
 
   undici@6.13.0:
     resolution: {integrity: sha512-Q2rtqmZWrbP8nePMq7mOJIN98M0fYvSgV89vwl/BQRT4mDOeY2GXZngfGpcBBhtky3woM7G24wZV3Q304Bv6cw==}
@@ -3496,11 +3490,11 @@ snapshots:
 
   '@colors/colors@1.6.0': {}
 
-  '@commitlint/cli@19.3.0(@types/node@22.0.2)(typescript@5.5.4)':
+  '@commitlint/cli@19.3.0(@types/node@22.1.0)(typescript@5.5.4)':
     dependencies:
       '@commitlint/format': 19.3.0
       '@commitlint/lint': 19.2.2
-      '@commitlint/load': 19.2.0(@types/node@22.0.2)(typescript@5.5.4)
+      '@commitlint/load': 19.2.0(@types/node@22.1.0)(typescript@5.5.4)
       '@commitlint/read': 19.2.1
       '@commitlint/types': 19.0.3
       execa: 8.0.1
@@ -3547,7 +3541,7 @@ snapshots:
       '@commitlint/rules': 19.0.3
       '@commitlint/types': 19.0.3
 
-  '@commitlint/load@19.2.0(@types/node@22.0.2)(typescript@5.5.4)':
+  '@commitlint/load@19.2.0(@types/node@22.1.0)(typescript@5.5.4)':
     dependencies:
       '@commitlint/config-validator': 19.0.3
       '@commitlint/execute-rule': 19.0.0
@@ -3555,7 +3549,7 @@ snapshots:
       '@commitlint/types': 19.0.3
       chalk: 5.3.0
       cosmiconfig: 9.0.0(typescript@5.5.4)
-      cosmiconfig-typescript-loader: 5.0.0(@types/node@22.0.2)(cosmiconfig@9.0.0(typescript@5.5.4))(typescript@5.5.4)
+      cosmiconfig-typescript-loader: 5.0.0(@types/node@22.1.0)(cosmiconfig@9.0.0(typescript@5.5.4))(typescript@5.5.4)
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       lodash.uniq: 4.5.0
@@ -3641,7 +3635,7 @@ snapshots:
       '@discordjs/util': 1.1.0
       '@sapphire/async-queue': 1.5.3
       '@sapphire/snowflake': 3.5.3
-      '@vladfrangu/async_event_emitter': 2.4.4
+      '@vladfrangu/async_event_emitter': 2.4.5
       discord-api-types: 0.37.83
       magic-bytes.js: 1.10.0
       tslib: 2.6.3
@@ -3656,7 +3650,7 @@ snapshots:
       '@discordjs/util': 1.1.0
       '@sapphire/async-queue': 1.5.3
       '@types/ws': 8.5.12
-      '@vladfrangu/async_event_emitter': 2.4.4
+      '@vladfrangu/async_event_emitter': 2.4.5
       discord-api-types: 0.37.83
       tslib: 2.6.3
       ws: 8.18.0
@@ -3730,14 +3724,13 @@ snapshots:
 
   '@js-sdsl/ordered-map@4.4.2': {}
 
-  '@langchain/core@0.2.18(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))(openai@4.53.2(encoding@0.1.13))':
+  '@langchain/core@0.2.20(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))(openai@4.54.0(encoding@0.1.13))':
     dependencies:
       ansi-styles: 5.2.0
       camelcase: 6.3.0
       decamelize: 1.2.0
       js-tiktoken: 1.0.12
-      langsmith: 0.1.40(@langchain/core@0.2.18(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))(openai@4.53.2(encoding@0.1.13)))(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))(openai@4.53.2(encoding@0.1.13))
-      ml-distance: 4.0.1
+      langsmith: 0.1.41(@langchain/core@0.2.20(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))(openai@4.54.0(encoding@0.1.13)))(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))(openai@4.54.0(encoding@0.1.13))
       mustache: 4.2.0
       p-queue: 6.6.2
       p-retry: 4.6.2
@@ -3748,20 +3741,20 @@ snapshots:
       - langchain
       - openai
 
-  '@langchain/openai@0.2.5(encoding@0.1.13)(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))':
+  '@langchain/openai@0.2.5(encoding@0.1.13)(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))':
     dependencies:
-      '@langchain/core': 0.2.18(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))(openai@4.53.2(encoding@0.1.13))
+      '@langchain/core': 0.2.20(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))(openai@4.54.0(encoding@0.1.13))
       js-tiktoken: 1.0.12
-      openai: 4.53.2(encoding@0.1.13)
+      openai: 4.54.0(encoding@0.1.13)
       zod: 3.23.8
       zod-to-json-schema: 3.23.2(zod@3.23.8)
     transitivePeerDependencies:
       - encoding
       - langchain
 
-  '@langchain/textsplitters@0.0.3(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))(openai@4.53.2(encoding@0.1.13))':
+  '@langchain/textsplitters@0.0.3(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))(openai@4.54.0(encoding@0.1.13))':
     dependencies:
-      '@langchain/core': 0.2.18(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))(openai@4.53.2(encoding@0.1.13))
+      '@langchain/core': 0.2.20(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))(openai@4.54.0(encoding@0.1.13))
       js-tiktoken: 1.0.12
     transitivePeerDependencies:
       - langchain
@@ -3784,7 +3777,7 @@ snapshots:
 
   '@newrelic/security-agent@1.4.0':
     dependencies:
-      axios: 1.7.2
+      axios: 1.7.3
       check-disk-space: 3.4.0
       content-type: 1.0.5
       fast-safe-stringify: 2.1.1
@@ -3899,7 +3892,7 @@ snapshots:
     dependencies:
       graceful-fs: 4.2.10
 
-  '@pnpm/npm-conf@2.2.2':
+  '@pnpm/npm-conf@2.3.0':
     dependencies:
       '@pnpm/config.env-replace': 1.1.0
       '@pnpm/network.ca-file': 1.0.2
@@ -3968,11 +3961,11 @@ snapshots:
 
   '@types/concat-stream@1.6.1':
     dependencies:
-      '@types/node': 22.0.2
+      '@types/node': 22.1.0
 
   '@types/conventional-commits-parser@5.0.0':
     dependencies:
-      '@types/node': 22.0.2
+      '@types/node': 22.1.0
 
   '@types/debug@4.1.12':
     dependencies:
@@ -3980,7 +3973,7 @@ snapshots:
 
   '@types/form-data@0.0.33':
     dependencies:
-      '@types/node': 22.0.2
+      '@types/node': 22.1.0
 
   '@types/http-cache-semantics@4.0.4': {}
 
@@ -3994,18 +3987,18 @@ snapshots:
 
   '@types/node-fetch@2.6.11':
     dependencies:
-      '@types/node': 22.0.2
+      '@types/node': 22.1.0
       form-data: 4.0.0
 
   '@types/node@10.17.60': {}
 
-  '@types/node@18.19.42':
+  '@types/node@18.19.43':
     dependencies:
       undici-types: 5.26.5
 
-  '@types/node@22.0.2':
+  '@types/node@22.1.0':
     dependencies:
-      undici-types: 6.11.1
+      undici-types: 6.13.0
 
   '@types/node@8.10.66': {}
 
@@ -4055,16 +4048,16 @@ snapshots:
 
   '@types/ws@8.5.12':
     dependencies:
-      '@types/node': 22.0.2
+      '@types/node': 22.1.0
 
-  '@typescript-eslint/eslint-plugin@8.0.0(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0)(typescript@5.5.4)':
+  '@typescript-eslint/eslint-plugin@8.0.1(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0)(typescript@5.5.4)':
     dependencies:
       '@eslint-community/regexpp': 4.11.0
-      '@typescript-eslint/parser': 8.0.0(eslint@9.8.0)(typescript@5.5.4)
-      '@typescript-eslint/scope-manager': 8.0.0
-      '@typescript-eslint/type-utils': 8.0.0(eslint@9.8.0)(typescript@5.5.4)
-      '@typescript-eslint/utils': 8.0.0(eslint@9.8.0)(typescript@5.5.4)
-      '@typescript-eslint/visitor-keys': 8.0.0
+      '@typescript-eslint/parser': 8.0.1(eslint@9.8.0)(typescript@5.5.4)
+      '@typescript-eslint/scope-manager': 8.0.1
+      '@typescript-eslint/type-utils': 8.0.1(eslint@9.8.0)(typescript@5.5.4)
+      '@typescript-eslint/utils': 8.0.1(eslint@9.8.0)(typescript@5.5.4)
+      '@typescript-eslint/visitor-keys': 8.0.1
       eslint: 9.8.0
       graphemer: 1.4.0
       ignore: 5.3.1
@@ -4075,12 +4068,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4)':
+  '@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4)':
     dependencies:
-      '@typescript-eslint/scope-manager': 8.0.0
-      '@typescript-eslint/types': 8.0.0
-      '@typescript-eslint/typescript-estree': 8.0.0(typescript@5.5.4)
-      '@typescript-eslint/visitor-keys': 8.0.0
+      '@typescript-eslint/scope-manager': 8.0.1
+      '@typescript-eslint/types': 8.0.1
+      '@typescript-eslint/typescript-estree': 8.0.1(typescript@5.5.4)
+      '@typescript-eslint/visitor-keys': 8.0.1
       debug: 4.3.6
       eslint: 9.8.0
     optionalDependencies:
@@ -4088,15 +4081,15 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/scope-manager@8.0.0':
+  '@typescript-eslint/scope-manager@8.0.1':
     dependencies:
-      '@typescript-eslint/types': 8.0.0
-      '@typescript-eslint/visitor-keys': 8.0.0
+      '@typescript-eslint/types': 8.0.1
+      '@typescript-eslint/visitor-keys': 8.0.1
 
-  '@typescript-eslint/type-utils@8.0.0(eslint@9.8.0)(typescript@5.5.4)':
+  '@typescript-eslint/type-utils@8.0.1(eslint@9.8.0)(typescript@5.5.4)':
     dependencies:
-      '@typescript-eslint/typescript-estree': 8.0.0(typescript@5.5.4)
-      '@typescript-eslint/utils': 8.0.0(eslint@9.8.0)(typescript@5.5.4)
+      '@typescript-eslint/typescript-estree': 8.0.1(typescript@5.5.4)
+      '@typescript-eslint/utils': 8.0.1(eslint@9.8.0)(typescript@5.5.4)
       debug: 4.3.6
       ts-api-utils: 1.3.0(typescript@5.5.4)
     optionalDependencies:
@@ -4105,12 +4098,12 @@ snapshots:
       - eslint
       - supports-color
 
-  '@typescript-eslint/types@8.0.0': {}
+  '@typescript-eslint/types@8.0.1': {}
 
-  '@typescript-eslint/typescript-estree@8.0.0(typescript@5.5.4)':
+  '@typescript-eslint/typescript-estree@8.0.1(typescript@5.5.4)':
     dependencies:
-      '@typescript-eslint/types': 8.0.0
-      '@typescript-eslint/visitor-keys': 8.0.0
+      '@typescript-eslint/types': 8.0.1
+      '@typescript-eslint/visitor-keys': 8.0.1
       debug: 4.3.6
       globby: 11.1.0
       is-glob: 4.0.3
@@ -4122,25 +4115,25 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/utils@8.0.0(eslint@9.8.0)(typescript@5.5.4)':
+  '@typescript-eslint/utils@8.0.1(eslint@9.8.0)(typescript@5.5.4)':
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@9.8.0)
-      '@typescript-eslint/scope-manager': 8.0.0
-      '@typescript-eslint/types': 8.0.0
-      '@typescript-eslint/typescript-estree': 8.0.0(typescript@5.5.4)
+      '@typescript-eslint/scope-manager': 8.0.1
+      '@typescript-eslint/types': 8.0.1
+      '@typescript-eslint/typescript-estree': 8.0.1(typescript@5.5.4)
       eslint: 9.8.0
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  '@typescript-eslint/visitor-keys@8.0.0':
+  '@typescript-eslint/visitor-keys@8.0.1':
     dependencies:
-      '@typescript-eslint/types': 8.0.0
+      '@typescript-eslint/types': 8.0.1
       eslint-visitor-keys: 3.4.3
 
   '@tyriar/fibonacci-heap@2.0.9': {}
 
-  '@vladfrangu/async_event_emitter@2.4.4': {}
+  '@vladfrangu/async_event_emitter@2.4.5': {}
 
   JSONStream@1.3.5:
     dependencies:
@@ -4312,7 +4305,7 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.0.0
 
-  axios@1.7.2:
+  axios@1.7.3:
     dependencies:
       follow-redirects: 1.15.6
       form-data: 4.0.0
@@ -4594,9 +4587,9 @@ snapshots:
 
   core-util-is@1.0.3: {}
 
-  cosmiconfig-typescript-loader@5.0.0(@types/node@22.0.2)(cosmiconfig@9.0.0(typescript@5.5.4))(typescript@5.5.4):
+  cosmiconfig-typescript-loader@5.0.0(@types/node@22.1.0)(cosmiconfig@9.0.0(typescript@5.5.4))(typescript@5.5.4):
     dependencies:
-      '@types/node': 22.0.2
+      '@types/node': 22.1.0
       cosmiconfig: 9.0.0(typescript@5.5.4)
       jiti: 1.21.6
       typescript: 5.5.4
@@ -4722,8 +4715,6 @@ snapshots:
       path-type: 4.0.0
 
   discord-api-types@0.37.83: {}
-
-  discord-api-types@0.37.93: {}
 
   discord-tictactoe@4.2.0:
     dependencies:
@@ -4896,21 +4887,21 @@ snapshots:
     optionalDependencies:
       source-map: 0.6.1
 
-  eslint-config-airbnb-base@15.0.0(eslint-plugin-import@2.29.1(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0))(eslint@9.8.0):
+  eslint-config-airbnb-base@15.0.0(eslint-plugin-import@2.29.1(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0))(eslint@9.8.0):
     dependencies:
       confusing-browser-globals: 1.0.11
       eslint: 9.8.0
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0)
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0)
       object.assign: 4.1.5
       object.entries: 1.1.8
       semver: 6.3.1
 
-  eslint-config-airbnb-typescript@18.0.0(@typescript-eslint/eslint-plugin@8.0.0(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0)(typescript@5.5.4))(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0))(eslint@9.8.0):
+  eslint-config-airbnb-typescript@18.0.0(@typescript-eslint/eslint-plugin@8.0.1(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0)(typescript@5.5.4))(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0))(eslint@9.8.0):
     dependencies:
-      '@typescript-eslint/eslint-plugin': 8.0.0(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0)(typescript@5.5.4)
-      '@typescript-eslint/parser': 8.0.0(eslint@9.8.0)(typescript@5.5.4)
+      '@typescript-eslint/eslint-plugin': 8.0.1(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0)(typescript@5.5.4)
+      '@typescript-eslint/parser': 8.0.1(eslint@9.8.0)(typescript@5.5.4)
       eslint: 9.8.0
-      eslint-config-airbnb-base: 15.0.0(eslint-plugin-import@2.29.1(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0))(eslint@9.8.0)
+      eslint-config-airbnb-base: 15.0.0(eslint-plugin-import@2.29.1(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0))(eslint@9.8.0)
     transitivePeerDependencies:
       - eslint-plugin-import
 
@@ -4922,17 +4913,17 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.8.1(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint@9.8.0):
+  eslint-module-utils@2.8.1(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint@9.8.0):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
-      '@typescript-eslint/parser': 8.0.0(eslint@9.8.0)(typescript@5.5.4)
+      '@typescript-eslint/parser': 8.0.1(eslint@9.8.0)(typescript@5.5.4)
       eslint: 9.8.0
       eslint-import-resolver-node: 0.3.9
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.29.1(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0):
+  eslint-plugin-import@2.29.1(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint@9.8.0):
     dependencies:
       array-includes: 3.1.8
       array.prototype.findlastindex: 1.2.5
@@ -4942,7 +4933,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.8.0
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.1(@typescript-eslint/parser@8.0.0(eslint@9.8.0)(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint@9.8.0)
+      eslint-module-utils: 2.8.1(@typescript-eslint/parser@8.0.1(eslint@9.8.0)(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint@9.8.0)
       hasown: 2.0.2
       is-core-module: 2.15.0
       is-glob: 4.0.3
@@ -4953,7 +4944,7 @@ snapshots:
       semver: 6.3.1
       tsconfig-paths: 3.15.0
     optionalDependencies:
-      '@typescript-eslint/parser': 8.0.0(eslint@9.8.0)(typescript@5.5.4)
+      '@typescript-eslint/parser': 8.0.1(eslint@9.8.0)(typescript@5.5.4)
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
       - eslint-import-resolver-webpack
@@ -5096,7 +5087,7 @@ snapshots:
 
   fetch-cookie@2.2.0:
     dependencies:
-      set-cookie-parser: 2.6.0
+      set-cookie-parser: 2.7.0
       tough-cookie: 4.1.4
 
   file-entry-cache@8.0.0:
@@ -5676,17 +5667,17 @@ snapshots:
 
   ky@1.5.0: {}
 
-  langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0):
+  langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0):
     dependencies:
-      '@langchain/core': 0.2.18(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))(openai@4.53.2(encoding@0.1.13))
-      '@langchain/openai': 0.2.5(encoding@0.1.13)(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))
-      '@langchain/textsplitters': 0.0.3(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))(openai@4.53.2(encoding@0.1.13))
+      '@langchain/core': 0.2.20(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))(openai@4.54.0(encoding@0.1.13))
+      '@langchain/openai': 0.2.5(encoding@0.1.13)(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))
+      '@langchain/textsplitters': 0.0.3(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))(openai@4.54.0(encoding@0.1.13))
       binary-extensions: 2.3.0
       js-tiktoken: 1.0.12
       js-yaml: 4.1.0
       jsonpointer: 5.0.1
       langchainhub: 0.0.11
-      langsmith: 0.1.40(@langchain/core@0.2.18(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))(openai@4.53.2(encoding@0.1.13)))(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))(openai@4.53.2(encoding@0.1.13))
+      langsmith: 0.1.41(@langchain/core@0.2.20(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))(openai@4.54.0(encoding@0.1.13)))(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))(openai@4.54.0(encoding@0.1.13))
       ml-distance: 4.0.1
       openapi-types: 12.1.3
       p-retry: 4.6.2
@@ -5696,7 +5687,7 @@ snapshots:
       zod-to-json-schema: 3.23.2(zod@3.23.8)
     optionalDependencies:
       '@notionhq/client': 2.2.15(encoding@0.1.13)
-      axios: 1.7.2
+      axios: 1.7.3
       handlebars: 4.7.8
       ignore: 5.3.1
       ws: 8.18.0
@@ -5706,7 +5697,7 @@ snapshots:
 
   langchainhub@0.0.11: {}
 
-  langsmith@0.1.40(@langchain/core@0.2.18(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))(openai@4.53.2(encoding@0.1.13)))(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))(openai@4.53.2(encoding@0.1.13)):
+  langsmith@0.1.41(@langchain/core@0.2.20(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))(openai@4.54.0(encoding@0.1.13)))(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))(openai@4.54.0(encoding@0.1.13)):
     dependencies:
       '@types/uuid': 9.0.8
       commander: 10.0.1
@@ -5715,9 +5706,9 @@ snapshots:
       semver: 7.6.3
       uuid: 9.0.1
     optionalDependencies:
-      '@langchain/core': 0.2.18(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0))(openai@4.53.2(encoding@0.1.13))
-      langchain: 0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.2)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.53.2(encoding@0.1.13))(ws@8.18.0)
-      openai: 4.53.2(encoding@0.1.13)
+      '@langchain/core': 0.2.20(langchain@0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0))(openai@4.54.0(encoding@0.1.13))
+      langchain: 0.2.12(@notionhq/client@2.2.15(encoding@0.1.13))(axios@1.7.3)(encoding@0.1.13)(handlebars@4.7.8)(ignore@5.3.1)(openai@4.54.0(encoding@0.1.13))(ws@8.18.0)
+      openai: 4.54.0(encoding@0.1.13)
 
   latest-version@9.0.0:
     dependencies:
@@ -6102,9 +6093,9 @@ snapshots:
       is-inside-container: 1.0.0
       is-wsl: 3.1.0
 
-  openai@4.53.2(encoding@0.1.13):
+  openai@4.54.0(encoding@0.1.13):
     dependencies:
-      '@types/node': 18.19.42
+      '@types/node': 18.19.43
       '@types/node-fetch': 2.6.11
       abort-controller: 3.0.0
       agentkeepalive: 4.5.0
@@ -6318,7 +6309,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 22.0.2
+      '@types/node': 22.1.0
       long: 5.2.3
 
   protocols@2.0.1: {}
@@ -6354,7 +6345,7 @@ snapshots:
     dependencies:
       escape-goat: 4.0.0
 
-  qs@6.12.3:
+  qs@6.13.0:
     dependencies:
       side-channel: 1.0.6
 
@@ -6422,7 +6413,7 @@ snapshots:
 
   registry-auth-token@5.0.2:
     dependencies:
-      '@pnpm/npm-conf': 2.2.2
+      '@pnpm/npm-conf': 2.3.0
 
   registry-url@6.0.1:
     dependencies:
@@ -6545,7 +6536,7 @@ snapshots:
 
   semver@7.6.3: {}
 
-  set-cookie-parser@2.6.0: {}
+  set-cookie-parser@2.7.0: {}
 
   set-function-length@1.2.2:
     dependencies:
@@ -6755,7 +6746,7 @@ snapshots:
       http-basic: 8.1.3
       http-response-object: 3.0.2
       promise: 8.3.0
-      qs: 6.12.3
+      qs: 6.13.0
 
   through2@3.0.2:
     dependencies:
@@ -6789,14 +6780,14 @@ snapshots:
 
   ts-mixer@6.0.4: {}
 
-  ts-node@10.9.2(@types/node@22.0.2)(typescript@5.5.4):
+  ts-node@10.9.2(@types/node@22.1.0)(typescript@5.5.4):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 22.0.2
+      '@types/node': 22.1.0
       acorn: 8.12.1
       acorn-walk: 8.3.3
       arg: 4.1.3
@@ -6884,7 +6875,7 @@ snapshots:
 
   undici-types@5.26.5: {}
 
-  undici-types@6.11.1: {}
+  undici-types@6.13.0: {}
 
   undici@6.13.0: {}
 
