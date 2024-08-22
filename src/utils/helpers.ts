@@ -227,16 +227,16 @@ export class DailyReminderAtEmpiric {
     const thread = (await this.client.channels.fetch(
       empiricDailyReminderThreadId,
     )) as ThreadChannel;
-    let message = '';
 
-    if (
-      type === EMPIRIC_DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.STANDUP ||
-      type === EMPIRIC_DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.CODE_PUSH
-    ) {
-      message = `<@&${empiricRoleId}> please provide your standup update and a reminder to push code if you haven't already.`;
+    if (type === EMPIRIC_DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.STANDUP) {
+      const message = `<@&${empiricRoleId}> please provide your standup update.`;
+      thread.send(message);
     }
 
-    thread.send(message);
+    if (type === EMPIRIC_DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.CODE_PUSH) {
+      const message = `<@&${empiricRoleId}> a reminder to push code if you haven't already.`;
+      thread.send(message);
+    }
   }
 
   public static getInstance(client: Client): DailyReminderAtEmpiric {
@@ -247,12 +247,12 @@ export class DailyReminderAtEmpiric {
   }
 
   public start() {
-    this.standupJob.start();
+    // this.standupJob.start();
     this.codePushJob.start();
   }
 
   public stop() {
-    this.standupJob.stop();
+    // this.standupJob.stop();
     this.codePushJob.stop();
   }
 }
