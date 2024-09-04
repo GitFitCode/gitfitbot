@@ -222,7 +222,7 @@ export class DailyReminderAtEmpiric {
 
   private async sendReminder(type: string) {
     const empiricDailyReminderThreadId = process.env.EMPIRIC_DAILY_REMINDER_THREAD_ID ?? '';
-    const empiricRoleId = process.env.EMPIRIC_ROLE_ID ?? '';
+    const empiricRoleId = process.env.EMPIRIC_DEVS_ROLE_ID ?? '';
 
     const thread = (await this.client.channels.fetch(
       empiricDailyReminderThreadId,
