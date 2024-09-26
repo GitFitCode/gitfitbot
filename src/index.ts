@@ -1,4 +1,3 @@
-import 'newrelic';
 import { start, stop } from './Bot';
 
 // Start the bot.

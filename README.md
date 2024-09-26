@@ -43,11 +43,6 @@ pnpm i
 
 - Get access to the [Digital Junkyard](https://discord.gg/4cJFTdGMBY) development server on Discord.
 
-- Create a new file `newrelic.js` in project root.
-
-  - Look for the `newrelic.js` file in the same location as `.env` in Keybase.
-  - Copy those contents over to the local `newrelic.js` file.
-
 ### Run the bot
 
 ```shell
