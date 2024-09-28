@@ -58,10 +58,6 @@ function start() {
  * @param code - The signal code that triggered the stop.
  */
 function stop(code: NodeJS.Signals) {
-  // Stop the daily reminders.
-  const dailyReminder = DailyReminderAtEmpiric.getInstance(client);
-  dailyReminder.stop();
-
   // Log out, terminate connection to Discord and destroy the client.
   client.destroy();
 

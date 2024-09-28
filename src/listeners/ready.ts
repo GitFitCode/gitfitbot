@@ -24,10 +24,6 @@ export default (client: Client): void => {
       client.user.setActivity('the world slowly 🔥 itself', { type: ActivityType.Watching });
     }
 
-    // Start the daily reminders.
-    const dailyReminder = DailyReminderAtEmpiric.getInstance(client);
-    dailyReminder.start();
-
     // Register slash commands with the client.
     await client.application.commands.set(Commands);
 
