@@ -19,15 +19,15 @@
   "author": "GitFitCode",
   "license": "GNU GPLv3",
   "dependencies": {
-    "@langchain/core": "^0.2.34",
-    "@langchain/openai": "^0.2.11",
+    "@langchain/core": "latest",
+    "@langchain/openai": "latest",
     "@notionhq/client": "latest",
     "cron": "latest",
     "dayjs": "latest",
     "discord-tictactoe": "latest",
     "discord.js": "latest",
     "dotenv": "latest",
-    "langchain": "^0.2.20",
+    "langchain": "latest",
     "pouchdb-node": "latest",
     "undici": "latest"
   },
