@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "pm2": "pnpm build && pm2 start ./dist/src/index.js --name gitfitbot",
     "pre-build": "rm -rf ./dist",
-    "prepare": "husky install",
+    "prepare": "husky",
     "release": "release-it",
     "release-dry": "release-it --dry-run",
     "start": "node ./dist/src/index.js",
@@ -49,7 +49,7 @@
     "typescript": "latest"
   },
   "engines": {
-    "node": "20.x",
+    "node": "22.x",
     "pnpm": "9.x"
   }
 }
