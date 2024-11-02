@@ -57,7 +57,7 @@ When committing code to the repo, please follow the commit message guidelines/pa
 
 ### Currently supported commands
 
-[Supported Commands](/docs/COMMANDS)
+[Supported Commands](/docs/COMMANDS.md)
 
 ### Create new slash commands
 
