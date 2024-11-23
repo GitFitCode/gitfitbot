@@ -1,5 +1,12 @@
 
 
+## [1.19.2](https://github.com/GitFitCode/gitfitbot/compare/v1.19.1...v1.19.2) (2024-11-23)
+
+
+### Bug Fixes
+
+* **backlog:** report error when unable to create a backlog item ([467bcea](https://github.com/GitFitCode/gitfitbot/commit/467bcea4c0af84886a7b47e6cfadbe1c9d999eaa))
+
 ## [1.19.1](https://github.com/GitFitCode/gitfitbot/compare/v1.19.0...v1.19.1) (2024-06-28)
 
 
