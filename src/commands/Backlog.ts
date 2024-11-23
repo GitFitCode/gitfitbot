@@ -36,30 +36,38 @@ async function executeRun(interaction: CommandInteraction) {
     String(priorityType),
   );
 
-  // Notion link uses pageID without hyphens.
-  const pageIDWithoutHyphens = pageID.replaceAll('-', '');
-  const notionDatabaseLink = process.env.NOTION_BACKLOG_DATABASE_LINK;
-  const notionURL = `${notionDatabaseLink}&p=${pageIDWithoutHyphens}`;
+  if (pageID === '') {
+    await interaction.followUp({
+      ephemeral: true,
+      content: 'Failed to create a backlog item!',
+    });
+    return;
+  } else {
+    // Notion link uses pageID without hyphens.
+    const pageIDWithoutHyphens = pageID.replaceAll('-', '');
+    const notionDatabaseLink = process.env.NOTION_BACKLOG_DATABASE_LINK;
+    const notionURL = `${notionDatabaseLink}&p=${pageIDWithoutHyphens}`;
 
-  const content = 'Backlog task created!';
+    const content = 'Backlog task created!';
 
-  await interaction.followUp({
-    ephemeral: true,
-    content,
-    components: [
-      {
-        type: ComponentType.ActionRow,
-        components: [
-          {
-            type: ComponentType.Button,
-            style: ButtonStyle.Link,
-            url: notionURL,
-            label: 'Notion Link',
-          },
-        ],
-      },
-    ],
-  });
+    await interaction.followUp({
+      ephemeral: true,
+      content,
+      components: [
+        {
+          type: ComponentType.ActionRow,
+          components: [
+            {
+              type: ComponentType.Button,
+              style: ButtonStyle.Link,
+              url: notionURL,
+              label: 'Notion Link',
+            },
+          ],
+        },
+      ],
+    });
+  }
 }
 
 const Backlog: SlashCommand = {
