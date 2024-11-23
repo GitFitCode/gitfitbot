@@ -142,6 +142,14 @@ export const BACKLOG = {
       value: 'gitfitcode-general',
     },
     {
+      name: 'GFC Website',
+      value: 'gfc-website',
+    },
+    {
+      name: 'Content',
+      value: 'content',
+    },
+    {
       name: 'Discord Server',
       value: 'discord-server',
     },
