@@ -1,0 +1,4 @@
+[tool.commitizen]
+version = "1.19.2"
+version_files = ["package.json:version", "VERSION"]
+update_changelog_on_bump = true

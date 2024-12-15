@@ -11,8 +11,6 @@
     "pm2": "pnpm build && pm2 start ./dist/src/index.js --name gitfitbot",
     "pre-build": "rm -rf ./dist",
     "prepare": "husky",
-    "release": "release-it",
-    "release-dry": "release-it --dry-run",
     "start": "node ./dist/src/index.js",
     "test": "echo 'No tests yet'."
   },
@@ -34,7 +32,6 @@
   "devDependencies": {
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
-    "@release-it/conventional-changelog": "latest",
     "@types/node": "latest",
     "@types/pouchdb-node": "latest",
     "@typescript-eslint/eslint-plugin": "latest",
@@ -43,7 +40,6 @@
     "eslint-config-airbnb-base": "latest",
     "eslint-config-airbnb-typescript": "latest",
     "husky": "latest",
-    "release-it": "latest",
     "ts-node": "latest",
     "tslib": "latest",
     "typescript": "latest"
