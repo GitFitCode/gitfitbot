@@ -1,5 +1,7 @@
 
 
+## 1.20.0 (2024-12-15)
+
 ## [1.19.2](https://github.com/GitFitCode/gitfitbot/compare/v1.19.1...v1.19.2) (2024-11-23)
 
 
