@@ -4,10 +4,7 @@
 
 import 'dotenv/config';
 import { Client, GatewayIntentBits } from 'discord.js';
-import guildMemberAdd from './listeners/guildMemberAdd';
-import interactionCreate from './listeners/interactionCreate';
-import messageCreate from './listeners/messageCreate';
-import ready from './listeners/ready';
+import { registerEventListeners } from './listeners';
 import { DailyReminderAtEmpiric } from './utils';
 
 /**
@@ -43,10 +40,7 @@ const client = new Client({
  */
 function start() {
   // Register the bot client with listeners.
-  guildMemberAdd(client);
-  interactionCreate(client);
-  messageCreate(client);
-  ready(client);
+  registerEventListeners(client);
 
   // Call login on client for authenticating the bot with Discord.
   client.login(process.env.DISCORD_BOT_TOKEN);

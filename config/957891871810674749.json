@@ -1,0 +1,8 @@
+{
+  "prefix": "{GFC}",
+  "welcomeChannelId": "1019306709489033358",
+  "roles": {
+    "admin": "Admin",
+    "member": "Member"
+  }
+}

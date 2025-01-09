@@ -3,14 +3,24 @@
  */
 
 import { ActivityType, Client } from 'discord.js';
-import { AUTOBOT, DailyReminderAtEmpiric, GITFITBOT } from '../utils';
-import Commands from '../Commands';
+import { AUTOBOT, DailyReminderAtEmpiric, GITFITBOT, loadConfig } from '../utils';
+import { registerCommands } from '../Commands';
 
 export default (client: Client): void => {
   client.on('ready', async () => {
     if (!client.user || !client.application) {
       return;
     }
+
+    // Load configuration for each guild
+    client.guilds.cache.forEach(guild => {
+      try {
+        const config = loadConfig(guild.id);
+        console.log(`Loaded config for guild ${guild.name}:`, config);
+      } catch (error: any) {
+        console.error(error.message);
+      }
+    });
 
     // Set status (i.e. activity) of the "GitFitBot" bot.
     if (client.user.username.toLowerCase() === GITFITBOT) {
@@ -25,7 +35,7 @@ export default (client: Client): void => {
     }
 
     // Register slash commands with the client.
-    await client.application.commands.set(Commands);
+    await registerCommands(client);
 
     console.log(`${client.user.username} is online`);
   });

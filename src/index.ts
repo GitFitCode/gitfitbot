@@ -1,4 +1,5 @@
 import { start, stop } from './Bot';
+import 'dotenv/config';
 
 // Start the bot.
 start();
