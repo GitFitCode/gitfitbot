@@ -11,10 +11,11 @@ import {
   InteractionType,
   CacheType,
   ModalSubmitInteraction,
+  AutocompleteInteraction,
 } from 'discord.js';
 import Commands from '../Commands';
 import { COMMAND_STANDUP } from '../utils';
-
+import ThreadInfo from '../commands/ThreadInfo';
 // All commands that invoke a modal should be listed here.
 const dontDeferCommandsList = [COMMAND_STANDUP.COMMAND_NAME];
 
@@ -84,6 +85,11 @@ export default (client: Client): void => {
     // Check if interaction is a modal submission and call handleModalSubmission() if so.
     if (interaction.type === InteractionType.ModalSubmit) {
       await handleModalSubmission(interaction);
+    }
+
+    if (interaction.isAutocomplete()) {
+      console.log('Autocomplete interaction received');
+      await ThreadInfo.autocomplete?.(interaction as AutocompleteInteraction);
     }
   });
 };

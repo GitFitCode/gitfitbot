@@ -24,9 +24,24 @@ export default (client: Client): void => {
       client.user.setActivity('the world slowly 🔥 itself', { type: ActivityType.Watching });
     }
 
-    // Register slash commands with the client.
-    await client.application.commands.set(Commands);
-
     console.log(`${client.user.username} is online`);
+
+    // Register slash commands with the client.
+    try {
+      console.log('Registering slash commands...');
+      const guildId = process.env.DISCORD_SERVER_ID;
+      if (!guildId) {
+        throw new Error('DISCORD_SERVER_ID is not defined');
+      }
+      const guild = client.guilds.cache.get(guildId);
+      if (!guild) {
+        throw new Error(`Guild with ID ${guildId} not found`);
+      }
+      await guild.commands.set(Commands);
+      console.log('Slash commands registered successfully');
+    } catch (error) {
+      console.error(`Error registering slash commands: ${error}`);
+    }
+
   });
 };

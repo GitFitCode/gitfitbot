@@ -11,6 +11,7 @@
 - [`/test` - A test command where the bot will respond with `Test.`](#test---a-test-command-where-the-bot-will-respond-with-test)
 - [`/tictactoe` - Tic Tac Toe game that can be playes with AI or a human opponent](#tictactoe---tic-tac-toe-game-that-can-be-playes-with-ai-or-a-human-opponent)
 - [`/standup` - Provide standup update](#standup---provide-standup-update)
+- [ `/thread-info` - Information about the thread](#thread-info---information-about-the-thread)
 
 ---
 
@@ -120,3 +121,13 @@
 1. Opponent - **OPTIONAL**
 
 ### `/standup` - Provide standup update
+
+### `/thread-info` - Information about the thread
+
+**Options**:
+
+1. Forum Channel
+2. Thread ID
+
+---
+

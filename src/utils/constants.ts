@@ -243,3 +243,38 @@ export const COMMAND_STANDUP = {
   BLOCKERS_LABEL: 'Any blockers?',
   BLOCKERS_DEFAULT_VALUE: 'None',
 };
+
+/**
+ * Constants for the Thread Info command.
+ */
+export const COMMAND_THREAD_INFO = {
+  COMMAND_NAME: 'thread-info',
+  COMMAND_DESCRIPTION: 'Retrieve metadata about a specific thread in a selected channel.',
+  
+  // Option names
+  OPTIONS: {
+    CHANNEL: 'channel',
+    THREAD_ID: 'thread_id',
+  },
+
+  // Channel types that support threads
+  CHANNEL_TYPES: ['GUILD_TEXT', 'GUILD_ANNOUNCEMENT', 'GUILD_THREAD_NEWS', 'GUILD_PUBLIC_THREAD', 'GUILD_PRIVATE_THREAD', 'GUILD_STAGE_VOICE', 'GUILD_TEXT', 'GUILD_NEWS', 'GUILD_STORE'] as const,
+  
+  // Embed Colors
+  EMBED_COLORS: {
+    DEFAULT: 'Blue',
+    ERROR: 'Red',
+  },
+  
+  // Error Messages
+  ERROR_MESSAGES: {
+    INVALID_CHANNEL: 'Please select a valid text or announcement channel that can contain threads.',
+    THREAD_NOT_FOUND: 'No thread found with the provided ID in that channel.',
+    FETCH_ERROR: 'Something went wrong while fetching the thread. Please ensure the thread ID is correct and try again.',
+  },
+  
+  // Success Messages
+  SUCCESS_MESSAGES: {
+    THREAD_INFO_TITLE: 'Thread Metadata',
+  },
+};

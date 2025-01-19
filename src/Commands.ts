@@ -13,6 +13,7 @@ import Ping from './commands/Ping';
 import Standup from './commands/Standup';
 import Support from './commands/Support';
 import Test from './commands/Test';
+import ThreadInfo from './commands/ThreadInfo';
 import TicTacToe from './commands/TicTacToe';
 
 const Commands: SlashCommand[] = [
@@ -26,6 +27,7 @@ const Commands: SlashCommand[] = [
   Standup,
   Support,
   Test,
+  ThreadInfo,
   TicTacToe,
 ];
 
