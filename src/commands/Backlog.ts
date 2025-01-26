@@ -5,15 +5,15 @@
  */
 
 import {
-  CommandInteraction,
-  Client,
   ApplicationCommandOptionType,
   ButtonStyle,
+  Client,
+  CommandInteraction,
   ComponentType,
 } from 'discord.js';
 import 'dotenv/config';
-import { BACKLOG, createNotionBacklogDBEntry } from '../utils';
 import { SlashCommand } from '../Command';
+import { BACKLOG, createNotionBacklogDBEntry } from '../utils';
 
 async function executeRun(interaction: CommandInteraction) {
   // Snowflake structure received from get(), destructured and renamed.

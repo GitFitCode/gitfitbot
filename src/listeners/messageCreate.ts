@@ -1,5 +1,3 @@
-/* eslint-disable operator-linebreak */
-
 /**
  * "messageCreate" event listener for the bot.
  */

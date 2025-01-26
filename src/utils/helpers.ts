@@ -1,13 +1,7 @@
-/* eslint-disable operator-linebreak */
-/* eslint-disable implicit-arrow-linebreak */
-
+import { createClient } from '@supabase/supabase-js';
 import { CronJob } from 'cron';
-import {
-  ApplicationCommandOptionType,
-  ApplicationCommandOptionChoiceData,
-  Client,
-} from 'discord.js';
 import dayjs from 'dayjs';
+import { ApplicationCommandOptionChoiceData, ApplicationCommandOptionType } from 'discord.js';
 import 'dotenv/config';
 import {
   COMMAND_EVENT,
@@ -17,7 +11,6 @@ import {
   THREAD_START_MESSAGE_SLICE_INDEX,
 } from './constants';
 import { GitFitCodeEventOptions } from './types';
-import { createClient } from '@supabase/supabase-js';
 
 /**
  * Generates an array of choices for the current year and the next year.

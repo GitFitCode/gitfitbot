@@ -4,9 +4,9 @@
  * To trigger, type `/tictactoe` in the discord server.
  */
 
-import { CommandInteraction, Client, ApplicationCommandOptionType } from 'discord.js';
-import { COMMAND_TICTACTOE } from '../utils';
+import { ApplicationCommandOptionType, Client, CommandInteraction } from 'discord.js';
 import { SlashCommand } from '../Command';
+import { COMMAND_TICTACTOE } from '../utils';
 
 const TTT = require('discord-tictactoe');
 

@@ -41,6 +41,8 @@
     "eslint-config-airbnb-base": "latest",
     "eslint-config-airbnb-typescript": "latest",
     "husky": "latest",
+    "prettier": "latest",
+    "prettier-plugin-organize-imports": "latest",
     "ts-node": "latest",
     "tslib": "latest",
     "typescript": "latest"

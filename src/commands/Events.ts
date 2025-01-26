@@ -1,26 +1,24 @@
-/* eslint-disable operator-linebreak */
-
 /**
  * Helper slash command for managing GFC events.
  *
  * To trigger, type `/events` in the discord server.
  */
 
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
 import {
-  CommandInteraction,
-  Client,
   ApplicationCommandOptionType,
+  ButtonStyle,
+  ChannelType,
+  Client,
+  Collection,
+  CommandInteraction,
+  ComponentType,
   GuildScheduledEventCreateOptions,
   GuildScheduledEventEntityType,
   GuildScheduledEventPrivacyLevel,
-  ChannelType,
-  Collection,
   Role,
-  ComponentType,
-  ButtonStyle,
 } from 'discord.js';
-import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration';
 import 'dotenv/config';
 import { SlashCommand } from '../Command';
 import { buildEventOptions, COMMAND_EVENT } from '../utils';

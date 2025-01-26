@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits } from 'discord.js';
-import { SlashCommand } from 'src/Command';
 import 'dotenv/config';
+import { SlashCommand } from 'src/Command';
 
 // A new instance of `Client`.
 const client = new Client({

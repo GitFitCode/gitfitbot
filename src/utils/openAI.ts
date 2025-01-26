@@ -1,10 +1,10 @@
-import { ChatOpenAI } from '@langchain/openai';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { ChatOpenAI } from '@langchain/openai';
 import 'dotenv/config';
 import {
   GENERAL_GFC_SYSTEM_PROMPT,
-  OPEN_AI_CONFIG,
   OPEN_AI_API_RESPONSE_ERROR_MSG,
+  OPEN_AI_CONFIG,
 } from './constants';
 
 /**
