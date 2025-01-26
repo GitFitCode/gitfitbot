@@ -4,10 +4,10 @@
  * To trigger, type `/joke` in the discord server.
  */
 
-import { CommandInteraction, Client, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandOptionType, Client, CommandInteraction } from 'discord.js';
 import { request } from 'undici';
-import { COMMAND_JOKE } from '../utils';
 import { SlashCommand } from '../Command';
+import { COMMAND_JOKE } from '../utils';
 
 /**
  * Function to query the joke api and send a joke to the discord server.

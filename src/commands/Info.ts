@@ -5,10 +5,10 @@
  * To trigger, type `/info` in the discord server.
  */
 
-import { CommandInteraction, Client } from 'discord.js';
+import { Client, CommandInteraction } from 'discord.js';
 import { version } from '../../package.json';
-import { COMMAND_INFO } from '../utils';
 import { SlashCommand } from '../Command';
+import { COMMAND_INFO } from '../utils';
 
 async function executeRun(interaction: CommandInteraction) {
   const content = `\`Your username\`: ${interaction.user.username}

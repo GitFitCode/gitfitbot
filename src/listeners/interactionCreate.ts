@@ -1,15 +1,13 @@
-/* eslint-disable object-curly-newline */
-
 /**
  * "interactionCreate" event listener for the bot.
  */
 
 import {
-  CommandInteraction,
+  CacheType,
   Client,
+  CommandInteraction,
   Interaction,
   InteractionType,
-  CacheType,
   ModalSubmitInteraction,
 } from 'discord.js';
 import Commands from '../Commands';

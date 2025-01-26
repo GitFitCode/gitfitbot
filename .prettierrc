@@ -4,11 +4,12 @@
   "embeddedLanguageFormatting": "auto",
   "endOfLine": "lf",
   "htmlWhitespaceSensitivity": "css",
+  "plugins": ["prettier-plugin-organize-imports"],
   "printWidth": 100,
   "proseWrap": "preserve",
   "quoteProps": "as-needed",
   "semi": true,
+  "singleQuote": true,
   "tabWidth": 2,
-  "trailingComma": "all",
-  "singleQuote": true
+  "trailingComma": "all"
 }

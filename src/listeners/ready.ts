@@ -3,8 +3,8 @@
  */
 
 import { ActivityType, Client } from 'discord.js';
-import { AUTOBOT, CronJobs, GITFITBOT } from '../utils';
 import Commands from '../Commands';
+import { AUTOBOT, CronJobs, GITFITBOT } from '../utils';
 
 export default (client: Client): void => {
   client.on('ready', async () => {
