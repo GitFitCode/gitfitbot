@@ -5,18 +5,19 @@ import { CronJob } from 'cron';
 import {
   ApplicationCommandOptionType,
   ApplicationCommandOptionChoiceData,
-  ThreadChannel,
   Client,
 } from 'discord.js';
 import dayjs from 'dayjs';
 import 'dotenv/config';
 import {
   COMMAND_EVENT,
-  EMPIRIC_DAILY_REMINDER_CRON_CONFIG,
+  GFC_CRON_CONFIG,
+  GFC_SUPABASE_PING_TABLE,
   NOTION_PAGE_ID_DELIMITER,
   THREAD_START_MESSAGE_SLICE_INDEX,
 } from './constants';
 import { GitFitCodeEventOptions } from './types';
+import { createClient } from '@supabase/supabase-js';
 
 /**
  * Generates an array of choices for the current year and the next year.
@@ -197,62 +198,55 @@ export function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export class DailyReminderAtEmpiric {
-  private static instance: DailyReminderAtEmpiric;
-  private standupJob: CronJob;
-  private codePushJob: CronJob;
+export class CronJobs {
+  private static instance: CronJobs;
+  private GFCSupbasePingJob: CronJob;
 
-  constructor(private client: Client) {
-    this.standupJob = new CronJob(
-      EMPIRIC_DAILY_REMINDER_CRON_CONFIG.STANDUP_PATTERN, // cron pattern for standup
-      () => this.sendReminder(EMPIRIC_DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.STANDUP), // send standup reminder
-      null, // onComplete
-      false, // start
-      EMPIRIC_DAILY_REMINDER_CRON_CONFIG.TIMEZONE, // timezone
-    );
-
-    this.codePushJob = new CronJob(
-      EMPIRIC_DAILY_REMINDER_CRON_CONFIG.CODE_PUSH_PATTERN, // cron pattern for code push
-      () => this.sendReminder(EMPIRIC_DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.CODE_PUSH), // send code push reminder
-      null, // onComplete
-      false, // start
-      EMPIRIC_DAILY_REMINDER_CRON_CONFIG.TIMEZONE, // timezone
+  constructor() {
+    this.GFCSupbasePingJob = new CronJob(
+      GFC_CRON_CONFIG.SUPABASE_PING.PATTERN,
+      () => this._execute(GFC_CRON_CONFIG.SUPABASE_PING),
+      null,
+      false,
+      GFC_CRON_CONFIG.SUPABASE_PING.TIMEZONE,
     );
   }
 
-  private async sendReminder(type: string) {
-    const empiricDailyReminderThreadId = process.env.EMPIRIC_DAILY_REMINDER_THREAD_ID ?? '';
-    const empiricRoleId = process.env.EMPIRIC_DEVS_ROLE_ID ?? '';
+  private async _execute(type: { PATTERN: string; TIMEZONE: string }) {
+    // Supabase ping
+    if (type === GFC_CRON_CONFIG.SUPABASE_PING) {
+      const SUPABASE_URL = process.env.SUPABASE_URL || '';
+      const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
+      // ping supabase
 
-    const thread = (await this.client.channels.fetch(
-      empiricDailyReminderThreadId,
-    )) as ThreadChannel;
-
-    if (type === EMPIRIC_DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.STANDUP) {
-      const message = `<@&${empiricRoleId}> please provide your standup update.`;
-      thread.send(message);
-    }
-
-    if (type === EMPIRIC_DAILY_REMINDER_CRON_CONFIG.JOB_TYPE.CODE_PUSH) {
-      const message = `<@&${empiricRoleId}> a reminder to push code if you haven't already.`;
-      thread.send(message);
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        console.error('Missing Supabase URL or Supabase Anon Key');
+      } else {
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        try {
+          const { data, error } = await supabase.from(GFC_SUPABASE_PING_TABLE).select().limit(1);
+          if (error) {
+            console.error('Error pinging Supabase:', error);
+          }
+        } catch (error) {
+          console.error('Error pinging Supabase:', error);
+        }
+      }
     }
   }
 
-  public static getInstance(client: Client): DailyReminderAtEmpiric {
-    if (!DailyReminderAtEmpiric.instance) {
-      DailyReminderAtEmpiric.instance = new DailyReminderAtEmpiric(client);
+  public static getInstance(): CronJobs {
+    if (!CronJobs.instance) {
+      CronJobs.instance = new CronJobs();
     }
-    return DailyReminderAtEmpiric.instance;
+    return CronJobs.instance;
   }
 
-  public start() {
-    // this.standupJob.start();
-    this.codePushJob.start();
+  public startGFCSupbasePingJob() {
+    this.GFCSupbasePingJob.start();
   }
 
-  public stop() {
-    // this.standupJob.stop();
-    this.codePushJob.stop();
+  public stopGFCSupbasePingJob() {
+    this.GFCSupbasePingJob.stop();
   }
 }

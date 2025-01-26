@@ -32,11 +32,18 @@ pnpm i
 
 ### Setting up .env
 
-- Create a `.env` file at the root of your project.
+```sh
+cp .env.example .env
+```
+
+```pwsh
+copy .env.example .env # pwsh
+```
+
 - Populate fields in the `.env` file.
 
   - Sign up on [Keybase](https://keybase.io/)!
-  - Ask Sirrele, Pratik, or Robert for an invite to the GitFitCode Team in Keybase.
+  - Ask Sirrele or Pratik for an invite to the GitFitCode Team in Keybase.
   - Upon receiving the invite, navigate to the Files section in Keybase.
   - Inside Files, look for team -> gitfitcode -> discord bot secrets -> autobot -> `.env`.
   - Download or copy contents into your local `.env` file.
@@ -46,7 +53,7 @@ pnpm i
 ### Run the bot
 
 ```shell
-pnpm dev
+pnpm dev # the bot is online in the Digital Junkyard discord server
 ```
 
 ## Development

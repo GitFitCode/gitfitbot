@@ -35,15 +35,13 @@ export const OPEN_AI_CONFIG = {
   STOP: ['GFC Community Member:'],
 };
 export const DISCORD_MESSAGE_MAX_CHAR_LIMIT = 2000;
-export const EMPIRIC_DAILY_REMINDER_CRON_CONFIG = {
-  STANDUP_PATTERN: '0 5 * * 1-5', // At 5am on every day-of-week from Monday through Friday.
-  CODE_PUSH_PATTERN: '0 17 * * 1-5', // At 5pm on every day-of-week from Monday through Friday.
-  TIMEZONE: 'America/Los_Angeles',
-  JOB_TYPE: {
-    STANDUP: 'standup',
-    CODE_PUSH: 'code-push',
+export const GFC_CRON_CONFIG = {
+  SUPABASE_PING: {
+    PATTERN: '0 9 * * 2,5', // At 09:00 on Tuesday and Friday.
+    TIMEZONE: 'America/Los_Angeles',
   },
 };
+export const GFC_SUPABASE_PING_TABLE = 'contact_form_submissions';
 
 // Events command constants
 export const COMMAND_EVENT = {
