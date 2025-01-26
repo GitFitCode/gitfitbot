@@ -9,9 +9,6 @@
     "dev": "pnpm i && ts-node ./src/index.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix && pnpm format",
-    "lint:strict": "eslint --max-warnings=0 .",
     "pm2": "pnpm build && pm2 start ./dist/src/index.js --name gitfitbot",
     "pre-build": "rm -rf ./dist",
     "prepare": "husky",
@@ -37,14 +34,11 @@
   "devDependencies": {
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
-    "@eslint/js": "latest",
     "@types/node": "latest",
     "@types/pouchdb-node": "latest",
-    "eslint": "latest",
     "husky": "latest",
     "lint-staged": "latest",
     "prettier": "latest",
-    "prettier-eslint": "latest",
     "prettier-plugin-organize-imports": "latest",
     "ts-node": "latest",
     "tslib": "latest",
@@ -52,7 +46,6 @@
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
-      "eslint --max-warnings=0",
       "prettier -w"
     ],
     "**/*.{json,css,scss,md,webmanifest}": [

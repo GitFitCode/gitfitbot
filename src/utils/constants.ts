@@ -1,5 +1,3 @@
-/* eslint-disable operator-linebreak */
-
 export const GITFITBOT = 'gitfitbot';
 export const AUTOBOT = 'autobot';
 export const THREAD_CLOSING_MESSAGE = 'OK, closing/archiving the thread.';
@@ -37,7 +35,8 @@ export const OPEN_AI_CONFIG = {
 export const DISCORD_MESSAGE_MAX_CHAR_LIMIT = 2000;
 export const GFC_CRON_CONFIG = {
   SUPABASE_PING: {
-    PATTERN: '0 9 * * 2,5', // At 09:00 on Tuesday and Friday.
+    // At 09:00 on Tuesday and Friday.
+    PATTERN: '0 9 * * 2,5',
     TIMEZONE: 'America/Los_Angeles',
   },
 };

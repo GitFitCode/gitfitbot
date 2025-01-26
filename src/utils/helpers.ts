@@ -187,7 +187,6 @@ export function addHoursToDate(date: Date, hours: number): Date {
  * @returns A promise that resolves after the specified delay.
  */
 export function delay(ms: number) {
-  // eslint-disable-next-line no-promise-executor-return
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 

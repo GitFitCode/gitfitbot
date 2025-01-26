@@ -1,5 +1,3 @@
-/* eslint-disable indent */
-
 module.exports = {
   extends: ['@commitlint/config-conventional'],
   rules: {
