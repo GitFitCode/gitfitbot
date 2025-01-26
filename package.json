@@ -7,12 +7,16 @@
     "clear-commands": "pnpm build && node ./dist/src/scripts/clearRegisteredCommands.js",
     "clear-events": "pnpm build && node ./dist/src/scripts/clearScheduledEvents.js",
     "dev": "pnpm i && ts-node ./src/index.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix && pnpm format",
+    "lint:strict": "eslint --max-warnings=0 .",
     "pm2": "pnpm build && pm2 start ./dist/src/index.js --name gitfitbot",
     "pre-build": "rm -rf ./dist",
     "prepare": "husky",
     "start": "node ./dist/src/index.js",
-    "test": "echo 'No tests yet'."
+    "typecheck": "tsc --pretty --noEmit --incremental false"
   },
   "author": "GitFitCode",
   "license": "GNU GPLv3",
@@ -38,12 +42,22 @@
     "@types/pouchdb-node": "latest",
     "eslint": "latest",
     "husky": "latest",
+    "lint-staged": "latest",
     "prettier": "latest",
     "prettier-eslint": "latest",
     "prettier-plugin-organize-imports": "latest",
     "ts-node": "latest",
     "tslib": "latest",
     "typescript": "latest"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": [
+      "eslint --max-warnings=0",
+      "prettier -w"
+    ],
+    "**/*.{json,css,scss,md,webmanifest}": [
+      "prettier -w"
+    ]
   },
   "engines": {
     "node": "22.x",
