@@ -1,3 +1,5 @@
+/* eslint-disable indent */
+
 import pkg from '@eslint/js';
 
 const { configs } = pkg;
