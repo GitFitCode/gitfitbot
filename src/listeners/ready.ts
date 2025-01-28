@@ -4,7 +4,7 @@
 
 import { ActivityType, Client } from 'discord.js';
 import Commands from '../Commands';
-import { AUTOBOT, CronJobs, GITFITBOT } from '../utils';
+import { AUTOBOT, CronJobs, GITFITBOT, subscribeContactFormInsertsListener } from '../utils';
 
 export default (client: Client): void => {
   client.on('ready', async () => {
@@ -27,6 +27,9 @@ export default (client: Client): void => {
     // Run cron jobs
     const cronJobs = CronJobs.getInstance();
     cronJobs.startGFCSupbasePingJob();
+
+    // Subscribe for changes in Supabase
+    await subscribeContactFormInsertsListener(client);
 
     // Register slash commands with the client.
     await client.application.commands.set(Commands);

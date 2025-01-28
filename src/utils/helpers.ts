@@ -1,13 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 import { CronJob } from 'cron';
 import dayjs from 'dayjs';
-import { ApplicationCommandOptionChoiceData, ApplicationCommandOptionType } from 'discord.js';
+import {
+  ApplicationCommandOptionChoiceData,
+  ApplicationCommandOptionType,
+  Client,
+  TextChannel,
+} from 'discord.js';
 import 'dotenv/config';
 import {
   COMMAND_EVENT,
   GFC_CRON_CONFIG,
   GFC_SUPABASE_PING_TABLE,
   NOTION_PAGE_ID_DELIMITER,
+  SUPABASE_CONFIG,
   THREAD_START_MESSAGE_SLICE_INDEX,
 } from './constants';
 import { GitFitCodeEventOptions } from './types';
@@ -216,7 +222,7 @@ export class CronJobs {
       } else {
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         try {
-          const { data, error } = await supabase.from(GFC_SUPABASE_PING_TABLE).select().limit(1);
+          const { error } = await supabase.from(GFC_SUPABASE_PING_TABLE).select().limit(1);
           if (error) {
             console.error('Error pinging Supabase:', error);
           }
@@ -242,3 +248,52 @@ export class CronJobs {
     this.GFCSupbasePingJob.stop();
   }
 }
+
+// listen to supabase realtime changes
+export const subscribeContactFormInsertsListener = async (client: Client) => {
+  const SUPABASE_URL = process.env.SUPABASE_URL || '';
+  const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
+
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    console.error('Missing Supabase URL or Supabase Anon Key');
+  } else {
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    supabase
+      .channel(SUPABASE_CONFIG.SUPABASE_REALTIME_CHANNEL)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: SUPABASE_CONFIG.SUPABASE_REALTIME_TABLE },
+        (payload) => {
+          // send a message to a discord thread via client
+          const channelID = process.env.CONTACT_FORM_SUBMISSION_CHANNEL_ID || '';
+          const channel = client.channels.cache.get(channelID) as TextChannel;
+
+          const content = `
+**New Contact Form Submission:**
+
+- **Name:** ${payload.new.name}
+- **Company:** ${payload.new.company || 'N/A'}
+- **Phone:** ${payload.new.phone}
+- **Email:** ${payload.new.email}
+- **Confirm Email:** ${payload.new.confirm_email}
+- **Budget:** ${payload.new.budget}
+- **Synopsis:** ${payload.new.synopsis || 'N/A'}
+- **Code Base:** ${payload.new.code_base || 'N/A'}
+- **Designs:** ${payload.new.designs || 'N/A'}
+- **Documentation:** ${payload.new.documentation || 'N/A'}
+`;
+          channel.send(content);
+        },
+      )
+      .subscribe((status, err) => {
+        if (err) {
+          console.error(
+            `Error subscribing to ${SUPABASE_CONFIG.SUPABASE_REALTIME_CHANNEL} channel`,
+            err,
+          );
+        }
+        console.log(`${SUPABASE_CONFIG.SUPABASE_REALTIME_CHANNEL} subscription status`, status);
+      });
+  }
+};

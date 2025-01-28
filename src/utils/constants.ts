@@ -240,3 +240,8 @@ export const COMMAND_STANDUP = {
   BLOCKERS_LABEL: 'Any blockers?',
   BLOCKERS_DEFAULT_VALUE: 'None',
 };
+
+export const SUPABASE_CONFIG = {
+  SUPABASE_REALTIME_TABLE: 'contact_form_submissions',
+  SUPABASE_REALTIME_CHANNEL: 'contact-form-table-inserts',
+};
