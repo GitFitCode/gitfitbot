@@ -4,8 +4,9 @@
  * To trigger, type `/next-speaker` in the discord server.
  */
 
-import { CommandInteraction, Client, ChannelType } from 'discord.js';
+import { ChannelType, Client, CommandInteraction } from 'discord.js';
 import 'dotenv/config';
+import { SlashCommand } from '../Command';
 import {
   COMMAND_NEXT_SPEAKER,
   fetchAllAttendees,
@@ -17,7 +18,6 @@ import {
   RETRO_NEXT_SPEAKER_MESSAGE,
   updateAttendeeRetroStatus,
 } from '../utils';
-import { SlashCommand } from '../Command';
 
 /**
  * Function to pick the next attendee randomly.

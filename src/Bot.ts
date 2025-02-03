@@ -2,13 +2,13 @@
  * Entrypoint for the bot.
  */
 
-import 'dotenv/config';
 import { Client, GatewayIntentBits } from 'discord.js';
+import 'dotenv/config';
 import guildMemberAdd from './listeners/guildMemberAdd';
 import interactionCreate from './listeners/interactionCreate';
 import messageCreate from './listeners/messageCreate';
 import ready from './listeners/ready';
-import { DailyReminderAtEmpiric } from './utils';
+import { CronJobs } from './utils';
 
 /**
  * Creates a new Discord Client with specific intents and allowed mentions.
@@ -58,6 +58,9 @@ function start() {
  * @param code - The signal code that triggered the stop.
  */
 function stop(code: NodeJS.Signals) {
+  // Stop cron jobs
+  CronJobs.getInstance().stopGFCSupbasePingJob();
+
   // Log out, terminate connection to Discord and destroy the client.
   client.destroy();
 

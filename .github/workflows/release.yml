@@ -3,12 +3,40 @@ name: Release
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
+  lint:
+    name: 🧹 Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8
+        with:
+          node-version: 22
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
+        with:
+          version: 10
+          run_install: true
+
+      - name: 🔎 Type check
+        run: pnpm typecheck
+
+      - name: 💅 Prettier check
+        run: pnpm format:check
+
   release:
-    # create a release if the head commit's commit message does NOT starts with `bump:`
-    if: ${{ ! startsWith(github.event.head_commit.message , 'bump:') }}
+    # run release if event is push and the head commit's commit message does NOT starts with `bump:`
+    if: ${{ github.event_name == 'push' && ! startsWith(github.event.head_commit.message , 'bump:') }}
     name: ⬆️ Bump version and create changelog with a GitHub release
+    needs: lint
     runs-on: ubuntu-latest
 
     steps:

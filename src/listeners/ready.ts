@@ -3,8 +3,8 @@
  */
 
 import { ActivityType, Client } from 'discord.js';
-import { AUTOBOT, DailyReminderAtEmpiric, GITFITBOT } from '../utils';
 import Commands from '../Commands';
+import { AUTOBOT, CronJobs, GITFITBOT } from '../utils';
 
 export default (client: Client): void => {
   client.on('ready', async () => {
@@ -24,6 +24,13 @@ export default (client: Client): void => {
       client.user.setActivity('the world slowly 🔥 itself', { type: ActivityType.Watching });
     }
 
+    // Run cron jobs
+    const cronJobs = CronJobs.getInstance();
+    cronJobs.startGFCSupbasePingJob();
+
+    // Register slash commands with the client.
+    await client.application.commands.set(Commands);
+
     console.log(`${client.user.username} is online`);
 
     // Register slash commands with the client.
@@ -42,6 +49,5 @@ export default (client: Client): void => {
     } catch (error) {
       console.error(`Error registering slash commands: ${error}`);
     }
-
   });
 };

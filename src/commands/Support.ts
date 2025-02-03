@@ -1,6 +1,3 @@
-/* eslint-disable implicit-arrow-linebreak */
-/* eslint-disable operator-linebreak */
-
 /**
  * Slash command that open a support ticket when triggered.
  *
@@ -8,35 +5,35 @@
  */
 
 import {
-  CommandInteraction,
-  Client,
-  ApplicationCommandOptionType,
   AnyThreadChannel,
-  CacheType,
-  ComponentType,
+  ApplicationCommandOptionType,
   ButtonStyle,
+  CacheType,
   ChannelType,
+  Client,
+  CommandInteraction,
+  ComponentType,
 } from 'discord.js';
 import 'dotenv/config';
+import { SlashCommand } from '../Command';
 import {
   CHECK_MARK_EMOJI,
   COMMAND_SUPPORT,
   NOTION_PAGE_ID_DELIMITER,
   NOT_A_THREAD_FOR_CLOSING_ERROR_MESSAGE,
+  NOT_THE_BOT_THREAD_FOR_CLOSING_ERROR_MESSAGE,
+  OPEN_AI_QUESTION_IDENTIFIER,
+  THREAD_CLOSING_MESSAGE,
   THREAD_CLOSING_SUCCESSFUL_MESSAGE,
   THREAD_CREATION_ERROR_MESSAGE,
   THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_1,
   THREAD_CREATION_SUCCESSFUL_MESSAGE_PART_2,
   THREAD_START_MESSAGE_SLICE_INDEX,
-  OPEN_AI_QUESTION_IDENTIFIER,
+  addDiscordThreadLinkToNotionPage,
   // Notion DB helper functions
   createNotionSupportTicketsDBEntry,
   updateNotionSupportTicketsDBEntry,
-  NOT_THE_BOT_THREAD_FOR_CLOSING_ERROR_MESSAGE,
-  THREAD_CLOSING_MESSAGE,
-  addDiscordThreadLinkToNotionPage,
 } from '../utils';
-import { SlashCommand } from '../Command';
 
 /**
  * Function to create a thread.

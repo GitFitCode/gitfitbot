@@ -4,9 +4,9 @@
  * To trigger, type `/test` in the discord server.
  */
 
-import { CommandInteraction, Client } from 'discord.js';
-import { COMMAND_TEST } from '../utils';
+import { Client, CommandInteraction } from 'discord.js';
 import { SlashCommand } from '../Command';
+import { COMMAND_TEST } from '../utils';
 
 async function executeRun(interaction: CommandInteraction) {
   const content = 'Test.';

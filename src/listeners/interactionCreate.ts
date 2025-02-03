@@ -1,21 +1,19 @@
-/* eslint-disable object-curly-newline */
-
 /**
  * "interactionCreate" event listener for the bot.
  */
 
 import {
-  CommandInteraction,
+  AutocompleteInteraction,
+  CacheType,
   Client,
+  CommandInteraction,
   Interaction,
   InteractionType,
-  CacheType,
   ModalSubmitInteraction,
-  AutocompleteInteraction,
 } from 'discord.js';
 import Commands from '../Commands';
-import { COMMAND_STANDUP } from '../utils';
 import ThreadInfo from '../commands/ThreadInfo';
+import { COMMAND_STANDUP } from '../utils';
 // All commands that invoke a modal should be listed here.
 const dontDeferCommandsList = [COMMAND_STANDUP.COMMAND_NAME];
 

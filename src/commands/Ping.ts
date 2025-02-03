@@ -4,9 +4,9 @@
  * To trigger, type `/ping` in the discord server.
  */
 
-import { CommandInteraction, Client } from 'discord.js';
-import { COMMAND_PING } from '../utils';
+import { Client, CommandInteraction } from 'discord.js';
 import { SlashCommand } from '../Command';
+import { COMMAND_PING } from '../utils';
 
 async function executeRun(client: Client, interaction: CommandInteraction) {
   const sent = await interaction.followUp({

@@ -5,16 +5,16 @@
  */
 
 import {
-  CommandInteraction,
+  ActionRowBuilder,
   Client,
+  CommandInteraction,
+  ModalActionRowComponentBuilder,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-  ActionRowBuilder,
-  ModalActionRowComponentBuilder,
 } from 'discord.js';
-import { COMMAND_STANDUP } from '../utils';
 import { SlashCommand } from '../Command';
+import { COMMAND_STANDUP } from '../utils';
 
 async function executeRun(interaction: CommandInteraction) {
   // Create the modal

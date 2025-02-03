@@ -1,5 +1,3 @@
-/* eslint-disable operator-linebreak */
-
 export const GITFITBOT = 'gitfitbot';
 export const AUTOBOT = 'autobot';
 export const THREAD_CLOSING_MESSAGE = 'OK, closing/archiving the thread.';
@@ -35,15 +33,14 @@ export const OPEN_AI_CONFIG = {
   STOP: ['GFC Community Member:'],
 };
 export const DISCORD_MESSAGE_MAX_CHAR_LIMIT = 2000;
-export const EMPIRIC_DAILY_REMINDER_CRON_CONFIG = {
-  STANDUP_PATTERN: '0 5 * * 1-5', // At 5am on every day-of-week from Monday through Friday.
-  CODE_PUSH_PATTERN: '0 17 * * 1-5', // At 5pm on every day-of-week from Monday through Friday.
-  TIMEZONE: 'America/Los_Angeles',
-  JOB_TYPE: {
-    STANDUP: 'standup',
-    CODE_PUSH: 'code-push',
+export const GFC_CRON_CONFIG = {
+  SUPABASE_PING: {
+    // At 09:00 on Tuesday and Friday.
+    PATTERN: '0 9 * * 2,5',
+    TIMEZONE: 'America/Los_Angeles',
   },
 };
+export const GFC_SUPABASE_PING_TABLE = 'contact_form_submissions';
 
 // Events command constants
 export const COMMAND_EVENT = {
@@ -250,7 +247,7 @@ export const COMMAND_STANDUP = {
 export const COMMAND_THREAD_INFO = {
   COMMAND_NAME: 'thread-info',
   COMMAND_DESCRIPTION: 'Retrieve metadata about a specific thread in a selected channel.',
-  
+
   // Option names
   OPTIONS: {
     CHANNEL: 'channel',
@@ -258,21 +255,32 @@ export const COMMAND_THREAD_INFO = {
   },
 
   // Channel types that support threads
-  CHANNEL_TYPES: ['GUILD_TEXT', 'GUILD_ANNOUNCEMENT', 'GUILD_THREAD_NEWS', 'GUILD_PUBLIC_THREAD', 'GUILD_PRIVATE_THREAD', 'GUILD_STAGE_VOICE', 'GUILD_TEXT', 'GUILD_NEWS', 'GUILD_STORE'] as const,
-  
+  CHANNEL_TYPES: [
+    'GUILD_TEXT',
+    'GUILD_ANNOUNCEMENT',
+    'GUILD_THREAD_NEWS',
+    'GUILD_PUBLIC_THREAD',
+    'GUILD_PRIVATE_THREAD',
+    'GUILD_STAGE_VOICE',
+    'GUILD_TEXT',
+    'GUILD_NEWS',
+    'GUILD_STORE',
+  ] as const,
+
   // Embed Colors
   EMBED_COLORS: {
     DEFAULT: 'Blue',
     ERROR: 'Red',
   },
-  
+
   // Error Messages
   ERROR_MESSAGES: {
     INVALID_CHANNEL: 'Please select a valid text or announcement channel that can contain threads.',
     THREAD_NOT_FOUND: 'No thread found with the provided ID in that channel.',
-    FETCH_ERROR: 'Something went wrong while fetching the thread. Please ensure the thread ID is correct and try again.',
+    FETCH_ERROR:
+      'Something went wrong while fetching the thread. Please ensure the thread ID is correct and try again.',
   },
-  
+
   // Success Messages
   SUCCESS_MESSAGES: {
     THREAD_INFO_TITLE: 'Thread Metadata',

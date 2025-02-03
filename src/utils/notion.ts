@@ -1,5 +1,5 @@
-import 'dotenv/config';
 import { Client } from '@notionhq/client';
+import 'dotenv/config';
 import {
   BACKLOG,
   NOTION_MAX_CHAR_LIMIT_IN_RICH_TEXT_BLOCK,

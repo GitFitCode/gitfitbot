@@ -1,18 +1,19 @@
 {
   "name": "gitfitbot",
-  "version": "1.20.0",
+  "version": "1.21.0",
   "description": "Discord bot for GitFitCode needs, written in TypeScript.",
   "scripts": {
     "build": "tsc -p tsconfig.production.json",
     "clear-commands": "pnpm build && node ./dist/src/scripts/clearRegisteredCommands.js",
     "clear-events": "pnpm build && node ./dist/src/scripts/clearScheduledEvents.js",
     "dev": "pnpm i && ts-node ./src/index.ts",
-    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "pm2": "pnpm build && pm2 start ./dist/src/index.js --name gitfitbot",
     "pre-build": "rm -rf ./dist",
     "prepare": "husky",
     "start": "node ./dist/src/index.js",
-    "test": "echo 'No tests yet'."
+    "typecheck": "tsc --pretty --noEmit --incremental false"
   },
   "author": "GitFitCode",
   "license": "GNU GPLv3",
@@ -20,6 +21,7 @@
     "@langchain/core": "latest",
     "@langchain/openai": "latest",
     "@notionhq/client": "latest",
+    "@supabase/supabase-js": "latest",
     "cron": "latest",
     "dayjs": "latest",
     "discord-tictactoe": "latest",
@@ -34,18 +36,24 @@
     "@commitlint/config-conventional": "latest",
     "@types/node": "latest",
     "@types/pouchdb-node": "latest",
-    "@typescript-eslint/eslint-plugin": "latest",
-    "@typescript-eslint/parser": "latest",
-    "eslint": "latest",
-    "eslint-config-airbnb-base": "latest",
-    "eslint-config-airbnb-typescript": "latest",
     "husky": "latest",
+    "lint-staged": "latest",
+    "prettier": "latest",
+    "prettier-plugin-organize-imports": "latest",
     "ts-node": "latest",
     "tslib": "latest",
     "typescript": "latest"
   },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": [
+      "prettier -w"
+    ],
+    "**/*.{json,css,scss,md,webmanifest}": [
+      "prettier -w"
+    ]
+  },
   "engines": {
     "node": "22.x",
-    "pnpm": "10.x"
+    "pnpm": "^9.x"
   }
 }
