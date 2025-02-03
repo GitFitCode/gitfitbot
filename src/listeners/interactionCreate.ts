@@ -8,7 +8,6 @@ import {
   Client,
   CommandInteraction,
   Interaction,
-  InteractionType,
   ModalSubmitInteraction,
 } from 'discord.js';
 import Commands from '../Commands';
@@ -76,12 +75,12 @@ const handleModalSubmission = async (interaction: ModalSubmitInteraction<CacheTy
 export default (client: Client): void => {
   client.on('interactionCreate', async (interaction: Interaction) => {
     // Check if interaction is a command and call handleSlashCommand() if so.
-    if (interaction.type === InteractionType.ApplicationCommand) {
+    if (interaction.isCommand()) {
       await handleSlashCommand(client, interaction);
     }
 
     // Check if interaction is a modal submission and call handleModalSubmission() if so.
-    if (interaction.type === InteractionType.ModalSubmit) {
+    if (interaction.isModalSubmit()) {
       await handleModalSubmission(interaction);
     }
 
