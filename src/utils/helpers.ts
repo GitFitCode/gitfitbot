@@ -1,12 +1,8 @@
-import { createClient } from '@supabase/supabase-js';
-import { CronJob } from 'cron';
 import dayjs from 'dayjs';
 import { ApplicationCommandOptionChoiceData, ApplicationCommandOptionType } from 'discord.js';
 import 'dotenv/config';
 import {
   COMMAND_EVENT,
-  GFC_CRON_CONFIG,
-  GFC_SUPABASE_PING_TABLE,
   NOTION_PAGE_ID_DELIMITER,
   THREAD_START_MESSAGE_SLICE_INDEX,
 } from './constants';
@@ -192,53 +188,15 @@ export function delay(ms: number) {
 
 export class CronJobs {
   private static instance: CronJobs;
-  private GFCSupbasePingJob: CronJob;
 
-  constructor() {
-    this.GFCSupbasePingJob = new CronJob(
-      GFC_CRON_CONFIG.SUPABASE_PING.PATTERN,
-      () => this._execute(GFC_CRON_CONFIG.SUPABASE_PING),
-      null,
-      false,
-      GFC_CRON_CONFIG.SUPABASE_PING.TIMEZONE,
-    );
-  }
+  constructor() {}
 
-  private async _execute(type: { PATTERN: string; TIMEZONE: string }) {
-    // Supabase ping
-    if (type === GFC_CRON_CONFIG.SUPABASE_PING) {
-      const SUPABASE_URL = process.env.SUPABASE_URL || '';
-      const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
-      // ping supabase
-
-      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-        console.error('Missing Supabase URL or Supabase Anon Key');
-      } else {
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        try {
-          const { data, error } = await supabase.from(GFC_SUPABASE_PING_TABLE).select().limit(1);
-          if (error) {
-            console.error('Error pinging Supabase:', error);
-          }
-        } catch (error) {
-          console.error('Error pinging Supabase:', error);
-        }
-      }
-    }
-  }
+  private async _execute(type: { PATTERN: string; TIMEZONE: string }) {}
 
   public static getInstance(): CronJobs {
     if (!CronJobs.instance) {
       CronJobs.instance = new CronJobs();
     }
     return CronJobs.instance;
-  }
-
-  public startGFCSupbasePingJob() {
-    this.GFCSupbasePingJob.start();
-  }
-
-  public stopGFCSupbasePingJob() {
-    this.GFCSupbasePingJob.stop();
   }
 }

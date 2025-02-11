@@ -4,7 +4,7 @@
 
 import { ActivityType, Client } from 'discord.js';
 import Commands from '../Commands';
-import { AUTOBOT, CronJobs, GITFITBOT } from '../utils';
+import { AUTOBOT, GITFITBOT } from '../utils';
 
 export default (client: Client): void => {
   client.on('ready', async () => {
@@ -23,10 +23,6 @@ export default (client: Client): void => {
     if (client.user.username.toLowerCase() === AUTOBOT) {
       client.user.setActivity('the world slowly 🔥 itself', { type: ActivityType.Watching });
     }
-
-    // Run cron jobs
-    const cronJobs = CronJobs.getInstance();
-    cronJobs.startGFCSupbasePingJob();
 
     // Register slash commands with the client.
     await client.application.commands.set(Commands);
