@@ -8,6 +8,7 @@ import guildMemberAdd from './listeners/guildMemberAdd';
 import interactionCreate from './listeners/interactionCreate';
 import messageCreate from './listeners/messageCreate';
 import ready from './listeners/ready';
+import { CronJobs } from './utils';
 
 /**
  * Creates a new Discord Client with specific intents and allowed mentions.
@@ -57,6 +58,10 @@ function start() {
  * @param code - The signal code that triggered the stop.
  */
 function stop(code: NodeJS.Signals) {
+  // Stop the steering reminder.
+  const cronJobs = CronJobs.getInstance(client);
+  cronJobs.stopGFCSteeringReminderJob();
+
   // Log out, terminate connection to Discord and destroy the client.
   client.destroy();
 

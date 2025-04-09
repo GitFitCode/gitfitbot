@@ -4,7 +4,7 @@
 
 import { ActivityType, Client } from 'discord.js';
 import Commands from '../Commands';
-import { AUTOBOT, GITFITBOT } from '../utils';
+import { AUTOBOT, CronJobs, GITFITBOT } from '../utils';
 
 export default (client: Client): void => {
   client.on('ready', async () => {
@@ -17,6 +17,10 @@ export default (client: Client): void => {
       client.user.setActivity('"Do Androids Dream of ⚡🐑?" audio book', {
         type: ActivityType.Listening,
       });
+
+      // Start the steering reminder cron job.
+      const cronJobs = CronJobs.getInstance(client);
+      cronJobs.startGFCSteeringReminderJob();
     }
 
     // Set status (i.e. activity) of the "autobot" bot.
