@@ -1,5 +1,11 @@
 
 
+## 1.22.0 (2025-04-09)
+
+### Feat
+
+- add steering update reminder for Sirrele
+
 ## 1.21.1 (2025-04-08)
 
 ### Perf
