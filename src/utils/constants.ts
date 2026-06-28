@@ -78,7 +78,10 @@ export const GFC_CRON_CONFIG = {
 // community project. Used by the weekly Project Pulse cron job.
 export const GFC_PROJECTS_FORUM_ID = '1032761290919260262';
 // How far back the weekly pulse looks for project activity.
-export const PROJECT_PULSE_LOOKBACK_DAYS = 7;
+// 30 days — GFC project threads don't get daily traffic, so a 7-day window
+// missed most real activity (e.g. a thread with 38 msgs over the month but 1 in
+// the last week). Override at boot via the PROJECT_PULSE_LOOKBACK_DAYS env var.
+export const PROJECT_PULSE_LOOKBACK_DAYS = Number(process.env.PROJECT_PULSE_LOOKBACK_DAYS) || 30;
 // System prompt for the per-project weekly status blurb.
 export const PROJECT_PULSE_SYSTEM_PROMPT =
   'You write a single concise status update (1-2 sentences, max ~280 chars) for a software project, based on the past week of chat messages from its thread. ' +
