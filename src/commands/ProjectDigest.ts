@@ -10,15 +10,16 @@
 
 import {
   ApplicationCommandOptionType,
+  AttachmentBuilder,
   AutocompleteInteraction,
   Client,
   CommandInteraction,
+  EmbedBuilder,
 } from 'discord.js';
 import 'dotenv/config';
 import { SlashCommand } from '../Command';
 import {
   buildTranscriptText,
-  chunkForDiscord,
   COMMAND_PROJECT_DIGEST,
   condenseMessages,
   fetchAllMessages,
@@ -27,6 +28,18 @@ import {
   listForumThreads,
   upsertPostDigest,
 } from '../utils';
+
+const EMBED_DESCRIPTION_LIMIT = 4096;
+
+/** Safe filename slug for the attached digest. */
+function fileSlug(name: string): string {
+  return (
+    name
+      .replace(/[^a-z0-9-_]+/gi, '-')
+      .replace(/^-+|-+$/g, '')
+      .toLowerCase() || 'project'
+  );
+}
 
 async function executeRun(interaction: CommandInteraction) {
   const requestedId = interaction.options.get(COMMAND_PROJECT_DIGEST.OPTION_PROJECT)?.value as
@@ -75,23 +88,29 @@ async function executeRun(interaction: CommandInteraction) {
     digest,
     messageCount: messages.length,
   });
-  const savedNote = saved
-    ? `\n\n_💾 Saved to projects DB${saved.linkedProjectId ? ' · linked to a conduit project' : ' · not yet linked to a project'}._`
-    : '';
+  // Build a clean embed + attach the full digest as a markdown file, instead of
+  // dumping chunked text walls (which render poorly in Discord).
+  const footerParts = [`${messages.length} messages`];
+  if (truncated) footerParts.push('truncated to recent context');
+  if (saved) footerParts.push(saved.linkedProjectId ? 'linked to a project' : 'not yet linked');
 
-  const header =
-    `# 📋 Project Digest — ${channelName}\n` +
-    `_${messages.length} messages${truncated ? ', transcript truncated to most recent context' : ''}_\n`;
+  const embed = new EmbedBuilder()
+    .setColor(0x57f287)
+    .setTitle(`📋 Project Digest — ${channelName}`.slice(0, 256))
+    .setDescription(
+      digest.length > EMBED_DESCRIPTION_LIMIT
+        ? `${digest.slice(0, EMBED_DESCRIPTION_LIMIT - 60)}\n\n*…full digest attached below.*`
+        : digest,
+    )
+    .setFooter({ text: `${footerParts.join(' · ')}${saved ? ' · 💾 saved' : ''}` })
+    .setTimestamp();
 
-  const chunks = chunkForDiscord(`${header}\n${digest}${savedNote}`);
+  const attachment = new AttachmentBuilder(
+    Buffer.from(`# Project Digest — ${channelName}\n\n${digest}\n`, 'utf8'),
+    { name: `${fileSlug(String(channelName))}-digest.md` },
+  );
 
-  // First chunk replaces the deferred reply; the rest are follow-ups so the
-  // whole digest threads together in order.
-  await interaction.editReply(chunks[0]);
-  for (const chunk of chunks.slice(1)) {
-    // eslint-disable-next-line no-await-in-loop
-    await interaction.followUp(chunk);
-  }
+  await interaction.editReply({ content: '', embeds: [embed], files: [attachment] });
 }
 
 /** Autocomplete: searchable list of gfc-projects threads by name. */
