@@ -41,6 +41,10 @@ export const ANTHROPIC_MODELS = {
 export const ACTIVE_MODEL_SETTING_KEY = 'active_model';
 export const ANTHROPIC_CONFIG = {
   DEFAULT_MODEL: ANTHROPIC_MODELS.HAIKU,
+  // Digests get a stronger model (Sonnet) regardless of the active chat model,
+  // since synthesizing 1000+ message threads benefits from the extra capability.
+  // Override via the ANTHROPIC_DIGEST_MODEL env var.
+  DIGEST_MODEL: ANTHROPIC_MODELS.SONNET,
   MAX_TOKENS: {
     CHAT: 4096,
     DIGEST: 8192,
