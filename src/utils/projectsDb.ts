@@ -75,3 +75,52 @@ export async function upsertPostDigest(input: PostDigestInput): Promise<SavedPos
     return null;
   }
 }
+
+export type FeedbackKind = 'correction' | 'feedback';
+
+export interface FeedbackInput {
+  discordPostId: string;
+  discordUserId: string;
+  userName: string;
+  kind: FeedbackKind;
+  content: string;
+}
+
+/** Records a correction (author/admin) or community feedback for a post. */
+export async function addDigestFeedback(input: FeedbackInput): Promise<boolean> {
+  const db = getPool();
+  if (!db) {
+    return false;
+  }
+  try {
+    await db.query(
+      `insert into digest_feedback (discord_post_id, discord_user_id, user_name, kind, content)
+       values ($1, $2, $3, $4, $5)`,
+      [input.discordPostId, input.discordUserId, input.userName, input.kind, input.content],
+    );
+    return true;
+  } catch (err) {
+    console.error('Failed to record digest feedback:', (err as Error).message);
+    return false;
+  }
+}
+
+/** Returns all correction texts for a post, oldest first (for regeneration). */
+export async function listCorrections(discordPostId: string): Promise<string[]> {
+  const db = getPool();
+  if (!db) {
+    return [];
+  }
+  try {
+    const result = await db.query(
+      `select content from digest_feedback
+       where discord_post_id = $1 and kind = 'correction'
+       order by created_at asc`,
+      [discordPostId],
+    );
+    return result.rows.map((r) => r.content as string);
+  } catch (err) {
+    console.error('Failed to list corrections:', (err as Error).message);
+    return [];
+  }
+}

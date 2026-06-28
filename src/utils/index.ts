@@ -1,5 +1,6 @@
 export * from './channelDump';
 export * from './constants';
+export * from './digest';
 export * from './helpers';
 export * from './localdb';
 export * from './notion';

@@ -283,6 +283,20 @@ export const COMMAND_PROJECT_DIGEST = {
     'Pick a project thread by name. Leave empty to digest the thread you run this in.',
 };
 
+// Component IDs + copy for digest correction/feedback interactions. Button and
+// modal custom IDs are suffixed with `:<postId>` at build time.
+export const DIGEST_INTERACTION = {
+  CORRECT_BUTTON: 'digest:correct',
+  FEEDBACK_BUTTON: 'digest:feedback',
+  CORRECT_MODAL: 'digest:correctModal',
+  FEEDBACK_MODAL: 'digest:feedbackModal',
+  CORRECTION_INPUT: 'correctionInput',
+  FEEDBACK_INPUT: 'feedbackInput',
+  REACTIONS: ['👍', '👎', '🤔'],
+  NOT_ALLOWED_MSG:
+    'Only the post author or an admin can submit corrections — use the 💬 Feedback button instead.',
+};
+
 // System prompt that turns a project thread transcript into a structured,
 // reusable case study for GitFitCode community projects.
 export const PROJECT_DIGEST_SYSTEM_PROMPT =
