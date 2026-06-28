@@ -20,6 +20,20 @@ import {
 // Reads ANTHROPIC_API_KEY from the environment.
 const anthropic = new Anthropic();
 
+// The active model. Initialized from the ANTHROPIC_MODEL env var (if set),
+// otherwise the cheapest default. Mutable at runtime via the /model command.
+let activeModel = process.env.ANTHROPIC_MODEL || ANTHROPIC_CONFIG.DEFAULT_MODEL;
+
+/** Returns the model currently used for all Claude calls. */
+export function getActiveModel(): string {
+  return activeModel;
+}
+
+/** Sets the model used for all subsequent Claude calls (resets on restart). */
+export function setActiveModel(model: string): void {
+  activeModel = model;
+}
+
 /** Concatenate the text blocks of a Claude response, or return the error msg. */
 function extractText(message: Anthropic.Message): string {
   const text = message.content
@@ -39,7 +53,7 @@ function extractText(message: Anthropic.Message): string {
  */
 export async function getChatOpenAIPromptResponse(prompt: string): Promise<string> {
   const message = await anthropic.messages.create({
-    model: ANTHROPIC_CONFIG.MODEL,
+    model: getActiveModel(),
     max_tokens: ANTHROPIC_CONFIG.MAX_TOKENS.CHAT,
     system: GENERAL_GFC_SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
@@ -56,7 +70,7 @@ export async function getChatOpenAIPromptResponse(prompt: string): Promise<strin
  */
 export async function getProjectDigestResponse(transcript: string): Promise<string> {
   const message = await anthropic.messages.create({
-    model: ANTHROPIC_CONFIG.MODEL,
+    model: getActiveModel(),
     max_tokens: ANTHROPIC_CONFIG.MAX_TOKENS.DIGEST,
     system: PROJECT_DIGEST_SYSTEM_PROMPT,
     messages: [
@@ -75,7 +89,7 @@ export async function getProjectDigestResponse(transcript: string): Promise<stri
  */
 export async function getProjectPulseResponse(prompt: string): Promise<string> {
   const message = await anthropic.messages.create({
-    model: ANTHROPIC_CONFIG.MODEL,
+    model: getActiveModel(),
     max_tokens: ANTHROPIC_CONFIG.MAX_TOKENS.PULSE,
     system: PROJECT_PULSE_SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
