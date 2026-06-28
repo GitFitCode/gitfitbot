@@ -1,80 +1,87 @@
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { ChatOpenAI } from '@langchain/openai';
+/**
+ * LLM helpers for the bot.
+ *
+ * Backed by Anthropic's Claude (the official @anthropic-ai/sdk). The function
+ * names are kept (`...OpenAI...`) for backwards compatibility with existing
+ * callers; the implementation now calls Claude. Requires ANTHROPIC_API_KEY in
+ * the environment.
+ */
+
+import Anthropic from '@anthropic-ai/sdk';
 import 'dotenv/config';
 import {
+  ANTHROPIC_CONFIG,
   GENERAL_GFC_SYSTEM_PROMPT,
   OPEN_AI_API_RESPONSE_ERROR_MSG,
-  OPEN_AI_CONFIG,
   PROJECT_DIGEST_SYSTEM_PROMPT,
   PROJECT_PULSE_SYSTEM_PROMPT,
 } from './constants';
 
+// Reads ANTHROPIC_API_KEY from the environment.
+const anthropic = new Anthropic();
+
+/** Concatenate the text blocks of a Claude response, or return the error msg. */
+function extractText(message: Anthropic.Message): string {
+  const text = message.content
+    .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+    .map((block) => block.text)
+    .join('')
+    .trim();
+
+  return text || OPEN_AI_API_RESPONSE_ERROR_MSG;
+}
+
 /**
- * Fetches a response from OpenAI based on the provided prompt.
+ * Fetches a response from Claude for a general GFC community prompt.
  *
- * @param {string} prompt - The input prompt to be sent to OpenAI.
- * @returns {Promise<string>} - A promise that resolves to the response from OpenAI.
+ * @param {string} prompt - The input prompt.
+ * @returns {Promise<string>} - The model's response.
  */
 export async function getChatOpenAIPromptResponse(prompt: string): Promise<string> {
-  const chatModel = new ChatOpenAI({
-    modelName: OPEN_AI_CONFIG.MODEL,
-    temperature: OPEN_AI_CONFIG.TEMPERATURE,
-    stop: OPEN_AI_CONFIG.STOP,
-    openAIApiKey: process.env.OPENAI_API_KEY,
+  const message = await anthropic.messages.create({
+    model: ANTHROPIC_CONFIG.MODEL,
+    max_tokens: ANTHROPIC_CONFIG.MAX_TOKENS.CHAT,
+    system: GENERAL_GFC_SYSTEM_PROMPT,
+    messages: [{ role: 'user', content: prompt }],
   });
 
-  const response = await chatModel.invoke([
-    new SystemMessage(GENERAL_GFC_SYSTEM_PROMPT),
-    new HumanMessage(prompt),
-  ]);
-
-  return response.content.toString() || OPEN_AI_API_RESPONSE_ERROR_MSG;
+  return extractText(message);
 }
 
 /**
  * Summarizes a project thread transcript into a structured, reusable digest.
  *
- * Uses a dedicated system prompt (separate from the general chat prompt) and a
- * lower temperature for more deterministic, factual output.
- *
  * @param {string} transcript - The plain-text thread transcript to digest.
  * @returns {Promise<string>} - The markdown digest.
  */
 export async function getProjectDigestResponse(transcript: string): Promise<string> {
-  const chatModel = new ChatOpenAI({
-    modelName: OPEN_AI_CONFIG.MODEL,
-    temperature: 0.2,
-    openAIApiKey: process.env.OPENAI_API_KEY,
+  const message = await anthropic.messages.create({
+    model: ANTHROPIC_CONFIG.MODEL,
+    max_tokens: ANTHROPIC_CONFIG.MAX_TOKENS.DIGEST,
+    system: PROJECT_DIGEST_SYSTEM_PROMPT,
+    messages: [
+      { role: 'user', content: `Here is the full project thread transcript:\n\n${transcript}` },
+    ],
   });
 
-  const response = await chatModel.invoke([
-    new SystemMessage(PROJECT_DIGEST_SYSTEM_PROMPT),
-    new HumanMessage(`Here is the full project thread transcript:\n\n${transcript}`),
-  ]);
-
-  return response.content.toString() || OPEN_AI_API_RESPONSE_ERROR_MSG;
+  return extractText(message);
 }
 
 /**
- * Produces a short (1-2 sentence) weekly status blurb for a single project,
- * based on the past week of its thread messages. Used by the Project Pulse cron.
+ * Produces a short (1-2 sentence) weekly status blurb for a single project.
  *
  * @param {string} prompt - Project name + recent messages.
  * @returns {Promise<string>} - A concise status sentence.
  */
 export async function getProjectPulseResponse(prompt: string): Promise<string> {
-  const chatModel = new ChatOpenAI({
-    modelName: OPEN_AI_CONFIG.MODEL,
-    temperature: 0.3,
-    openAIApiKey: process.env.OPENAI_API_KEY,
+  const message = await anthropic.messages.create({
+    model: ANTHROPIC_CONFIG.MODEL,
+    max_tokens: ANTHROPIC_CONFIG.MAX_TOKENS.PULSE,
+    system: PROJECT_PULSE_SYSTEM_PROMPT,
+    messages: [{ role: 'user', content: prompt }],
   });
 
-  const response = await chatModel.invoke([
-    new SystemMessage(PROJECT_PULSE_SYSTEM_PROMPT),
-    new HumanMessage(prompt),
-  ]);
-
-  return response.content.toString() || OPEN_AI_API_RESPONSE_ERROR_MSG;
+  return extractText(message);
 }
 
 export default {

@@ -18,8 +18,7 @@
   "author": "GitFitCode",
   "license": "GNU GPLv3",
   "dependencies": {
-    "@langchain/core": "latest",
-    "@langchain/openai": "latest",
+    "@anthropic-ai/sdk": "latest",
     "@notionhq/client": "latest",
     "@supabase/supabase-js": "latest",
     "cron": "latest",
@@ -27,7 +26,6 @@
     "discord-tictactoe": "latest",
     "discord.js": "latest",
     "dotenv": "latest",
-    "langchain": "latest",
     "newrelic": "latest",
     "pouchdb-node": "latest",
     "undici": "latest"

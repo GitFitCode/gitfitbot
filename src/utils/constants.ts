@@ -27,10 +27,17 @@ export const RETRO_NEXT_SPEAKER_MESSAGE = "you're next! Please provide your upda
 // https://developers.notion.com/reference/request-limits#limits-for-property-values
 export const NOTION_MAX_CHAR_LIMIT_IN_RICH_TEXT_BLOCK = 2000;
 export const OPEN_AI_QUESTION_IDENTIFIER = '#question';
-export const OPEN_AI_CONFIG = {
-  MODEL: 'gpt-4o',
-  TEMPERATURE: 0.7,
-  STOP: ['GFC Community Member:'],
+// Anthropic (Claude) model config. Default to the latest Opus; note Opus 4.x
+// does not accept temperature/top_p/stop (they return a 400), so the model is
+// steered via prompts only. To use a cheaper tier, change MODEL to
+// 'claude-sonnet-4-6' or 'claude-haiku-4-5'.
+export const ANTHROPIC_CONFIG = {
+  MODEL: 'claude-opus-4-8',
+  MAX_TOKENS: {
+    CHAT: 4096,
+    DIGEST: 8192,
+    PULSE: 512,
+  },
 };
 export const DISCORD_MESSAGE_MAX_CHAR_LIMIT = 2000;
 export const GFC_CRON_CONFIG = {
