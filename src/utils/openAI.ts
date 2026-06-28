@@ -5,6 +5,7 @@ import {
   GENERAL_GFC_SYSTEM_PROMPT,
   OPEN_AI_API_RESPONSE_ERROR_MSG,
   OPEN_AI_CONFIG,
+  PROJECT_DIGEST_SYSTEM_PROMPT,
 } from './constants';
 
 /**
@@ -29,4 +30,28 @@ export async function getChatOpenAIPromptResponse(prompt: string): Promise<strin
   return response.content.toString() || OPEN_AI_API_RESPONSE_ERROR_MSG;
 }
 
-export default { getChatOpenAIPromptResponse };
+/**
+ * Summarizes a project thread transcript into a structured, reusable digest.
+ *
+ * Uses a dedicated system prompt (separate from the general chat prompt) and a
+ * lower temperature for more deterministic, factual output.
+ *
+ * @param {string} transcript - The plain-text thread transcript to digest.
+ * @returns {Promise<string>} - The markdown digest.
+ */
+export async function getProjectDigestResponse(transcript: string): Promise<string> {
+  const chatModel = new ChatOpenAI({
+    modelName: OPEN_AI_CONFIG.MODEL,
+    temperature: 0.2,
+    openAIApiKey: process.env.OPENAI_API_KEY,
+  });
+
+  const response = await chatModel.invoke([
+    new SystemMessage(PROJECT_DIGEST_SYSTEM_PROMPT),
+    new HumanMessage(`Here is the full project thread transcript:\n\n${transcript}`),
+  ]);
+
+  return response.content.toString() || OPEN_AI_API_RESPONSE_ERROR_MSG;
+}
+
+export default { getChatOpenAIPromptResponse, getProjectDigestResponse };

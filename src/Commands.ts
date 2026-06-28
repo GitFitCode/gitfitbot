@@ -10,6 +10,7 @@ import Info from './commands/Info';
 import Joke from './commands/Joke';
 import NextSpeaker from './commands/NextSpeaker';
 import Ping from './commands/Ping';
+import ProjectDigest from './commands/ProjectDigest';
 import Standup from './commands/Standup';
 import Support from './commands/Support';
 import Test from './commands/Test';
@@ -23,6 +24,7 @@ const Commands: SlashCommand[] = [
   Joke,
   NextSpeaker,
   Ping,
+  ProjectDigest,
   Standup,
   Support,
   Test,
