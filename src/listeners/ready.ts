@@ -4,13 +4,16 @@
 
 import { ActivityType, Client } from 'discord.js';
 import Commands from '../Commands';
-import { AUTOBOT, CronJobs, GITFITBOT } from '../utils';
+import { AUTOBOT, CronJobs, GITFITBOT, loadPersistedModel } from '../utils';
 
 export default (client: Client): void => {
   client.on('ready', async () => {
     if (!client.user || !client.application) {
       return;
     }
+
+    // Restore the persisted /model choice (overrides env/default).
+    await loadPersistedModel();
 
     // Set status (i.e. activity) of the "GitFitBot" bot.
     if (client.user.username.toLowerCase() === GITFITBOT) {

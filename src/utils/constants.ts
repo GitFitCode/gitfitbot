@@ -37,6 +37,8 @@ export const ANTHROPIC_MODELS = {
 // active model can be overridden at boot via the ANTHROPIC_MODEL env var, or at
 // runtime by admins via the /model slash command. Note: Opus/Sonnet 4.x reject
 // temperature/top_p/stop (they 400), so the model is steered via prompts only.
+// PouchDB settings key under which the active model is persisted.
+export const ACTIVE_MODEL_SETTING_KEY = 'active_model';
 export const ANTHROPIC_CONFIG = {
   DEFAULT_MODEL: ANTHROPIC_MODELS.HAIKU,
   MAX_TOKENS: {

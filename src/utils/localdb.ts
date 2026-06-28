@@ -3,6 +3,52 @@ import { Attendee } from './types';
 
 let attendeesDB: PouchDB.Database<Attendee>;
 
+interface Setting {
+  _id: string;
+  value: string;
+}
+
+let settingsDB: PouchDB.Database<Setting>;
+
+/** Opens (once) a small key/value database for persisted bot settings. */
+function openSettingsDatabase() {
+  if (!settingsDB) {
+    settingsDB = new PouchDB<Setting>('settings_db');
+  }
+}
+
+/**
+ * Reads a persisted setting by key.
+ *
+ * @param {string} key - The setting key.
+ * @returns {Promise<string | undefined>} The stored value, or undefined if unset.
+ */
+export async function getSetting(key: string): Promise<string | undefined> {
+  openSettingsDatabase();
+  try {
+    const doc = await settingsDB.get(key);
+    return doc.value;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Persists a setting by key (upsert).
+ *
+ * @param {string} key - The setting key.
+ * @param {string} value - The value to store.
+ */
+export async function setSetting(key: string, value: string): Promise<void> {
+  openSettingsDatabase();
+  try {
+    const doc = await settingsDB.get(key);
+    await settingsDB.put({ ...doc, value });
+  } catch {
+    await settingsDB.put({ _id: key, value });
+  }
+}
+
 /**
  * Opens a new connection to the Attendees database.
  */

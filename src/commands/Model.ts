@@ -29,8 +29,8 @@ async function executeRun(interaction: CommandInteraction) {
     return;
   }
 
-  setActiveModel(requested);
-  await interaction.editReply(`Model switched to \`${requested}\`.`);
+  await setActiveModel(requested);
+  await interaction.editReply(`Model switched to \`${requested}\`. (persists across restarts)`);
 }
 
 const Model: SlashCommand = {
