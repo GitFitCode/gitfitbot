@@ -5,9 +5,44 @@
  * slash command so message-fetching logic lives in one place.
  */
 
-import { Collection, Message, TextBasedChannel } from 'discord.js';
+import { AnyThreadChannel, Client, Collection, Message, TextBasedChannel } from 'discord.js';
 
 import { DISCORD_MESSAGE_MAX_CHAR_LIMIT } from './constants';
+
+export interface ForumThreadRef {
+  id: string;
+  name: string;
+}
+
+/**
+ * Lists every thread (active + archived) in a forum channel as {id, name},
+ * newest-id first. Used to power the /project-digest thread picker.
+ */
+export async function listForumThreads(client: Client, forumId: string): Promise<ForumThreadRef[]> {
+  const channel = await client.channels.fetch(forumId);
+  const holder = channel as unknown as {
+    threads: {
+      fetchActive: () => Promise<{ threads: Collection<string, AnyThreadChannel> }>;
+      fetchArchived: () => Promise<{ threads: Collection<string, AnyThreadChannel> }>;
+    };
+  };
+
+  const byId = new Map<string, string>();
+  try {
+    (await holder.threads.fetchActive()).threads.forEach((t) => byId.set(t.id, t.name));
+  } catch {
+    /* ignore */
+  }
+  try {
+    (await holder.threads.fetchArchived()).threads.forEach((t) => byId.set(t.id, t.name));
+  } catch {
+    /* ignore */
+  }
+
+  return [...byId.entries()]
+    .map(([id, name]) => ({ id, name }))
+    .sort((a, b) => b.id.localeCompare(a.id));
+}
 
 /**
  * Split text into chunks that respect Discord's per-message character limit,
