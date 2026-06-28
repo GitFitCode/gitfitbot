@@ -11,7 +11,7 @@ import {
   ModalSubmitInteraction,
 } from 'discord.js';
 import Commands from '../Commands';
-import { COMMAND_STANDUP } from '../utils';
+import { COMMAND_STANDUP, handleDigestButton, handleDigestModal } from '../utils';
 
 // All commands that invoke a modal should be listed here.
 const dontDeferCommandsList = [COMMAND_STANDUP.COMMAND_NAME];
@@ -80,6 +80,18 @@ export default (client: Client): void => {
       if (slashCommand?.autocomplete) {
         await slashCommand.autocomplete(client, interaction);
       }
+      return;
+    }
+
+    // Digest correction/feedback buttons.
+    if (interaction.isButton() && interaction.customId.startsWith('digest:')) {
+      await handleDigestButton(interaction);
+      return;
+    }
+
+    // Digest correction/feedback modal submissions.
+    if (interaction.isModalSubmit() && interaction.customId.startsWith('digest:')) {
+      await handleDigestModal(interaction);
       return;
     }
 

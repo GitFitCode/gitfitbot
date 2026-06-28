@@ -86,13 +86,25 @@ export async function getChatOpenAIPromptResponse(prompt: string): Promise<strin
  * @param {string} transcript - The plain-text thread transcript to digest.
  * @returns {Promise<string>} - The markdown digest.
  */
-export async function getProjectDigestResponse(transcript: string): Promise<string> {
+export async function getProjectDigestResponse(
+  transcript: string,
+  corrections: string[] = [],
+): Promise<string> {
+  const correctionBlock = corrections.length
+    ? `\n\nThe project author/admins have provided these corrections — treat them as AUTHORITATIVE and make sure the digest reflects them, overriding anything in the transcript that conflicts:\n${corrections
+        .map((c, i) => `${i + 1}. ${c}`)
+        .join('\n')}`
+    : '';
+
   const message = await anthropic.messages.create({
     model: getActiveModel(),
     max_tokens: ANTHROPIC_CONFIG.MAX_TOKENS.DIGEST,
     system: PROJECT_DIGEST_SYSTEM_PROMPT,
     messages: [
-      { role: 'user', content: `Here is the full project thread transcript:\n\n${transcript}` },
+      {
+        role: 'user',
+        content: `Here is the full project thread transcript:\n\n${transcript}${correctionBlock}`,
+      },
     ],
   });
 

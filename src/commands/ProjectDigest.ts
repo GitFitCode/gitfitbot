@@ -10,36 +10,20 @@
 
 import {
   ApplicationCommandOptionType,
-  AttachmentBuilder,
   AutocompleteInteraction,
   Client,
   CommandInteraction,
-  EmbedBuilder,
 } from 'discord.js';
 import 'dotenv/config';
 import { SlashCommand } from '../Command';
 import {
-  buildTranscriptText,
+  buildDigestPayload,
   COMMAND_PROJECT_DIGEST,
-  condenseMessages,
-  fetchAllMessages,
-  getProjectDigestResponse,
+  DIGEST_INTERACTION,
+  generateDigest,
   GFC_PROJECTS_FORUM_ID,
   listForumThreads,
-  upsertPostDigest,
 } from '../utils';
-
-const EMBED_DESCRIPTION_LIMIT = 4096;
-
-/** Safe filename slug for the attached digest. */
-function fileSlug(name: string): string {
-  return (
-    name
-      .replace(/[^a-z0-9-_]+/gi, '-')
-      .replace(/^-+|-+$/g, '')
-      .toLowerCase() || 'project'
-  );
-}
 
 async function executeRun(interaction: CommandInteraction) {
   const requestedId = interaction.options.get(COMMAND_PROJECT_DIGEST.OPTION_PROJECT)?.value as
@@ -65,52 +49,26 @@ async function executeRun(interaction: CommandInteraction) {
   }
 
   const channelName = 'name' in channel ? (channel.name ?? targetId) : targetId;
-  await interaction.editReply(`📥 Reading history of **${channelName}**...`);
+  await interaction.editReply(
+    `🧠 Digesting **${channelName}** (reading history + summarizing, this can take a moment)...`,
+  );
 
-  const messages = await fetchAllMessages(channel);
-  if (messages.length === 0) {
+  const result = await generateDigest(channel, targetId);
+  if (result.empty) {
     await interaction.editReply(`**${channelName}** has no readable messages to digest.`);
     return;
   }
 
-  await interaction.editReply(
-    `🧠 Digesting **${messages.length}** messages from **${channelName}** (this can take a moment)...`,
-  );
+  await interaction.editReply({ content: '', ...buildDigestPayload(result, targetId) });
 
-  const { text, truncated } = buildTranscriptText(condenseMessages(messages));
-  const digest = await getProjectDigestResponse(text);
-
-  // Persist the digest (1 post = 1 row in discord_post_digests).
-  const saved = await upsertPostDigest({
-    discordPostId: targetId,
-    guildId: interaction.guildId,
-    name: String(channelName),
-    digest,
-    messageCount: messages.length,
-  });
-  // Build a clean embed + attach the full digest as a markdown file, instead of
-  // dumping chunked text walls (which render poorly in Discord).
-  const footerParts = [`${messages.length} messages`];
-  if (truncated) footerParts.push('truncated to recent context');
-  if (saved) footerParts.push(saved.linkedProjectId ? 'linked to a project' : 'not yet linked');
-
-  const embed = new EmbedBuilder()
-    .setColor(0x57f287)
-    .setTitle(`📋 Project Digest — ${channelName}`.slice(0, 256))
-    .setDescription(
-      digest.length > EMBED_DESCRIPTION_LIMIT
-        ? `${digest.slice(0, EMBED_DESCRIPTION_LIMIT - 60)}\n\n*…full digest attached below.*`
-        : digest,
-    )
-    .setFooter({ text: `${footerParts.join(' · ')}${saved ? ' · 💾 saved' : ''}` })
-    .setTimestamp();
-
-  const attachment = new AttachmentBuilder(
-    Buffer.from(`# Project Digest — ${channelName}\n\n${digest}\n`, 'utf8'),
-    { name: `${fileSlug(String(channelName))}-digest.md` },
-  );
-
-  await interaction.editReply({ content: '', embeds: [embed], files: [attachment] });
+  // Add community sentiment reactions to the digest message.
+  const reply = await interaction.fetchReply().catch(() => null);
+  if (reply) {
+    for (const emoji of DIGEST_INTERACTION.REACTIONS) {
+      // eslint-disable-next-line no-await-in-loop
+      await reply.react(emoji).catch(() => null);
+    }
+  }
 }
 
 /** Autocomplete: searchable list of gfc-projects threads by name. */
