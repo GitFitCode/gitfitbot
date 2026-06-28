@@ -34,13 +34,12 @@ export const OPEN_AI_CONFIG = {
 };
 export const DISCORD_MESSAGE_MAX_CHAR_LIMIT = 2000;
 export const GFC_CRON_CONFIG = {
-  SUPABASE_PING: {
-    // At 09:00 on Tuesday and Friday.
-    PATTERN: '0 9 * * 2,5',
+  STEERING_REMINDER: {
+    // At 09:00 on Tuesdays.
+    PATTERN: '0 10 * * 2',
     TIMEZONE: 'America/Los_Angeles',
   },
 };
-export const GFC_SUPABASE_PING_TABLE = 'contact_form_submissions';
 
 // Events command constants
 export const COMMAND_EVENT = {

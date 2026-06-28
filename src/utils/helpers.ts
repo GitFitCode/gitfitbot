@@ -1,8 +1,15 @@
+import { CronJob } from 'cron';
 import dayjs from 'dayjs';
-import { ApplicationCommandOptionChoiceData, ApplicationCommandOptionType } from 'discord.js';
+import {
+  ApplicationCommandOptionChoiceData,
+  ApplicationCommandOptionType,
+  Client,
+  ThreadChannel,
+} from 'discord.js';
 import 'dotenv/config';
 import {
   COMMAND_EVENT,
+  GFC_CRON_CONFIG,
   NOTION_PAGE_ID_DELIMITER,
   THREAD_START_MESSAGE_SLICE_INDEX,
 } from './constants';
@@ -188,15 +195,44 @@ export function delay(ms: number) {
 
 export class CronJobs {
   private static instance: CronJobs;
+  private GFCSteeringReminderJob: CronJob;
 
-  constructor() {}
+  constructor(private client: Client) {
+    this.GFCSteeringReminderJob = new CronJob(
+      GFC_CRON_CONFIG.STEERING_REMINDER.PATTERN, // cron pattern
+      () => this._execute(GFC_CRON_CONFIG.STEERING_REMINDER), // execute cron job
+      null, // onComplete
+      false, // start
+      GFC_CRON_CONFIG.STEERING_REMINDER.TIMEZONE, // timezone
+    );
+  }
 
-  private async _execute(type: { PATTERN: string; TIMEZONE: string }) {}
+  private async _execute(type: { PATTERN: string; TIMEZONE: string }) {
+    // Steering reminder for Sirrele
+    if (type === GFC_CRON_CONFIG.STEERING_REMINDER) {
+      try {
+        const threadId = '1339272070135283865';
+        const thread = (await this.client.channels.fetch(threadId)) as ThreadChannel;
 
-  public static getInstance(): CronJobs {
+        thread.send('<@268643697443340288> reminder for weekly steering update!');
+      } catch (error) {
+        console.error('Error while executing steering reminder cron job:', error);
+      }
+    }
+  }
+
+  public static getInstance(client: Client): CronJobs {
     if (!CronJobs.instance) {
-      CronJobs.instance = new CronJobs();
+      CronJobs.instance = new CronJobs(client);
     }
     return CronJobs.instance;
+  }
+
+  public startGFCSteeringReminderJob() {
+    this.GFCSteeringReminderJob.start();
+  }
+
+  public stopGFCSteeringReminderJob() {
+    this.GFCSteeringReminderJob.stop();
   }
 }
