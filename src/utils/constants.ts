@@ -27,17 +27,36 @@ export const RETRO_NEXT_SPEAKER_MESSAGE = "you're next! Please provide your upda
 // https://developers.notion.com/reference/request-limits#limits-for-property-values
 export const NOTION_MAX_CHAR_LIMIT_IN_RICH_TEXT_BLOCK = 2000;
 export const OPEN_AI_QUESTION_IDENTIFIER = '#question';
-// Anthropic (Claude) model config. Default to the latest Opus; note Opus 4.x
-// does not accept temperature/top_p/stop (they return a 400), so the model is
-// steered via prompts only. To use a cheaper tier, change MODEL to
-// 'claude-sonnet-4-6' or 'claude-haiku-4-5'.
+// Selectable Claude tiers (cheapest -> most capable).
+export const ANTHROPIC_MODELS = {
+  HAIKU: 'claude-haiku-4-5',
+  SONNET: 'claude-sonnet-4-6',
+  OPUS: 'claude-opus-4-8',
+};
+// Anthropic (Claude) model config. Defaults to the cheapest tier (Haiku); the
+// active model can be overridden at boot via the ANTHROPIC_MODEL env var, or at
+// runtime by admins via the /model slash command. Note: Opus/Sonnet 4.x reject
+// temperature/top_p/stop (they 400), so the model is steered via prompts only.
 export const ANTHROPIC_CONFIG = {
-  MODEL: 'claude-opus-4-8',
+  DEFAULT_MODEL: ANTHROPIC_MODELS.HAIKU,
   MAX_TOKENS: {
     CHAT: 4096,
     DIGEST: 8192,
     PULSE: 512,
   },
+};
+
+// Model command constants
+export const COMMAND_MODEL = {
+  COMMAND_NAME: 'model',
+  COMMAND_DESCRIPTION: 'View or change the Claude model the bot uses.',
+  OPTION_SET: 'set',
+  OPTION_SET_DESCRIPTION: 'Switch the active model (admins only).',
+  OPTION_SET_CHOICES: [
+    { name: 'Haiku (cheapest)', value: ANTHROPIC_MODELS.HAIKU },
+    { name: 'Sonnet (balanced)', value: ANTHROPIC_MODELS.SONNET },
+    { name: 'Opus (most capable)', value: ANTHROPIC_MODELS.OPUS },
+  ],
 };
 export const DISCORD_MESSAGE_MAX_CHAR_LIMIT = 2000;
 export const GFC_CRON_CONFIG = {
