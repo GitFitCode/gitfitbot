@@ -7,6 +7,39 @@
 
 import { Collection, Message, TextBasedChannel } from 'discord.js';
 
+import { DISCORD_MESSAGE_MAX_CHAR_LIMIT } from './constants';
+
+/**
+ * Split text into chunks that respect Discord's per-message character limit,
+ * breaking on line boundaries where possible and hard-splitting overlong lines.
+ */
+export function chunkForDiscord(text: string, limit = DISCORD_MESSAGE_MAX_CHAR_LIMIT): string[] {
+  const chunks: string[] = [];
+  const lines = text.split('\n');
+  let current = '';
+
+  for (const line of lines) {
+    if (line.length > limit) {
+      if (current) {
+        chunks.push(current);
+        current = '';
+      }
+      for (let i = 0; i < line.length; i += limit) {
+        chunks.push(line.slice(i, i + limit));
+      }
+      continue;
+    }
+    if (current.length + line.length + 1 > limit) {
+      chunks.push(current);
+      current = line;
+    } else {
+      current = current ? `${current}\n${line}` : line;
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks;
+}
+
 export interface CondensedMessage {
   author: string;
   createdAt: string;
@@ -43,6 +76,38 @@ export async function fetchAllMessages(
   }
 
   return all.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
+}
+
+/**
+ * Page backwards through a channel/thread's history but stop once messages are
+ * older than `sinceTs`. Returns only messages at/after the cutoff, sorted
+ * oldest -> newest. Efficient for "what happened recently" use cases.
+ */
+export async function fetchMessagesSince(
+  channel: TextBasedChannel,
+  sinceTs: number,
+): Promise<Message[]> {
+  const collected: Message[] = [];
+  let before: string | undefined;
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const batch: Collection<string, Message> = await channel.messages.fetch({
+      limit: 100,
+      before,
+    });
+    if (batch.size === 0) break;
+
+    const recent = [...batch.values()].filter((m) => m.createdTimestamp >= sinceTs);
+    collected.push(...recent);
+
+    // If this page contains anything older than the cutoff, we're done.
+    const reachedCutoff = batch.some((m) => m.createdTimestamp < sinceTs);
+    if (reachedCutoff || batch.size < 100) break;
+    before = batch.last()?.id;
+  }
+
+  return collected.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
 }
 
 /** Reduce full messages to the minimal fields needed for summarization. */

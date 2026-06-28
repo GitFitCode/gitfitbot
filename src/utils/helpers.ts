@@ -4,15 +4,26 @@ import {
   ApplicationCommandOptionChoiceData,
   ApplicationCommandOptionType,
   Client,
+  ForumChannel,
   ThreadChannel,
 } from 'discord.js';
 import 'dotenv/config';
 import {
+  buildTranscriptText,
+  chunkForDiscord,
+  condenseMessages,
+  fetchMessagesSince,
+} from './channelDump';
+import {
   COMMAND_EVENT,
+  DISCORD_MESSAGE_MAX_CHAR_LIMIT,
   GFC_CRON_CONFIG,
+  GFC_PROJECTS_FORUM_ID,
   NOTION_PAGE_ID_DELIMITER,
+  PROJECT_PULSE_LOOKBACK_DAYS,
   THREAD_START_MESSAGE_SLICE_INDEX,
 } from './constants';
+import { getProjectPulseResponse } from './openAI';
 import { GitFitCodeEventOptions } from './types';
 
 /**
@@ -196,6 +207,7 @@ export function delay(ms: number) {
 export class CronJobs {
   private static instance: CronJobs;
   private GFCSteeringReminderJob: CronJob;
+  private projectPulseJob: CronJob;
 
   constructor(private client: Client) {
     this.GFCSteeringReminderJob = new CronJob(
@@ -204,6 +216,14 @@ export class CronJobs {
       null, // onComplete
       false, // start
       GFC_CRON_CONFIG.STEERING_REMINDER.TIMEZONE, // timezone
+    );
+
+    this.projectPulseJob = new CronJob(
+      GFC_CRON_CONFIG.PROJECT_PULSE.PATTERN,
+      () => this._execute(GFC_CRON_CONFIG.PROJECT_PULSE),
+      null,
+      false,
+      GFC_CRON_CONFIG.PROJECT_PULSE.TIMEZONE,
     );
   }
 
@@ -219,6 +239,58 @@ export class CronJobs {
         console.error('Error while executing steering reminder cron job:', error);
       }
     }
+
+    // Weekly roundup of gfc-projects activity.
+    if (type === GFC_CRON_CONFIG.PROJECT_PULSE) {
+      try {
+        await this.runProjectPulse();
+      } catch (error) {
+        console.error('Error while executing project pulse cron job:', error);
+      }
+    }
+  }
+
+  /**
+   * Builds a weekly "Project Pulse" — a one-line status for each gfc-projects
+   * thread that had activity in the last {@link PROJECT_PULSE_LOOKBACK_DAYS}
+   * days — and DMs it to the configured admin. Returns the report text so it can
+   * also be triggered manually (e.g. from a script) for testing.
+   */
+  public async runProjectPulse(): Promise<string> {
+    const sinceTs = Date.now() - PROJECT_PULSE_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
+
+    const forum = (await this.client.channels.fetch(GFC_PROJECTS_FORUM_ID)) as ForumChannel;
+    const active = await forum.threads.fetchActive();
+
+    const blurbs: string[] = [];
+    for (const [, thread] of active.threads) {
+      // eslint-disable-next-line no-await-in-loop
+      const messages = await fetchMessagesSince(thread, sinceTs);
+      if (messages.length === 0) continue; // skip quiet projects
+
+      const { text } = buildTranscriptText(condenseMessages(messages), 12_000);
+      // eslint-disable-next-line no-await-in-loop
+      const summary = await getProjectPulseResponse(
+        `Project: ${thread.name}\nMessages from the past week:\n${text}`,
+      );
+      blurbs.push(`**${thread.name}** — ${summary} _(${messages.length} msgs)_`);
+    }
+
+    const heading = `📊 **Weekly Project Pulse** — last ${PROJECT_PULSE_LOOKBACK_DAYS} days`;
+    const report = blurbs.length
+      ? `${heading}\n\n${blurbs.join('\n\n')}`
+      : `${heading}\n\nNo gfc-projects threads had activity this week.`;
+
+    const adminId = process.env.ADMIN_1_DISCORD_ID;
+    if (adminId) {
+      const admin = await this.client.users.fetch(adminId);
+      for (const chunk of chunkForDiscord(report, DISCORD_MESSAGE_MAX_CHAR_LIMIT)) {
+        // eslint-disable-next-line no-await-in-loop
+        await admin.send(chunk);
+      }
+    }
+
+    return report;
   }
 
   public static getInstance(client: Client): CronJobs {
@@ -234,5 +306,13 @@ export class CronJobs {
 
   public stopGFCSteeringReminderJob() {
     this.GFCSteeringReminderJob.stop();
+  }
+
+  public startProjectPulseJob() {
+    this.projectPulseJob.start();
+  }
+
+  public stopProjectPulseJob() {
+    this.projectPulseJob.stop();
   }
 }

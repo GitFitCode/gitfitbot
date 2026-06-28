@@ -14,41 +14,12 @@ import 'dotenv/config';
 import { SlashCommand } from '../Command';
 import {
   buildTranscriptText,
+  chunkForDiscord,
   COMMAND_PROJECT_DIGEST,
   condenseMessages,
-  DISCORD_MESSAGE_MAX_CHAR_LIMIT,
   fetchAllMessages,
   getProjectDigestResponse,
 } from '../utils';
-
-/** Split text into chunks that respect Discord's per-message character limit. */
-function chunkForDiscord(text: string, limit = DISCORD_MESSAGE_MAX_CHAR_LIMIT): string[] {
-  const chunks: string[] = [];
-  const lines = text.split('\n');
-  let current = '';
-
-  for (const line of lines) {
-    // A single line longer than the limit gets hard-split.
-    if (line.length > limit) {
-      if (current) {
-        chunks.push(current);
-        current = '';
-      }
-      for (let i = 0; i < line.length; i += limit) {
-        chunks.push(line.slice(i, i + limit));
-      }
-      continue;
-    }
-    if (current.length + line.length + 1 > limit) {
-      chunks.push(current);
-      current = line;
-    } else {
-      current = current ? `${current}\n${line}` : line;
-    }
-  }
-  if (current) chunks.push(current);
-  return chunks;
-}
 
 async function executeRun(interaction: CommandInteraction) {
   const requestedId = interaction.options.get(COMMAND_PROJECT_DIGEST.OPTION_THREAD_ID)?.value as

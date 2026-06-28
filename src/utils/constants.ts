@@ -39,7 +39,23 @@ export const GFC_CRON_CONFIG = {
     PATTERN: '0 10 * * 2',
     TIMEZONE: 'America/Los_Angeles',
   },
+  PROJECT_PULSE: {
+    // At 09:00 on Mondays.
+    PATTERN: '0 9 * * 1',
+    TIMEZONE: 'America/Los_Angeles',
+  },
 };
+
+// The gfc-projects forum channel in the GitFitCode server; each post/thread is a
+// community project. Used by the weekly Project Pulse cron job.
+export const GFC_PROJECTS_FORUM_ID = '1032761290919260262';
+// How far back the weekly pulse looks for project activity.
+export const PROJECT_PULSE_LOOKBACK_DAYS = 7;
+// System prompt for the per-project weekly status blurb.
+export const PROJECT_PULSE_SYSTEM_PROMPT =
+  'You write a single concise status update (1-2 sentences, max ~280 chars) for a software project, based on the past week of chat messages from its thread. ' +
+  'State what actually moved this week — features shipped, decisions made, metrics, blockers. Use only what is in the messages; do not invent. ' +
+  'Be specific and plain. No preamble, no markdown headings — just the sentence(s).';
 
 // Events command constants
 export const COMMAND_EVENT = {

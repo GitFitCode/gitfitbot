@@ -6,6 +6,7 @@ import {
   OPEN_AI_API_RESPONSE_ERROR_MSG,
   OPEN_AI_CONFIG,
   PROJECT_DIGEST_SYSTEM_PROMPT,
+  PROJECT_PULSE_SYSTEM_PROMPT,
 } from './constants';
 
 /**
@@ -54,4 +55,30 @@ export async function getProjectDigestResponse(transcript: string): Promise<stri
   return response.content.toString() || OPEN_AI_API_RESPONSE_ERROR_MSG;
 }
 
-export default { getChatOpenAIPromptResponse, getProjectDigestResponse };
+/**
+ * Produces a short (1-2 sentence) weekly status blurb for a single project,
+ * based on the past week of its thread messages. Used by the Project Pulse cron.
+ *
+ * @param {string} prompt - Project name + recent messages.
+ * @returns {Promise<string>} - A concise status sentence.
+ */
+export async function getProjectPulseResponse(prompt: string): Promise<string> {
+  const chatModel = new ChatOpenAI({
+    modelName: OPEN_AI_CONFIG.MODEL,
+    temperature: 0.3,
+    openAIApiKey: process.env.OPENAI_API_KEY,
+  });
+
+  const response = await chatModel.invoke([
+    new SystemMessage(PROJECT_PULSE_SYSTEM_PROMPT),
+    new HumanMessage(prompt),
+  ]);
+
+  return response.content.toString() || OPEN_AI_API_RESPONSE_ERROR_MSG;
+}
+
+export default {
+  getChatOpenAIPromptResponse,
+  getProjectDigestResponse,
+  getProjectPulseResponse,
+};
