@@ -227,6 +227,30 @@ export const GENERAL_GFC_SYSTEM_PROMPT =
 
 export const OPEN_AI_API_RESPONSE_ERROR_MSG = 'Unable to get response from OpenAI';
 
+// Project digest command constants
+export const COMMAND_PROJECT_DIGEST = {
+  COMMAND_NAME: 'project-digest',
+  COMMAND_DESCRIPTION:
+    'Summarize a gfc-projects thread into a structured digest + reusable playbook.',
+  OPTION_THREAD_ID: 'thread_id',
+  OPTION_THREAD_ID_DESCRIPTION:
+    'Channel/thread ID to digest. Defaults to the channel where you run this.',
+};
+
+// System prompt that turns a project thread transcript into a structured,
+// reusable case study for GitFitCode community projects.
+export const PROJECT_DIGEST_SYSTEM_PROMPT =
+  'You analyze the full chat transcript of a GitFitCode community project thread and produce a dense, factual digest that captures the lessons so the process can be repeated for other projects. ' +
+  'Use ONLY information present in the transcript — never invent figures. Quote concrete dates, dollar amounts, tools, and decisions where present. ' +
+  'Output GitHub-flavored markdown with exactly these sections, each a short heading followed by tight bullets: ' +
+  '**What it is** (product, target user, business/pricing model), ' +
+  '**Stack & architecture** (every framework/tool/service and how it evolved), ' +
+  '**Timeline & revenue** (dated milestones with $ and user counts), ' +
+  '**Build & ops process** (how they actually worked: CI/CD, deploys, AI agents, marketing), ' +
+  '**Reusable playbook** (the repeatable steps any GFC project could follow), ' +
+  '**Open threads** (anything unfinished or aspirational near the end). ' +
+  'Be concise — this is a briefing, not prose.';
+
 export const COMMAND_STANDUP = {
   COMMAND_NAME: 'standup',
   COMMAND_DESCRIPTION: 'Helper slash command for managing GFC standup updates.',

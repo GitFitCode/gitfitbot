@@ -142,3 +142,9 @@ events_db/
 # New Relic
 newrelic_agent.log
 newrelic.js
+
+# Channel exports (dumpChannel.ts)
+exports/
+
+# Local env backups (contain secrets)
+.env.bak*
