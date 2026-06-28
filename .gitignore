@@ -148,3 +148,7 @@ exports/
 
 # Local env backups (contain secrets)
 .env.bak*
+
+# PouchDB local stores (runtime)
+attendees_db/
+settings_db/

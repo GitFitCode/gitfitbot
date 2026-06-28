@@ -10,18 +10,21 @@
 import Anthropic from '@anthropic-ai/sdk';
 import 'dotenv/config';
 import {
+  ACTIVE_MODEL_SETTING_KEY,
   ANTHROPIC_CONFIG,
   GENERAL_GFC_SYSTEM_PROMPT,
   OPEN_AI_API_RESPONSE_ERROR_MSG,
   PROJECT_DIGEST_SYSTEM_PROMPT,
   PROJECT_PULSE_SYSTEM_PROMPT,
 } from './constants';
+import { getSetting, setSetting } from './localdb';
 
 // Reads ANTHROPIC_API_KEY from the environment.
 const anthropic = new Anthropic();
 
 // The active model. Initialized from the ANTHROPIC_MODEL env var (if set),
-// otherwise the cheapest default. Mutable at runtime via the /model command.
+// otherwise the cheapest default. A persisted /model choice overrides this once
+// loadPersistedModel() runs at startup.
 let activeModel = process.env.ANTHROPIC_MODEL || ANTHROPIC_CONFIG.DEFAULT_MODEL;
 
 /** Returns the model currently used for all Claude calls. */
@@ -29,9 +32,24 @@ export function getActiveModel(): string {
   return activeModel;
 }
 
-/** Sets the model used for all subsequent Claude calls (resets on restart). */
-export function setActiveModel(model: string): void {
+/**
+ * Sets the model used for all subsequent Claude calls and persists the choice
+ * so it survives a bot restart.
+ */
+export async function setActiveModel(model: string): Promise<void> {
   activeModel = model;
+  await setSetting(ACTIVE_MODEL_SETTING_KEY, model);
+}
+
+/**
+ * Loads the persisted model choice (set via /model) on startup, overriding the
+ * env/default. No-op if nothing has been persisted yet.
+ */
+export async function loadPersistedModel(): Promise<void> {
+  const stored = await getSetting(ACTIVE_MODEL_SETTING_KEY);
+  if (stored) {
+    activeModel = stored;
+  }
 }
 
 /** Concatenate the text blocks of a Claude response, or return the error msg. */
