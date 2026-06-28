@@ -25,6 +25,7 @@ import {
   getProjectDigestResponse,
   GFC_PROJECTS_FORUM_ID,
   listForumThreads,
+  upsertPostDigest,
 } from '../utils';
 
 async function executeRun(interaction: CommandInteraction) {
@@ -66,11 +67,23 @@ async function executeRun(interaction: CommandInteraction) {
   const { text, truncated } = buildTranscriptText(condenseMessages(messages));
   const digest = await getProjectDigestResponse(text);
 
+  // Persist the digest (1 post = 1 row in discord_post_digests).
+  const saved = await upsertPostDigest({
+    discordPostId: targetId,
+    guildId: interaction.guildId,
+    name: String(channelName),
+    digest,
+    messageCount: messages.length,
+  });
+  const savedNote = saved
+    ? `\n\n_💾 Saved to projects DB${saved.linkedProjectId ? ' · linked to a conduit project' : ' · not yet linked to a project'}._`
+    : '';
+
   const header =
     `# 📋 Project Digest — ${channelName}\n` +
     `_${messages.length} messages${truncated ? ', transcript truncated to most recent context' : ''}_\n`;
 
-  const chunks = chunkForDiscord(`${header}\n${digest}`);
+  const chunks = chunkForDiscord(`${header}\n${digest}${savedNote}`);
 
   // First chunk replaces the deferred reply; the rest are follow-ups so the
   // whole digest threads together in order.
