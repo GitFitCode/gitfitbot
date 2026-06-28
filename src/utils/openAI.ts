@@ -97,7 +97,8 @@ export async function getProjectDigestResponse(
     : '';
 
   const message = await anthropic.messages.create({
-    model: getActiveModel(),
+    // Digests use a stronger model than the active chat model (default Sonnet).
+    model: process.env.ANTHROPIC_DIGEST_MODEL || ANTHROPIC_CONFIG.DIGEST_MODEL,
     max_tokens: ANTHROPIC_CONFIG.MAX_TOKENS.DIGEST,
     system: PROJECT_DIGEST_SYSTEM_PROMPT,
     messages: [
