@@ -278,9 +278,9 @@ export const COMMAND_PROJECT_DIGEST = {
   COMMAND_NAME: 'project-digest',
   COMMAND_DESCRIPTION:
     'Summarize a gfc-projects thread into a structured digest + reusable playbook.',
-  OPTION_THREAD_ID: 'thread_id',
-  OPTION_THREAD_ID_DESCRIPTION:
-    'Channel/thread ID to digest. Defaults to the channel where you run this.',
+  OPTION_PROJECT: 'project',
+  OPTION_PROJECT_DESCRIPTION:
+    'Pick a project thread by name. Leave empty to digest the thread you run this in.',
 };
 
 // System prompt that turns a project thread transcript into a structured,

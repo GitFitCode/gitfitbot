@@ -74,6 +74,15 @@ const handleModalSubmission = async (interaction: ModalSubmitInteraction<CacheTy
 
 export default (client: Client): void => {
   client.on('interactionCreate', async (interaction: Interaction) => {
+    // Route autocomplete interactions to the matching command's handler.
+    if (interaction.isAutocomplete()) {
+      const slashCommand = Commands.find((c) => c.name === interaction.commandName);
+      if (slashCommand?.autocomplete) {
+        await slashCommand.autocomplete(client, interaction);
+      }
+      return;
+    }
+
     // Check if interaction is a command and call handleSlashCommand() if so.
     if (interaction.type === InteractionType.ApplicationCommand) {
       await handleSlashCommand(client, interaction);
