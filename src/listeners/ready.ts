@@ -18,9 +18,10 @@ export default (client: Client): void => {
         type: ActivityType.Listening,
       });
 
-      // Start the steering reminder cron job.
+      // Start the steering reminder + weekly project pulse cron jobs.
       const cronJobs = CronJobs.getInstance(client);
       cronJobs.startGFCSteeringReminderJob();
+      cronJobs.startProjectPulseJob();
     }
 
     // Set status (i.e. activity) of the "autobot" bot.
