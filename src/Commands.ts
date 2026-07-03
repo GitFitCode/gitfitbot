@@ -16,6 +16,7 @@ import Standup from './commands/Standup';
 import Support from './commands/Support';
 import Test from './commands/Test';
 import TicTacToe from './commands/TicTacToe';
+import Voice from './commands/Voice';
 
 const Commands: SlashCommand[] = [
   Backlog,
@@ -31,6 +32,7 @@ const Commands: SlashCommand[] = [
   Support,
   Test,
   TicTacToe,
+  Voice,
 ];
 
 export default Commands;

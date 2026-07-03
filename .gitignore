@@ -152,3 +152,7 @@ exports/
 # PouchDB local stores (runtime)
 attendees_db/
 settings_db/
+
+# Voice session artifacts (large, local-only)
+audio/
+exports/

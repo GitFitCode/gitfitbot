@@ -120,3 +120,12 @@
 1. Opponent - **OPTIONAL**
 
 ### `/standup` - Provide standup update
+
+### `/voice` - Otter.ai style: join voice channel for transcription & recording (ingests to Conduit)
+
+**Actions** (required):
+
+- `join` [channel] : Bot joins (defaults to CHECKINS or VIRTUAL_OFFICE env), starts listening for speakers.
+- `stop` : Leaves VC, produces transcript stub + metadata, saves locally to exports/voice/, ingests to conduit.source_documents (via Supabase if configured).
+
+**Status**: Initial implementation (speaking events captured; full live audio->STT via whisper-live-server or OpenAI pending for real text). Context (channel, participants, times) captured for conduit ingestion.
