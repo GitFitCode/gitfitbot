@@ -152,3 +152,6 @@ exports/
 # PouchDB local stores (runtime)
 attendees_db/
 settings_db/
+
+# Per-branch goal file for the grill→goal flow (see docs/goals/GOAL_TEMPLATE.md); working state, never lands on main
+goal.md
