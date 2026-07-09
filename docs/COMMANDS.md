@@ -126,7 +126,7 @@
 **Actions** (required):
 
 - `join` [channel] : Bot joins (defaults to CHECKINS or VIRTUAL_OFFICE env), starts listening for speakers. **Restricted** — see the consent & recording policy below.
-- `stop` : Leaves VC, produces transcript stub + metadata, saves locally to exports/voice/, ingests to conduit.source_documents (via Supabase if configured).
+- `stop` : Leaves VC, batch-transcribes the full session recording, produces the final transcript + metadata, saves locally to exports/voice/, ingests to conduit.source_documents (via Supabase if configured).
 - `status` : Shows the active session (channel, duration, segment/file counts) for the guild.
 - `leave` : Force-disconnects the bot and clears the session without ingesting.
 - `optout` : Opt yourself out of voice capture and transcription (persisted across sessions and restarts). Replies ephemerally.
@@ -138,4 +138,8 @@
 - **Notification**: When a session starts, the bot posts the usual announcement in the transcript channel **and** sends a notice to everyone currently in the voice channel ("this call is being transcribed by GitFitBot; run `/voice optout` to be excluded"). The notice goes to the voice channel's built-in text chat when possible, with a DM fallback per member. Users who join mid-session receive the same notice once (via the `voiceStateUpdate` listener).
 - **Opt-out**: `/voice optout` is per-user and persisted (local PouchDB). The bot **never subscribes to an opted-out user's audio stream** — no audio file is created and nothing of theirs is transcribed. They still appear in the final transcript's participants list as `username (not transcribed)`. `/voice optin` reverses it. Both take effect immediately, including during an active session.
 
-**Status**: Initial implementation (speaking events captured; full live audio->STT via whisper-live-server or OpenAI pending for real text). Context (channel, participants, times) captured for conduit ingestion.
+**Recording & transcription pipeline**:
+
+- While a session is active, each (non-opted-out) user's audio is recorded **continuously** to rotating 5-minute WAV chunks under `audio/<guildId>-<sessionStartTs>/<userId>/`, with a `manifest.json` in the session dir — a crash loses at most the current chunk.
+- Live captions in the thread stay per-utterance (short clips with quality guards), but they are only captions.
+- The **final transcript** now comes from a full-quality **batch transcription pass over the chunk recordings at `/voice stop`**: the bot posts a "processing full recording…" message, transcribes each chunk (local Whisper first, OpenAI fallback), merges results across users by chunk start time into `[HH:MM:SS] username: text` lines, and uses that for the export + Conduit ingest. Live captions are kept in the export under "Live captions (raw)" for comparison, and are used as a fallback if the batch pass produces nothing. The batch pass is capped at 15 minutes; on timeout, unprocessed chunk file paths are noted.
