@@ -669,6 +669,9 @@ async function forceLeave(interaction: CommandInteraction) {
  * Transcribe an audio file using OpenAI Whisper (or return placeholder).
  * Prepares for easy swap to self-hosted whisper-live-server WS streaming.
  */
+let openaiQuotaExceeded = false;
+let localQueue: Promise<any> = Promise.resolve();
+
 async function transcribeAudio(
   filePath: string,
   speaker: string,
@@ -707,6 +710,25 @@ async function transcribeAudio(
     return s; // let short phrases through; the isLowValue in handler will decide live posting
   };
 
+  // Safe body readers to avoid undici AssertionError when body is in bad state (e.g. after abort/timeout)
+  const safeText = async (b: any): Promise<string> => {
+    if (!b) return '';
+    try {
+      return await b.text();
+    } catch (e: any) {
+      return e.message || '';
+    }
+  };
+  const safeJson = async (b: any): Promise<any> => {
+    if (!b) return {};
+    try {
+      return await b.json();
+    } catch {
+      const txt = await safeText(b);
+      return { text: txt };
+    }
+  };
+
   // Support local self-hosted Whisper using undici for reliable multipart
   if (process.env.WHISPER_SERVER_URL) {
     const localUrl = process.env.WHISPER_SERVER_URL;
@@ -729,23 +751,11 @@ async function transcribeAudio(
         });
 
         if (statusCode < 200 || statusCode >= 300) {
-          let err = '';
-          try {
-            err = await body.text();
-          } catch (readErr: any) {
-            err = readErr.message || 'Could not read error body';
-          }
+          const err = await safeText(body);
           console.error('Local whisper /asr error:', err);
           return null;
         } else {
-          let data: any;
-          try {
-            data = await body.json();
-          } catch (readErr: any) {
-            const txt = await body.text().catch(() => '');
-            console.warn('[VOICE] local asr non-json body, raw:', txt.substring(0, 200));
-            data = { text: txt };
-          }
+          const data: any = await safeJson(body);
 
           // Prefer good segments if available (the server returns them)
           let t = '';
@@ -773,15 +783,15 @@ async function transcribeAudio(
           return '[no speech detected]';
         }
       } catch (e: any) {
+        const msg = e.message || e.code || String(e);
         if (
           e.name === 'AbortError' ||
           e.code === 'UND_ERR_HEADERS_TIMEOUT' ||
-          e.code === 'ERR_ASSERTION'
+          e.code === 'ERR_ASSERTION' ||
+          msg.includes('AssertionError') ||
+          msg.includes('false == true')
         ) {
-          console.error(
-            'local transcribe error (timeout or body read error after 5min):',
-            e.message || e,
-          );
+          console.error('local transcribe error (timeout or undici body error):', msg);
         } else {
           console.error('local transcribe error', e);
         }
@@ -791,13 +801,20 @@ async function transcribeAudio(
       }
     };
 
-    // Try local, retry once on timeout to handle slow server
-    let result = await attemptLocal();
-    if (result === null) {
-      console.log('[VOICE] Local timed out, retrying once...');
-      await new Promise((r) => setTimeout(r, 2000)); // brief pause
-      result = await attemptLocal();
-    }
+    // Serialize local calls via a queue so we don't overwhelm the local Whisper server
+    // (concurrent requests were causing HeadersTimeout / slow responses)
+    const queuedLocal = () =>
+      localQueue.then(async () => {
+        let result = await attemptLocal();
+        if (result === null) {
+          console.log('[VOICE] Local timed out, retrying once...');
+          await new Promise((r) => setTimeout(r, 2000));
+          result = await attemptLocal();
+        }
+        return result;
+      });
+    localQueue = queuedLocal();
+    const result = await localQueue;
     if (result !== null) {
       return result;
     }
@@ -805,7 +822,10 @@ async function transcribeAudio(
   }
 
   // Fallback to OpenAI (cloud) - use verbose_json for segment quality info
-  if (!process.env.OPENAI_API_KEY) {
+  if (openaiQuotaExceeded || !process.env.OPENAI_API_KEY) {
+    if (openaiQuotaExceeded) {
+      console.warn('[VOICE] Skipping OpenAI fallback due to previous quota error');
+    }
     return `[transcription failed for ${speaker}]`;
   }
   console.log(`[VOICE] Using OpenAI Whisper for ${speaker}`);
@@ -821,16 +841,17 @@ async function transcribeAudio(
       body: form as any,
     });
     if (!res.ok) {
-      const err = await res.text();
+      const err = await res.text().catch(() => 'could not read error response');
       console.error('OpenAI transcribe error:', err);
       if (err.includes('insufficient_quota')) {
+        openaiQuotaExceeded = true;
         console.error(
           '!!! OPENAI QUOTA EXHAUSTED - add billing credits or disable OpenAI fallback to avoid costs. Relying on local Whisper only.',
         );
       }
       return `[transcription failed for ${speaker}]`;
     }
-    const data: any = await res.json();
+    const data: any = await res.json().catch(() => ({}));
     let t = (data.text || '').trim();
     if (data.segments && Array.isArray(data.segments)) {
       const good = data.segments.filter(
