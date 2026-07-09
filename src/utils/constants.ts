@@ -78,6 +78,22 @@ export const GFC_CRON_CONFIG = {
   },
 };
 
+// Voice transcription (Otter.ai style) - bot joins VC, transcribes live-ish, records, ingests to conduit
+export const COMMAND_VOICE = {
+  COMMAND_NAME: 'voice',
+  COMMAND_DESCRIPTION:
+    'Join a voice channel, transcribe conversation (like Otter), stop and ingest to Conduit.',
+  OPTION_ACTION: 'action',
+  OPTION_ACTION_DESCRIPTION: 'join, stop, status, or leave',
+  ACTION_JOIN: 'join',
+  ACTION_STOP: 'stop',
+  ACTION_STATUS: 'status',
+  ACTION_LEAVE: 'leave',
+  OPTION_CHANNEL: 'channel',
+  OPTION_CHANNEL_DESCRIPTION:
+    'Voice channel to join (optional, defaults to CHECKINS or VIRTUAL_OFFICE)',
+};
+
 // The gfc-projects forum channel in the GitFitCode server; each post/thread is a
 // community project. Used by the weekly Project Pulse cron job.
 export const GFC_PROJECTS_FORUM_ID = '1032761290919260262';

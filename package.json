@@ -19,6 +19,8 @@
   "license": "GNU GPLv3",
   "dependencies": {
     "@anthropic-ai/sdk": "latest",
+    "@discordjs/opus": "latest",
+    "@discordjs/voice": "latest",
     "@notionhq/client": "latest",
     "@supabase/supabase-js": "latest",
     "@types/pg": "^8.20.0",
@@ -27,16 +29,22 @@
     "discord-tictactoe": "latest",
     "discord.js": "latest",
     "dotenv": "latest",
+    "ffmpeg-static": "latest",
+    "libsodium-wrappers": "latest",
     "newrelic": "latest",
+    "opusscript": "^0.1.1",
     "pg": "^8.22.0",
     "pouchdb-node": "latest",
-    "undici": "latest"
+    "prism-media": "latest",
+    "undici": "latest",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@commitlint/cli": "latest",
     "@commitlint/config-conventional": "latest",
     "@types/node": "latest",
     "@types/pouchdb-node": "latest",
+    "@types/ws": "^8.18.1",
     "husky": "latest",
     "lint-staged": "latest",
     "prettier": "latest",
@@ -58,7 +66,9 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "leveldown"
+      "leveldown",
+      "@discordjs/opus",
+      "ffmpeg-static"
     ]
   }
 }
