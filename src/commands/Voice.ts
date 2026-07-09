@@ -45,6 +45,7 @@ interface VoiceSession {
   localTranscriptions: number;
   openaiTranscriptions: number;
   estimatedAudioSeconds: number; // rough, for cost awareness
+  pendingTranscriptions: Set<Promise<void>>; // in-flight transcription work, drained on /voice stop
 }
 
 const activeSessions: Map<string, VoiceSession> = new Map();
@@ -171,6 +172,7 @@ async function joinAndListen(
     localTranscriptions: 0,
     openaiTranscriptions: 0,
     estimatedAudioSeconds: 0,
+    pendingTranscriptions: new Set(),
   };
   activeSessions.set(guildId, session);
 
@@ -318,7 +320,7 @@ async function joinAndListen(
     });
 
     let closeHandled = false;
-    ffmpeg.on('close', async (code) => {
+    const handleFfmpegClose = async (code: number | null) => {
       if (closeHandled) return;
       closeHandled = true;
       const stats = fs.existsSync(filePath) ? fs.statSync(filePath) : null;
@@ -452,6 +454,18 @@ async function joinAndListen(
       try {
         if (decoder && !decoder.destroyed) decoder.destroy();
       } catch {}
+    };
+
+    ffmpeg.on('close', (code) => {
+      // Track the async transcription work so /voice stop can drain in-flight
+      // transcriptions before building/exporting/ingesting the final transcript.
+      const work = handleFfmpegClose(code).catch((err) => {
+        console.error(`[VOICE] Transcription pipeline error for ${username}:`, err);
+      });
+      session.pendingTranscriptions.add(work);
+      void work.finally(() => {
+        session.pendingTranscriptions.delete(work);
+      });
     });
   });
 
@@ -480,10 +494,44 @@ async function stopAndIngest(interaction: CommandInteraction) {
 
   const { connection, channelName, startedAt, speakingEvents } = session;
 
+  // Destroying the connection stops new speaking events and fires the Destroyed
+  // handler (which removes the session from activeSessions). We keep using our
+  // local `session` reference — do NOT re-fetch it from the map after this point.
   connection.destroy();
   activeSessions.delete(guild.id);
 
   const endedAt = new Date();
+
+  await interaction.followUp({
+    content: 'Session ended — finalizing transcript (waiting for in-flight transcriptions)…',
+  });
+
+  // Drain in-flight transcriptions (ffmpeg close handlers + queued Whisper calls)
+  // before building the final transcript, with a hard cap so a wedged Whisper
+  // call can never hang the stop forever.
+  const DRAIN_TIMEOUT_MS = 180_000; // 3 minutes
+  let droppedSegments = 0;
+  if (session.pendingTranscriptions.size > 0) {
+    console.log(
+      `[VOICE] Draining ${session.pendingTranscriptions.size} in-flight transcription(s) (max ${DRAIN_TIMEOUT_MS / 1000}s)...`,
+    );
+    let drainTimer: NodeJS.Timeout | undefined;
+    const raceResult = await Promise.race([
+      Promise.allSettled([...session.pendingTranscriptions]).then(() => 'drained' as const),
+      new Promise<'timeout'>((resolve) => {
+        drainTimer = setTimeout(() => resolve('timeout'), DRAIN_TIMEOUT_MS);
+      }),
+    ]);
+    if (drainTimer) clearTimeout(drainTimer);
+    if (raceResult === 'timeout') {
+      droppedSegments = session.pendingTranscriptions.size;
+      console.warn(
+        `[VOICE] ⚠️ Drain timed out after ${DRAIN_TIMEOUT_MS / 1000}s with ${droppedSegments} transcription(s) still pending. Finalizing without them.`,
+      );
+    } else {
+      console.log('[VOICE] All in-flight transcriptions drained.');
+    }
+  }
   const durationMin = Math.round((endedAt.getTime() - startedAt.getTime()) / 60000);
 
   // Build transcript from actual captured + transcribed audio when available
@@ -515,6 +563,9 @@ async function stopAndIngest(interaction: CommandInteraction) {
     }
     if (currSpeaker) grouped.push({ speaker: currSpeaker, lines: currLines });
     realTranscripts = grouped.map((g) => `**${g.speaker}:**\n${g.lines.join('\n')}`).join('\n\n');
+  }
+  if (droppedSegments > 0) {
+    realTranscripts += `\n\n⚠️ ${droppedSegments} segment(s) were still transcribing at stop and were dropped (drain timed out after ${DRAIN_TIMEOUT_MS / 1000}s).`;
   }
 
   const localCount = session.localTranscriptions || 0;
