@@ -18,6 +18,7 @@ import {
   Client,
   CommandInteraction,
   GuildMember,
+  PermissionFlagsBits,
   VoiceBasedChannel,
 } from 'discord.js';
 import * as fs from 'fs';
@@ -26,6 +27,7 @@ import * as prism from 'prism-media';
 import { request } from 'undici';
 import { SlashCommand } from '../Command';
 import { COMMAND_VOICE } from '../utils/constants';
+import { addVoiceOptOut, fetchAllVoiceOptOuts, removeVoiceOptOut } from '../utils/localdb';
 
 const ffmpegPath: string = require('ffmpeg-static');
 
@@ -36,7 +38,13 @@ interface VoiceSession {
   channelId: string;
   channelName: string;
   startedAt: Date;
-  speakingEvents: Array<{ userId: string; username: string; started: Date; ended?: Date }>;
+  speakingEvents: Array<{
+    userId: string;
+    username: string;
+    started: Date;
+    ended?: Date;
+    optedOut?: boolean;
+  }>;
   transcripts: string[];
   audioPaths: string[];
   transcriptThread?: any; // Discord ThreadChannel for the live convo
@@ -46,9 +54,73 @@ interface VoiceSession {
   openaiTranscriptions: number;
   estimatedAudioSeconds: number; // rough, for cost awareness
   pendingTranscriptions: Set<Promise<void>>; // in-flight transcription work, drained on /voice stop
+  optOutSet: Set<string>; // user IDs opted out of capture/transcription (cached at start, refreshed on /voice optout|optin)
+  notifiedUserIds: Set<string>; // users already sent the recording notice this session
 }
 
 const activeSessions: Map<string, VoiceSession> = new Map();
+
+/**
+ * Returns the voice channel ID of the active transcription session for a guild,
+ * or null if there is no active session. Used by the voiceStateUpdate listener
+ * to detect mid-session joiners.
+ */
+export function getActiveSessionChannel(guildId: string): string | null {
+  return activeSessions.get(guildId)?.channelId ?? null;
+}
+
+/**
+ * Sends the "this call is being transcribed" notice to the given members, at
+ * most once per member per session. Tries the voice channel's built-in text
+ * chat first; falls back to DMing each member individually.
+ */
+async function sendRecordingNotice(session: VoiceSession, members: GuildMember[]): Promise<void> {
+  const targets = members.filter((m) => !m.user.bot && !session.notifiedUserIds.has(m.id));
+  if (targets.length === 0) return;
+  for (const m of targets) session.notifiedUserIds.add(m.id);
+
+  const mentions = targets.map((m) => `<@${m.id}>`).join(' ');
+  const notice =
+    `${mentions} 🎙️ Heads up: this call in **${session.channelName}** is being transcribed and recorded by GitFitBot. ` +
+    `Run \`/voice optout\` if you don't want your audio captured or transcribed (you'll show as "(not transcribed)"). ` +
+    `Run \`/voice optin\` to re-enable.`;
+
+  // Prefer the voice channel's built-in text chat (visible to everyone on the call).
+  try {
+    const vc: any = await session.client.channels.fetch(session.channelId).catch(() => null);
+    if (vc && 'send' in vc) {
+      await vc.send(notice);
+      console.log(
+        `[VOICE] Recording notice posted in VC text chat for ${targets.length} member(s).`,
+      );
+      return;
+    }
+  } catch (e: any) {
+    console.warn('[VOICE] VC text chat notice failed, falling back to DMs:', e?.message || e);
+  }
+
+  // Fallback: DM each member (DMs can be disabled; best effort).
+  const dmNotice =
+    `🎙️ Heads up: the call in **${session.channelName}** is being transcribed and recorded by GitFitBot. ` +
+    `Run \`/voice optout\` in the server if you don't want your audio captured or transcribed. ` +
+    `Run \`/voice optin\` to re-enable.`;
+  for (const m of targets) {
+    await m.send(dmNotice).catch((e: any) => {
+      console.warn(`[VOICE] Could not DM recording notice to ${m.user.username}:`, e?.message || e);
+    });
+  }
+}
+
+/**
+ * Notifies a user who joined a voice channel with an active transcription
+ * session (called from the voiceStateUpdate listener). One notice per user
+ * per session.
+ */
+export async function notifyMidSessionJoiner(guildId: string, member: GuildMember): Promise<void> {
+  const session = activeSessions.get(guildId);
+  if (!session) return;
+  await sendRecordingNotice(session, [member]);
+}
 
 async function getVoiceChannel(
   interaction: CommandInteraction,
@@ -159,6 +231,10 @@ async function joinAndListen(
     }
   });
 
+  // Cache the persisted opt-out set at session start. /voice optout|optin
+  // refreshes this cache live for all active sessions.
+  const optOutSet = new Set(await fetchAllVoiceOptOuts());
+
   const session: VoiceSession = {
     connection,
     client,
@@ -173,8 +249,17 @@ async function joinAndListen(
     openaiTranscriptions: 0,
     estimatedAudioSeconds: 0,
     pendingTranscriptions: new Set(),
+    optOutSet,
+    notifiedUserIds: new Set(),
   };
   activeSessions.set(guildId, session);
+
+  // Consent notice: tell everyone currently on the call that recording +
+  // transcription started (mid-session joiners are handled by the
+  // voiceStateUpdate listener using the same mechanism).
+  await sendRecordingNotice(session, [...voiceChannel.members.values()]).catch((e: any) => {
+    console.warn('[VOICE] Failed to send session-start recording notice:', e?.message || e);
+  });
 
   // Post the announcement in the configured transcript channel (the one "it's in now").
   // If that ID is already a thread (e.g. 1499605799947735071), use it directly as the live transcript container.
@@ -263,6 +348,21 @@ async function joinAndListen(
     const member = guild.members.cache.get(userId) as GuildMember | undefined;
     const username = member?.user?.username ?? userId;
     console.log(`[VOICE] ${username} (${userId}) started speaking in ${voiceChannel.name}`);
+
+    // Consent: never subscribe to (or record/transcribe) opted-out users.
+    // We still log the speaking event (flagged) so the participants list can
+    // show them as "(not transcribed)".
+    if (session.optOutSet.has(userId)) {
+      console.log(`[VOICE] ${username} (${userId}) is opted out — skipping audio capture.`);
+      session.speakingEvents.push({
+        userId,
+        username,
+        started: new Date(),
+        optedOut: true,
+      });
+      return;
+    }
+
     session.speakingEvents.push({
       userId,
       username,
@@ -534,12 +634,22 @@ async function stopAndIngest(interaction: CommandInteraction) {
   }
   const durationMin = Math.round((endedAt.getTime() - startedAt.getTime()) / 60000);
 
-  // Build transcript from actual captured + transcribed audio when available
-  const participants = [...new Set(speakingEvents.map((e) => e.username))];
+  // Build transcript from actual captured + transcribed audio when available.
+  // Opted-out users are listed as "(not transcribed)" — they spoke but were
+  // never captured or transcribed.
+  const participantTranscribed = new Map<string, boolean>();
+  for (const e of speakingEvents) {
+    const wasTranscribed = participantTranscribed.get(e.username) ?? false;
+    participantTranscribed.set(e.username, wasTranscribed || !e.optedOut);
+  }
+  const participants = [...participantTranscribed.entries()].map(([name, transcribed]) =>
+    transcribed ? name : `${name} (not transcribed)`,
+  );
   const eventsSummary = speakingEvents
     .map((e) => {
       const dur = e.ended ? Math.round((e.ended.getTime() - e.started.getTime()) / 1000) : '?';
-      return `- ${e.username}: spoke ~${dur}s starting ${e.started.toISOString()}`;
+      const optedOutNote = e.optedOut ? ' (opted out — not captured/transcribed)' : '';
+      return `- ${e.username}: spoke ~${dur}s starting ${e.started.toISOString()}${optedOutNote}`;
     })
     .join('\n');
 
@@ -997,6 +1107,49 @@ async function ingestToConduit(doc: {
   return { ok: false };
 }
 
+/**
+ * Permission gate for starting a recording session: requires the role in
+ * VOICE_RECORDER_ROLE_ID when set; otherwise falls back to requiring the
+ * Administrator permission.
+ */
+function canStartRecording(interaction: CommandInteraction): boolean {
+  const roleId = process.env.VOICE_RECORDER_ROLE_ID;
+  if (roleId) {
+    // interaction.member can be a GuildMember (roles.cache) or a raw API
+    // member (roles: string[]) depending on cache state — handle both.
+    const roles: any = (interaction.member as any)?.roles;
+    if (roles?.cache) return roles.cache.has(roleId);
+    if (Array.isArray(roles)) return roles.includes(roleId);
+    return false;
+  }
+  return interaction.memberPermissions?.has(PermissionFlagsBits.Administrator) ?? false;
+}
+
+/** Persist a user's opt-out/opt-in choice and refresh active session caches. */
+async function setVoiceOptOut(interaction: CommandInteraction, optedOut: boolean) {
+  const userId = interaction.user.id;
+  if (optedOut) {
+    await addVoiceOptOut(userId);
+  } else {
+    await removeVoiceOptOut(userId);
+  }
+
+  // Refresh the in-memory cache of every active session so the change takes
+  // effect immediately (mid-session opt-outs/opt-ins).
+  for (const session of activeSessions.values()) {
+    if (optedOut) {
+      session.optOutSet.add(userId);
+    } else {
+      session.optOutSet.delete(userId);
+    }
+  }
+
+  const content = optedOut
+    ? 'You are now **opted out** of voice capture and transcription. GitFitBot will never subscribe to your audio; you will appear in transcripts as "(not transcribed)". Run `/voice optin` to re-enable.'
+    : 'You are now **opted back in** to voice capture and transcription. Run `/voice optout` at any time to be excluded again.';
+  await interaction.followUp({ content, ephemeral: true });
+}
+
 async function executeRun(interaction: CommandInteraction) {
   const actionOpt = interaction.options.get(COMMAND_VOICE.OPTION_ACTION);
   // For Channel-type options, .get() returns { value: snowflake (the channel ID) }
@@ -1006,6 +1159,17 @@ async function executeRun(interaction: CommandInteraction) {
   const channelOpt = channelOptRaw ? String(channelOptRaw.value) : null;
 
   if (action === COMMAND_VOICE.ACTION_JOIN) {
+    if (!canStartRecording(interaction)) {
+      const roleId = process.env.VOICE_RECORDER_ROLE_ID;
+      const requirement = roleId
+        ? `the <@&${roleId}> role`
+        : 'the Administrator permission (no VOICE_RECORDER_ROLE_ID configured)';
+      await interaction.followUp({
+        content: `You can't start a recording session: starting \`/voice join\` requires ${requirement}. Recording captures and transcribes everyone on the call, so it's restricted.`,
+        ephemeral: true,
+      });
+      return;
+    }
     await joinAndListen(interaction.client, interaction, channelOpt);
   } else if (action === COMMAND_VOICE.ACTION_STOP) {
     await stopAndIngest(interaction);
@@ -1013,8 +1177,14 @@ async function executeRun(interaction: CommandInteraction) {
     await showStatus(interaction);
   } else if (action === COMMAND_VOICE.ACTION_LEAVE) {
     await forceLeave(interaction);
+  } else if (action === COMMAND_VOICE.ACTION_OPTOUT) {
+    await setVoiceOptOut(interaction, true);
+  } else if (action === COMMAND_VOICE.ACTION_OPTIN) {
+    await setVoiceOptOut(interaction, false);
   } else {
-    await interaction.followUp({ content: 'Unknown action. Use join, stop, status, or leave.' });
+    await interaction.followUp({
+      content: 'Unknown action. Use join, stop, status, leave, optout, or optin.',
+    });
   }
 }
 
@@ -1032,6 +1202,8 @@ const Voice: SlashCommand = {
         { name: 'stop', value: COMMAND_VOICE.ACTION_STOP },
         { name: 'status', value: COMMAND_VOICE.ACTION_STATUS },
         { name: 'leave', value: COMMAND_VOICE.ACTION_LEAVE },
+        { name: 'optout', value: COMMAND_VOICE.ACTION_OPTOUT },
+        { name: 'optin', value: COMMAND_VOICE.ACTION_OPTIN },
       ],
     },
     {
