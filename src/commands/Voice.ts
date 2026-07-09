@@ -5,13 +5,11 @@
  */
 
 import {
-  EndBehaviorType,
   entersState,
   joinVoiceChannel,
   VoiceConnection,
   VoiceConnectionStatus,
 } from '@discordjs/voice';
-import { spawn } from 'child_process';
 import {
   ApplicationCommandOptionType,
   ChannelType,
@@ -23,13 +21,11 @@ import {
 } from 'discord.js';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as prism from 'prism-media';
 import { request } from 'undici';
 import { SlashCommand } from '../Command';
 import { COMMAND_VOICE } from '../utils/constants';
 import { addVoiceOptOut, fetchAllVoiceOptOuts, removeVoiceOptOut } from '../utils/localdb';
-
-const ffmpegPath: string = require('ffmpeg-static');
+import { ChunkMeta, SessionRecorder } from '../utils/voiceRecorder';
 
 interface VoiceSession {
   connection: VoiceConnection;
@@ -56,6 +52,7 @@ interface VoiceSession {
   pendingTranscriptions: Set<Promise<void>>; // in-flight transcription work, drained on /voice stop
   optOutSet: Set<string>; // user IDs opted out of capture/transcription (cached at start, refreshed on /voice optout|optin)
   notifiedUserIds: Set<string>; // users already sent the recording notice this session
+  recorder: SessionRecorder; // continuous per-user chunk recording + utterance segmentation (#79)
 }
 
 const activeSessions: Map<string, VoiceSession> = new Map();
@@ -120,6 +117,17 @@ export async function notifyMidSessionJoiner(guildId: string, member: GuildMembe
   const session = activeSessions.get(guildId);
   if (!session) return;
   await sendRecordingNotice(session, [member]);
+}
+
+/**
+ * Called from the voiceStateUpdate listener when a user leaves the voice
+ * channel of an active session: closes their continuous recording chunk so
+ * the audio written so far is finalized on disk.
+ */
+export function handleVoiceChannelLeave(guildId: string, userId: string): void {
+  const session = activeSessions.get(guildId);
+  if (!session) return;
+  session.recorder.closeUser(userId, 'left the voice channel');
 }
 
 async function getVoiceChannel(
@@ -235,13 +243,37 @@ async function joinAndListen(
   // refreshes this cache live for all active sessions.
   const optOutSet = new Set(await fetchAllVoiceOptOuts());
 
+  const startedAt = new Date();
+
+  // Continuous per-user recording (#79): one Manual subscription per user,
+  // teed into rotating 5-min chunk WAVs (batch-transcribed at /voice stop)
+  // and a silence segmenter that emits per-utterance WAVs for live captions.
+  // The utterance callback runs the same live-caption pipeline (size skip,
+  // quality guards, thread post) the old AfterSilence path used.
+  const recorder = new SessionRecorder(
+    guildId,
+    startedAt.getTime(),
+    (uid) => session.optOutSet.has(uid),
+    (wavPath, _uid, username) => {
+      // Track the async caption transcription so /voice stop can drain
+      // in-flight work before finalizing (same contract as before, #82).
+      const work = handleUtteranceFile(session, wavPath, username).catch((err) => {
+        console.error(`[VOICE] Live-caption pipeline error for ${username}:`, err);
+      });
+      session.pendingTranscriptions.add(work);
+      void work.finally(() => {
+        session.pendingTranscriptions.delete(work);
+      });
+    },
+  );
+
   const session: VoiceSession = {
     connection,
     client,
     guildId,
     channelId: voiceChannel.id,
     channelName: voiceChannel.name,
-    startedAt: new Date(),
+    startedAt,
     speakingEvents: [],
     transcripts: [],
     audioPaths: [],
@@ -251,6 +283,7 @@ async function joinAndListen(
     pendingTranscriptions: new Set(),
     optOutSet,
     notifiedUserIds: new Set(),
+    recorder,
   };
   activeSessions.set(guildId, session);
 
@@ -369,204 +402,14 @@ async function joinAndListen(
       started: new Date(),
     });
 
-    const audioStream = receiver.subscribe(userId, {
-      end: {
-        behavior: EndBehaviorType.AfterSilence,
-        duration: 3500, // longer to capture more complete phrases in natural conversation
-      },
-    });
-    (audioStream as any).setMaxListeners?.(100);
-
-    const audioDir = path.join(process.cwd(), 'audio');
-    fs.mkdirSync(audioDir, { recursive: true });
-    const filePath = path.join(audioDir, `${userId}-${Date.now()}.wav`);
-    session.audioPaths.push(filePath);
-
-    // Decode opus -> pcm using prism-media, then ffmpeg to wav file
-    let decoder;
-    try {
-      decoder = new prism.opus.Decoder({
-        rate: 48000,
-        channels: 2,
-        frameSize: 960,
-      });
-      (decoder as any).setMaxListeners?.(100);
-    } catch (err) {
-      console.error(`[VOICE] Failed to create opus decoder for ${username}:`, err);
-      // Still track the speaking event for metadata, but skip audio processing/transcription this time.
-      // This prevents the whole process from crashing on native module issues.
-      return;
-    }
-    const pcmStream = audioStream.pipe(decoder);
-
-    const ffmpeg = spawn(ffmpegPath, [
-      '-f',
-      's16le',
-      '-ar',
-      '48000',
-      '-ac',
-      '2',
-      '-i',
-      'pipe:0',
-      '-f',
-      'wav',
-      filePath,
-    ]);
-
-    pcmStream.pipe(ffmpeg.stdin);
-
-    ffmpeg.stderr.on('data', (d) => {
-      // uncomment for debug: console.log('ffmpeg:', d.toString());
-    });
-
-    let closeHandled = false;
-    const handleFfmpegClose = async (code: number | null) => {
-      if (closeHandled) return;
-      closeHandled = true;
-      const stats = fs.existsSync(filePath) ? fs.statSync(filePath) : null;
-      const sizeKb = stats ? Math.round(stats.size / 1024) : 0;
-
-      console.log(
-        `[VOICE] ffmpeg closed for ${username} (code=${code}, size=${sizeKb}KB) at ${filePath}`,
-      );
-
-      // Use the stats from the close event to decide. Some closes have the file "disappear" momentarily or race with existsSync.
-      // Transcribe any file that had content at close time.
-      if (stats && sizeKb >= 15) {
-        console.log(`[VOICE] Starting transcription for ${username}...`);
-        const text = await transcribeAudio(filePath, username, session);
-        const cleaned = (text || '').trim();
-        const ts = new Date().toISOString().slice(11, 19);
-
-        // Track audio usage for cost awareness
-        const stats = fs.existsSync(filePath) ? fs.statSync(filePath) : null;
-        if (stats && session) {
-          const audioSeconds = Math.round(stats.size / 192000); // approx for 48kHz stereo 16-bit
-          session.estimatedAudioSeconds = (session.estimatedAudioSeconds || 0) + audioSeconds;
-        }
-
-        const looksLikeWhisperJson =
-          cleaned.startsWith('{') ||
-          cleaned.includes('"text"') ||
-          cleaned.includes('"segments"') ||
-          /"language"\s*:\s*"/.test(cleaned);
-
-        // Only drop obvious non-speech / json junk from server. Be permissive so real (even short) speech shows as live segments.
-        const isGibberish = cleaned.length > 1 && cleaned.length < 30 && !/[a-zA-Z]/.test(cleaned);
-
-        const wordCount = cleaned.split(/\s+/).filter(Boolean).length;
-
-        // Detect extreme repetition only
-        const lower = cleaned.toLowerCase();
-        const hasRepetition = /\b(\w{3,})\b.*\b\1\b.*\b\1\b/.test(lower); // at least triple repeat
-
-        const isLowValue =
-          !cleaned ||
-          looksLikeWhisperJson ||
-          cleaned.includes('transcription failed') ||
-          cleaned.includes('no speech') ||
-          cleaned.includes('no usable') ||
-          cleaned.trim().length < 1;
-
-        if (!isLowValue) {
-          // Anti-repetition: skip near-duplicates of recent lines (common with Whisper on short/noisy clips)
-          const recentTexts = session.transcripts
-            .slice(-3)
-            .map((line) => line.split(': ').slice(1).join(': ').toLowerCase());
-          const norm = cleaned.toLowerCase().trim();
-          const isRepeat = recentTexts.some(
-            (prev) =>
-              prev &&
-              (norm.includes(prev) || prev.includes(norm)) &&
-              Math.abs(norm.length - prev.length) < 30,
-          );
-          if (isRepeat) {
-            console.log(
-              `[VOICE] ⚠️ Dropped near-duplicate transcription for ${username}: ${cleaned.substring(0, 60)}`,
-            );
-          } else {
-            session.transcripts.push(`[${ts}] ${username}: ${cleaned}`);
-            console.log(
-              `[VOICE] ✅ Transcribed ${username}: ${cleaned.substring(0, 80)}${cleaned.length > 80 ? '...' : ''}`,
-            );
-
-            // Live caption ONLY for useful text -> the target (thread preferred)
-            // This is the key to "live transcript in the thread"
-            if (session.client) {
-              let target: any = session.transcriptThread;
-              if (!target) {
-                const chId =
-                  process.env.VOICE_TRANSCRIPT_CHANNEL_ID ||
-                  process.env.GENERAL_CHAT_CHANNEL_ID ||
-                  '';
-                if (chId) {
-                  target = await session.client.channels.fetch(chId).catch(() => null);
-                }
-              }
-              if (target && 'send' in target) {
-                // Final safety: never post raw JSON responses or empty garbage to the thread
-                const looksLikeRaw =
-                  cleaned.startsWith('{') ||
-                  cleaned.includes('"text"') ||
-                  cleaned.includes('"segments"') ||
-                  /"language"\s*:\s*"/.test(cleaned);
-                if (looksLikeRaw || cleaned.trim().length < 1) {
-                  console.log(
-                    `[VOICE] ⚠️ Final guard blocked bad text for ${username}: ${cleaned.substring(0, 60)}`,
-                  );
-                } else {
-                  const tgtId =
-                    (session.transcriptThread && session.transcriptThread.id) ||
-                    process.env.VOICE_TRANSCRIPT_CHANNEL_ID ||
-                    process.env.GENERAL_CHAT_CHANNEL_ID;
-                  console.log(`[VOICE] Sending live caption for ${username} to ${tgtId}`);
-
-                  // Send as a normal message in the transcript thread.
-                  // Since Discord threads don't support sub-threads like Slack, this is the natural way:
-                  // all content lives linearly in the thread after the "All live segments" header.
-                  // (We previously tried replies for nesting, but given Discord's model, plain messages in the thread are cleaner and more reliable.)
-                  await target.send(`🎙️ **${username}**: ${cleaned}`).catch((e: any) => {
-                    console.warn('[VOICE] live send failed:', e?.message || e);
-                  });
-                }
-              }
-            }
-          }
-        } else {
-          console.log(
-            `[VOICE] ⚠️ Dropped low-value segment for ${username}: ${cleaned.substring(0, 60)}`,
-          );
-        }
-      } else if (sizeKb < 15) {
-        console.log(
-          `[VOICE] ⚠️ Skipping tiny clip (${sizeKb}KB < 15KB) for ${username} (too short for reliable STT)`,
-        );
-      } else {
-        console.log(
-          `[VOICE] ⚠️ Audio file for ${username} ready at ${filePath} (ffmpeg code=${code})`,
-        );
-      }
-
-      // Cleanup streams to prevent listener leaks
-      try {
-        audioStream.destroy();
-      } catch {}
-      try {
-        if (decoder && !decoder.destroyed) decoder.destroy();
-      } catch {}
-    };
-
-    ffmpeg.on('close', (code) => {
-      // Track the async transcription work so /voice stop can drain in-flight
-      // transcriptions before building/exporting/ingesting the final transcript.
-      const work = handleFfmpegClose(code).catch((err) => {
-        console.error(`[VOICE] Transcription pipeline error for ${username}:`, err);
-      });
-      session.pendingTranscriptions.add(work);
-      void work.finally(() => {
-        session.pendingTranscriptions.delete(work);
-      });
-    });
+    // Continuous capture (#79): first speaking event subscribes the user with
+    // EndBehaviorType.Manual and tees decoded PCM into rotating chunk WAVs +
+    // the utterance segmenter (live captions). Subsequent events are no-ops.
+    // (Two parallel receiver subscriptions per user are NOT possible:
+    // VoiceReceiver.subscribe() returns the existing stream for a user, so the
+    // old AfterSilence path could not coexist with the continuous one — see
+    // the architecture note in src/utils/voiceRecorder.ts.)
+    session.recorder.ensureUser(receiver, userId, username);
   });
 
   receiver.speaking.on('end', (userId: string) => {
@@ -580,6 +423,114 @@ async function joinAndListen(
   // For now console + followUp already done. In prod post to GENERAL or dedicated transcript channel.
 
   console.log(`[VOICE] Session started in guild ${guildId} channel ${voiceChannel.id}`);
+}
+
+/**
+ * Live-caption pipeline for one utterance WAV (emitted by the recorder's
+ * silence segmenter). This is the old per-utterance AfterSilence path,
+ * unchanged in behavior: <15KB skip, transcription, JSON/gibberish/low-value
+ * guards, near-duplicate suppression, and the thread caption post. These
+ * guards stay HERE only — the final transcript comes from the clean batch
+ * pass over the continuous chunks at /voice stop (#79).
+ */
+async function handleUtteranceFile(
+  session: VoiceSession,
+  filePath: string,
+  username: string,
+): Promise<void> {
+  session.audioPaths.push(filePath);
+
+  const stats = fs.existsSync(filePath) ? fs.statSync(filePath) : null;
+  const sizeKb = stats ? Math.round(stats.size / 1024) : 0;
+
+  console.log(`[VOICE] Utterance WAV ready for ${username} (size=${sizeKb}KB) at ${filePath}`);
+
+  if (!stats || sizeKb < 15) {
+    console.log(
+      `[VOICE] ⚠️ Skipping tiny clip (${sizeKb}KB < 15KB) for ${username} (too short for reliable STT)`,
+    );
+    return;
+  }
+
+  console.log(`[VOICE] Starting transcription for ${username}...`);
+  const text = await transcribeAudio(filePath, username, session);
+  const cleaned = (text || '').trim();
+  const ts = new Date().toISOString().slice(11, 19);
+
+  // Track audio usage for cost awareness
+  const audioSeconds = Math.round(stats.size / 192000); // approx for 48kHz stereo 16-bit
+  session.estimatedAudioSeconds = (session.estimatedAudioSeconds || 0) + audioSeconds;
+
+  const looksLikeWhisperJson =
+    cleaned.startsWith('{') ||
+    cleaned.includes('"text"') ||
+    cleaned.includes('"segments"') ||
+    /"language"\s*:\s*"/.test(cleaned);
+
+  const isLowValue =
+    !cleaned ||
+    looksLikeWhisperJson ||
+    cleaned.includes('transcription failed') ||
+    cleaned.includes('no speech') ||
+    cleaned.includes('no usable') ||
+    cleaned.trim().length < 1;
+
+  if (isLowValue) {
+    console.log(
+      `[VOICE] ⚠️ Dropped low-value segment for ${username}: ${cleaned.substring(0, 60)}`,
+    );
+    return;
+  }
+
+  // Anti-repetition: skip near-duplicates of recent lines (common with Whisper on short/noisy clips)
+  const recentTexts = session.transcripts
+    .slice(-3)
+    .map((line) => line.split(': ').slice(1).join(': ').toLowerCase());
+  const norm = cleaned.toLowerCase().trim();
+  const isRepeat = recentTexts.some(
+    (prev) =>
+      prev &&
+      (norm.includes(prev) || prev.includes(norm)) &&
+      Math.abs(norm.length - prev.length) < 30,
+  );
+  if (isRepeat) {
+    console.log(
+      `[VOICE] ⚠️ Dropped near-duplicate transcription for ${username}: ${cleaned.substring(0, 60)}`,
+    );
+    return;
+  }
+
+  session.transcripts.push(`[${ts}] ${username}: ${cleaned}`);
+  console.log(
+    `[VOICE] ✅ Transcribed ${username}: ${cleaned.substring(0, 80)}${cleaned.length > 80 ? '...' : ''}`,
+  );
+
+  // Live caption ONLY for useful text -> the target (thread preferred)
+  // This is the key to "live transcript in the thread"
+  if (session.client) {
+    let target: any = session.transcriptThread;
+    if (!target) {
+      const chId =
+        process.env.VOICE_TRANSCRIPT_CHANNEL_ID || process.env.GENERAL_CHAT_CHANNEL_ID || '';
+      if (chId) {
+        target = await session.client.channels.fetch(chId).catch(() => null);
+      }
+    }
+    if (target && 'send' in target) {
+      const tgtId =
+        (session.transcriptThread && session.transcriptThread.id) ||
+        process.env.VOICE_TRANSCRIPT_CHANNEL_ID ||
+        process.env.GENERAL_CHAT_CHANNEL_ID;
+      console.log(`[VOICE] Sending live caption for ${username} to ${tgtId}`);
+
+      // Send as a normal message in the transcript thread.
+      // Since Discord threads don't support sub-threads like Slack, this is the natural way:
+      // all content lives linearly in the thread after the "All live segments" header.
+      await target.send(`🎙️ **${username}**: ${cleaned}`).catch((e: any) => {
+        console.warn('[VOICE] live send failed:', e?.message || e);
+      });
+    }
+  }
 }
 
 async function stopAndIngest(interaction: CommandInteraction) {
@@ -604,6 +555,15 @@ async function stopAndIngest(interaction: CommandInteraction) {
 
   await interaction.followUp({
     content: 'Session ended — finalizing transcript (waiting for in-flight transcriptions)…',
+  });
+
+  // Close all continuous recordings first: this finalizes every chunk WAV on
+  // disk and flushes any in-progress utterance (whose caption transcription
+  // gets registered in pendingTranscriptions before stopAll resolves), so the
+  // drain below covers it.
+  const recordedChunks = await session.recorder.stopAll().catch((e: any) => {
+    console.warn('[VOICE] Recorder stop failed:', e?.message || e);
+    return [] as ChunkMeta[];
   });
 
   // Drain in-flight transcriptions (ffmpeg close handlers + queued Whisper calls)
@@ -653,8 +613,10 @@ async function stopAndIngest(interaction: CommandInteraction) {
     })
     .join('\n');
 
-  // Improved formatting + basic categorization: group consecutive lines from same speaker
-  let realTranscripts = 'No transcribed segments (check OPENAI_API_KEY or audio files in ./audio)';
+  // Live-caption transcript (grouped by speaker) — kept as the raw record and
+  // as the fallback if the batch pass over the full recording produces nothing.
+  let liveCaptionTranscript =
+    'No transcribed segments (check OPENAI_API_KEY or audio files in ./audio)';
   if (session.transcripts && session.transcripts.length > 0) {
     const grouped: Array<{ speaker: string; lines: string[] }> = [];
     let currSpeaker = '';
@@ -672,11 +634,21 @@ async function stopAndIngest(interaction: CommandInteraction) {
       currLines.push(content);
     }
     if (currSpeaker) grouped.push({ speaker: currSpeaker, lines: currLines });
-    realTranscripts = grouped.map((g) => `**${g.speaker}:**\n${g.lines.join('\n')}`).join('\n\n');
+    liveCaptionTranscript = grouped
+      .map((g) => `**${g.speaker}:**\n${g.lines.join('\n')}`)
+      .join('\n\n');
   }
   if (droppedSegments > 0) {
-    realTranscripts += `\n\n⚠️ ${droppedSegments} segment(s) were still transcribing at stop and were dropped (drain timed out after ${DRAIN_TIMEOUT_MS / 1000}s).`;
+    liveCaptionTranscript += `\n\n⚠️ ${droppedSegments} caption segment(s) were still transcribing at stop and were dropped (drain timed out after ${DRAIN_TIMEOUT_MS / 1000}s).`;
   }
+
+  // Batch pass over the continuous chunk recordings (#79): full-quality
+  // transcription of everything captured, merged across users by chunk start
+  // time. This becomes the final transcript; live captions are kept for
+  // comparison. Falls back to live captions when no chunks transcribed.
+  const batch = await transcribeSessionRecordings(session, recordedChunks);
+  const usedBatchTranscript = batch.merged !== null;
+  const realTranscripts = batch.merged ?? liveCaptionTranscript;
 
   const localCount = session.localTranscriptions || 0;
   const openaiCount = session.openaiTranscriptions || 0;
@@ -694,13 +666,14 @@ async function stopAndIngest(interaction: CommandInteraction) {
     `- Local transcriptions: ${localCount}\n` +
     `- OpenAI Whisper calls: ${openaiCount}\n` +
     `- Estimated audio processed: ~${Math.round(totalSeconds)}s\n` +
-    `- Rough OpenAI cost (if any): $${roughCost} (only counts OpenAI path)\n\n` +
+    `- Rough OpenAI cost (if any): $${roughCost} (only counts OpenAI path)\n` +
+    `- Batch pass: ${batch.note}\n\n` +
     `## Transcribed conversation\n${realTranscripts}\n\n` +
+    `## Live captions (raw)\n${liveCaptionTranscript}\n\n` +
     `## Raw speaking events\n${eventsSummary || 'No events'}\n\n` +
-    `**Audio files**: ${session.audioPaths?.join(', ') || 'none'}\n` +
-    `**Note**: Audio was recorded per utterance. Prefer local Whisper to avoid costs. Local errors fall back to OpenAI.\n`;
-
-  // TODO: full audio recording + STT here. For now, use this stub + metadata.
+    `**Session recording dir**: ${session.recorder.sessionDir}\n` +
+    `**Utterance audio files**: ${session.audioPaths?.join(', ') || 'none'}\n` +
+    `**Note**: Audio is recorded continuously per user in 5-minute chunks; the "Transcribed conversation" above comes from a full-quality batch pass over those chunks at stop${usedBatchTranscript ? '' : ' (batch produced nothing — live captions used as fallback)'}. Prefer local Whisper to avoid costs. Local errors fall back to OpenAI.\n`;
 
   // Ingest to conduit (best effort using Supabase if configured, else local export)
   const ingestResult = await ingestToConduit({
@@ -731,9 +704,10 @@ async function stopAndIngest(interaction: CommandInteraction) {
 
   const summary =
     `**Session ended.** Duration ~${durationMin}m. ` +
-    `Transcript stub saved to ${filePath}. Ingest status: ${ingestResult.ok ? 'OK (doc ID: ' + (ingestResult.id ?? 'unknown') + ')' : 'logged (no full conduit yet)'}.\n\n` +
+    `Transcript saved to ${filePath}. Ingest status: ${ingestResult.ok ? 'OK (doc ID: ' + (ingestResult.id ?? 'unknown') + ')' : 'logged (no full conduit yet)'}.\n\n` +
+    `Final transcript: ${usedBatchTranscript ? `batch pass over ${recordedChunks.length} recorded chunk(s)` : 'live captions (batch pass produced nothing)'}.\n` +
     `Usage: ${localCount} local + ${openaiCount} OpenAI transcriptions (~${Math.round(totalSeconds)}s audio). Rough OpenAI cost ~$${roughCost}.\n` +
-    `Audio files: ${session.audioPaths?.join(', ') || 'none'}`;
+    `Recording dir: ${session.recorder.sessionDir}`;
 
   await interaction.followUp({ content: summary });
 
@@ -748,7 +722,7 @@ async function stopAndIngest(interaction: CommandInteraction) {
   if (summaryTarget && 'send' in summaryTarget) {
     const summaryContent =
       `✅ **Transcription session in \`${channelName}\` ended.**\n` +
-      `Duration: ~${durationMin}m | Segments: ${session.transcripts?.length || 0}\n` +
+      `Duration: ~${durationMin}m | Live segments: ${session.transcripts?.length || 0} | Recorded chunks: ${recordedChunks.length}\n` +
       `Usage: ${localCount} local + ${openaiCount} OpenAI (~${Math.round(totalSeconds)}s). Rough OpenAI cost ~$${roughCost}.\n` +
       `${ingestResult.ok ? '✅ Ingested to Conduit (doc ID logged in bot)' : '⚠️ Ingest may have failed — check logs'}\n` +
       `Full transcript saved locally too.`;
@@ -775,8 +749,9 @@ async function showStatus(interaction: CommandInteraction) {
     content =
       `**Active session in ${session.channelName}**\n` +
       `Started: ${session.startedAt.toISOString()} (~${durationMin}m ago)\n` +
-      `Segments transcribed: ${segs}\n` +
-      `Audio files captured: ${files}\n` +
+      `Segments transcribed (live captions): ${segs}\n` +
+      `Utterance audio files: ${files}\n` +
+      `Continuous recording chunks: ${session.recorder.chunks.length} (dir: ${session.recorder.sessionDir})\n` +
       `Local transcriptions: ${session.localTranscriptions || 0} | OpenAI: ${session.openaiTranscriptions || 0}\n` +
       `Est. audio: ~${Math.round(session.estimatedAudioSeconds || 0)}s\n` +
       `Use \`/voice stop\` to end and ingest to Conduit, or \`/voice leave\` to force disconnect.`;
@@ -824,6 +799,118 @@ async function forceLeave(interaction: CommandInteraction) {
   }
 
   console.log(`[VOICE] Force left session for guild ${guild.id}`);
+}
+
+/**
+ * Batch transcription pass over the continuous chunk recordings (#79).
+ *
+ * Runs each recorded chunk (chronological across all users) through
+ * transcribeAudio — which already handles local-Whisper serialization, the
+ * OpenAI fallback, and segment quality filtering — and merges the results by
+ * chunk start time into "[HH:MM:SS] username: text" lines.
+ *
+ * Posts a "processing…" message to the session thread and edits it when done.
+ * Total batch time is capped at 15 minutes; on timeout, whatever completed is
+ * kept and the remaining chunks are reported (with file paths) as unprocessed.
+ *
+ * Returns merged === null when nothing was transcribed (no chunks / all
+ * failed) so the caller can fall back to the live-caption transcript.
+ */
+const BATCH_TRANSCRIBE_TIMEOUT_MS = 15 * 60 * 1000;
+
+async function transcribeSessionRecordings(
+  session: VoiceSession,
+  chunks: ChunkMeta[],
+): Promise<{ merged: string | null; note: string }> {
+  const usable = chunks.filter((c) => {
+    try {
+      return fs.statSync(c.filePath).size > 1024; // skip empty/header-only WAVs
+    } catch {
+      return false;
+    }
+  });
+  if (usable.length === 0) {
+    return { merged: null, note: 'no recorded chunks to batch-transcribe' };
+  }
+
+  // Post the "processing" notice to the session thread (or fallback channel).
+  let target: any = session.transcriptThread;
+  if (!target && session.client) {
+    const chId = process.env.VOICE_TRANSCRIPT_CHANNEL_ID || process.env.GENERAL_CHAT_CHANNEL_ID;
+    if (chId) {
+      target = await session.client.channels.fetch(chId).catch(() => null);
+    }
+  }
+  let processingMsg: any = null;
+  if (target && 'send' in target) {
+    processingMsg = await target
+      .send(
+        `⏳ Processing full session recording (${usable.length} chunk(s))… the final transcript will use this clean batch pass.`,
+      )
+      .catch(() => null);
+  }
+
+  const startedProcessing = Date.now();
+  const deadline = startedProcessing + BATCH_TRANSCRIBE_TIMEOUT_MS;
+  const lines: string[] = [];
+  const unprocessed: string[] = [];
+  let transcribedCount = 0;
+
+  for (const chunk of usable) {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) {
+      unprocessed.push(chunk.filePath);
+      continue;
+    }
+    let text: string | null = null;
+    let capTimer: NodeJS.Timeout | undefined;
+    try {
+      // Race each chunk against the remaining global budget. We can't cancel
+      // the underlying Whisper call, but we stop waiting for it.
+      text = await Promise.race([
+        transcribeAudio(chunk.filePath, chunk.username, session),
+        new Promise<null>((resolve) => {
+          capTimer = setTimeout(() => resolve(null), remaining);
+        }),
+      ]);
+    } catch (err: any) {
+      console.error(
+        `[VOICE] Batch transcription failed for chunk ${chunk.filePath}:`,
+        err?.message || err,
+      );
+    } finally {
+      if (capTimer) clearTimeout(capTimer);
+    }
+    if (text === null) {
+      unprocessed.push(chunk.filePath);
+      continue;
+    }
+    transcribedCount++;
+    const cleaned = (text || '').trim();
+    const isLowValue =
+      !cleaned ||
+      cleaned.includes('no speech') ||
+      cleaned.includes('transcription failed') ||
+      cleaned.includes('transcription error');
+    if (isLowValue) continue;
+    lines.push(`[${chunk.startedAt.slice(11, 19)}] ${chunk.username}: ${cleaned}`);
+  }
+
+  const elapsedSec = Math.round((Date.now() - startedProcessing) / 1000);
+  let note = `${transcribedCount}/${usable.length} chunk(s) transcribed in ${elapsedSec}s`;
+  if (unprocessed.length > 0) {
+    note += `; ⚠️ batch cap (${BATCH_TRANSCRIBE_TIMEOUT_MS / 60000} min) hit — ${unprocessed.length} chunk(s) left unprocessed: ${unprocessed.join(', ')}`;
+  }
+
+  if (processingMsg && typeof processingMsg.edit === 'function') {
+    const doneContent =
+      lines.length > 0
+        ? `✅ Full recording processed: ${note}.`
+        : `⚠️ Full recording processed but produced no usable text (${note}). Falling back to live captions.`;
+    await processingMsg.edit(doneContent.slice(0, 1900)).catch(() => {});
+  }
+
+  return { merged: lines.length > 0 ? lines.join('\n') : null, note };
 }
 
 /**
@@ -1139,6 +1226,9 @@ async function setVoiceOptOut(interaction: CommandInteraction, optedOut: boolean
   for (const session of activeSessions.values()) {
     if (optedOut) {
       session.optOutSet.add(userId);
+      // Also stop any continuous recording already open for this user —
+      // opting out must halt capture immediately, not just future subscribes.
+      session.recorder.closeUser(userId, 'opted out');
     } else {
       session.optOutSet.delete(userId);
     }
