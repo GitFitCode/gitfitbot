@@ -8,6 +8,7 @@ import guildMemberAdd from './listeners/guildMemberAdd';
 import interactionCreate from './listeners/interactionCreate';
 import messageCreate from './listeners/messageCreate';
 import ready from './listeners/ready';
+import voiceStateUpdate from './listeners/voiceStateUpdate';
 import { CronJobs } from './utils';
 
 /**
@@ -47,6 +48,7 @@ function start() {
   interactionCreate(client);
   messageCreate(client);
   ready(client);
+  voiceStateUpdate(client);
 
   // Call login on client for authenticating the bot with Discord.
   client.login(process.env.DISCORD_BOT_TOKEN);

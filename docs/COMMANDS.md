@@ -125,7 +125,17 @@
 
 **Actions** (required):
 
-- `join` [channel] : Bot joins (defaults to CHECKINS or VIRTUAL_OFFICE env), starts listening for speakers.
+- `join` [channel] : Bot joins (defaults to CHECKINS or VIRTUAL_OFFICE env), starts listening for speakers. **Restricted** — see the consent & recording policy below.
 - `stop` : Leaves VC, produces transcript stub + metadata, saves locally to exports/voice/, ingests to conduit.source_documents (via Supabase if configured).
+- `status` : Shows the active session (channel, duration, segment/file counts) for the guild.
+- `leave` : Force-disconnects the bot and clears the session without ingesting.
+- `optout` : Opt yourself out of voice capture and transcription (persisted across sessions and restarts). Replies ephemerally.
+- `optin` : Opt yourself back in. Replies ephemerally.
+
+**Consent & recording policy**:
+
+- **Who can start a session**: `/voice join` requires the role configured in the `VOICE_RECORDER_ROLE_ID` environment variable. If that variable is unset, it falls back to requiring the **Administrator** permission. Anyone else gets a clear refusal.
+- **Notification**: When a session starts, the bot posts the usual announcement in the transcript channel **and** sends a notice to everyone currently in the voice channel ("this call is being transcribed by GitFitBot; run `/voice optout` to be excluded"). The notice goes to the voice channel's built-in text chat when possible, with a DM fallback per member. Users who join mid-session receive the same notice once (via the `voiceStateUpdate` listener).
+- **Opt-out**: `/voice optout` is per-user and persisted (local PouchDB). The bot **never subscribes to an opted-out user's audio stream** — no audio file is created and nothing of theirs is transcribed. They still appear in the final transcript's participants list as `username (not transcribed)`. `/voice optin` reverses it. Both take effect immediately, including during an active session.
 
 **Status**: Initial implementation (speaking events captured; full live audio->STT via whisper-live-server or OpenAI pending for real text). Context (channel, participants, times) captured for conduit ingestion.

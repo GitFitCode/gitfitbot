@@ -84,11 +84,13 @@ export const COMMAND_VOICE = {
   COMMAND_DESCRIPTION:
     'Join a voice channel, transcribe conversation (like Otter), stop and ingest to Conduit.',
   OPTION_ACTION: 'action',
-  OPTION_ACTION_DESCRIPTION: 'join, stop, status, or leave',
+  OPTION_ACTION_DESCRIPTION: 'join, stop, status, leave, optout, or optin',
   ACTION_JOIN: 'join',
   ACTION_STOP: 'stop',
   ACTION_STATUS: 'status',
   ACTION_LEAVE: 'leave',
+  ACTION_OPTOUT: 'optout',
+  ACTION_OPTIN: 'optin',
   OPTION_CHANNEL: 'channel',
   OPTION_CHANNEL_DESCRIPTION:
     'Voice channel to join (optional, defaults to CHECKINS or VIRTUAL_OFFICE)',
