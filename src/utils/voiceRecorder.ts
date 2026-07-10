@@ -38,12 +38,52 @@ import * as prism from 'prism-media';
 
 const ffmpegPath: string = require('ffmpeg-static');
 
+/**
+ * Maps a position in a chunk's AUDIO timeline back to wall-clock time (#94).
+ * Chunk WAVs contain speech only (Discord sends no packets during silence),
+ * so audio time drifts earlier than wall clock as silence accumulates. A
+ * checkpoint is recorded whenever PCM arrives after a >CHECKPOINT_GAP_MS gap:
+ * "pcmMs of audio had been written when the wall clock read wallMs".
+ */
+export interface ChunkCheckpoint {
+  /** Audio time: milliseconds of PCM written to the chunk before this point. */
+  pcmMs: number;
+  /** Wall-clock epoch ms when the PCM write after the gap happened. */
+  wallMs: number;
+}
+
 export interface ChunkMeta {
   userId: string;
   username: string;
   /** ISO timestamp of (approximately) the first audio written to the chunk. */
   startedAt: string;
   filePath: string;
+  /**
+   * Audio-time → wall-clock checkpoints, in ascending pcmMs order. Absent on
+   * chunks recorded before #94 (older manifests) — callers must fall back to
+   * startedAt + offset for those.
+   */
+  checkpoints?: ChunkCheckpoint[];
+}
+
+/**
+ * Piecewise-maps an offset within a chunk's audio timeline (e.g. a Whisper
+ * segment start) to absolute wall-clock epoch ms using the chunk's
+ * checkpoints: find the last checkpoint at or before the offset, then add the
+ * audio elapsed since it. Returns null when no checkpoints exist (legacy
+ * chunk) so the caller can use the old startedAt + offset formula.
+ */
+export function mapPcmToWallMs(
+  checkpoints: ChunkCheckpoint[] | undefined,
+  pcmMs: number,
+): number | null {
+  if (!checkpoints || checkpoints.length === 0) return null;
+  let anchor = checkpoints[0];
+  for (const cp of checkpoints) {
+    if (cp.pcmMs <= pcmMs) anchor = cp;
+    else break;
+  }
+  return anchor.wallMs + (pcmMs - anchor.pcmMs);
 }
 
 export type UtteranceHandler = (
@@ -61,6 +101,10 @@ export type UtteranceHandler = (
 const CHUNK_ROTATE_MS = 5 * 60 * 1000; // rotate chunk files every 5 minutes
 const UTTERANCE_SILENCE_MS = 3500; // same boundary the old AfterSilence path used
 const STOP_FLUSH_TIMEOUT_MS = 10_000; // max wait for ffmpeg processes to finish at stop
+/** A gap in PCM arrival longer than this = silence worth checkpointing (#94). */
+const CHECKPOINT_GAP_MS = 1500;
+/** 48000 Hz * 2 channels * 2 bytes/sample = 192000 bytes/s = 192 bytes per ms of audio. */
+const PCM_BYTES_PER_MS = 192;
 
 interface UserRecorderState {
   userId: string;
@@ -71,6 +115,12 @@ interface UserRecorderState {
   // Continuous chunk writer
   chunkFfmpeg: ChildProcessWithoutNullStreams | null;
   chunkOpenedAt: number; // epoch ms
+  /** Metadata of the open chunk — checkpoints are appended to it live (#94). */
+  chunkMeta: ChunkMeta | null;
+  /** PCM bytes written to the open chunk so far (audio time = bytes / 192). */
+  chunkBytesWritten: number;
+  /** Wall-clock epoch ms of the previous PCM write to the open chunk. */
+  lastChunkWriteWallMs: number;
   // Per-utterance segmenter (live captions)
   uttFfmpeg: ChildProcessWithoutNullStreams | null;
   uttPath: string | null;
@@ -168,6 +218,9 @@ export class SessionRecorder {
       onPcm: () => {},
       chunkFfmpeg: null,
       chunkOpenedAt: 0,
+      chunkMeta: null,
+      chunkBytesWritten: 0,
+      lastChunkWriteWallMs: 0,
       uttFfmpeg: null,
       uttPath: null,
       uttTimer: null,
@@ -249,8 +302,22 @@ export class SessionRecorder {
     const now = Date.now();
     if (!state.chunkFfmpeg || now - state.chunkOpenedAt >= CHUNK_ROTATE_MS) {
       this.rotateChunk(state, now);
+    } else if (now - state.lastChunkWriteWallMs > CHECKPOINT_GAP_MS && state.chunkMeta) {
+      // Silence gap (#94): Discord sent no packets, so the chunk's audio
+      // timeline just fell behind wall clock. Checkpoint "this much audio had
+      // been written when the clock read now" so the batch pass can map
+      // Whisper segment offsets back to true wall-clock timestamps.
+      state.chunkMeta.checkpoints?.push({
+        pcmMs: state.chunkBytesWritten / PCM_BYTES_PER_MS,
+        wallMs: now,
+      });
+      // Persist so a crash mid-chunk keeps the checkpoints usable. Cheap:
+      // happens at most once per >1.5s silence gap, not per PCM frame.
+      this.persistManifest();
     }
     safeWrite(state.chunkFfmpeg, buf);
+    state.chunkBytesWritten += buf.length;
+    state.lastChunkWriteWallMs = now;
 
     // 2) Utterance segmenter for live captions: a >UTTERANCE_SILENCE_MS gap in
     //    decoded PCM arrival ends the current utterance (Discord sends no
@@ -273,12 +340,18 @@ export class SessionRecorder {
 
     state.chunkFfmpeg = ffmpeg;
     state.chunkOpenedAt = now;
-    this.chunks.push({
+    state.chunkBytesWritten = 0;
+    state.lastChunkWriteWallMs = now;
+    const meta: ChunkMeta = {
       userId: state.userId,
       username: state.username,
       startedAt: new Date(now).toISOString(),
       filePath,
-    });
+      // Anchor checkpoint: 0ms of audio written at chunk-open wall time (#94).
+      checkpoints: [{ pcmMs: 0, wallMs: now }],
+    };
+    state.chunkMeta = meta;
+    this.chunks.push(meta);
     // Persist on open so a crash mid-chunk still leaves the manifest entry
     // pointing at the (partially written but decodable) WAV.
     this.persistManifest();
@@ -289,6 +362,7 @@ export class SessionRecorder {
     if (!state.chunkFfmpeg) return;
     safeEndStdin(state.chunkFfmpeg);
     state.chunkFfmpeg = null;
+    state.chunkMeta = null;
   }
 
   private openUtterance(state: UserRecorderState, now: number): void {
