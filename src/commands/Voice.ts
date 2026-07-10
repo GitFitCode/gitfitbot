@@ -61,6 +61,23 @@ interface VoiceSession {
   optOutSet: Set<string>; // user IDs opted out of capture/transcription (cached at start, refreshed on /voice optout|optin)
   notifiedUserIds: Set<string>; // users already sent the recording notice this session
   recorder: SessionRecorder; // continuous per-user chunk recording + utterance segmentation (#79)
+  /**
+   * Rolling per-chunk transcription results (#96), keyed by chunk file path.
+   * 'failed' marks a rolling attempt that produced nothing — the stop-time
+   * batch pass retries those. Segment text lives here (memory only); the
+   * manifest records just the transcribed flag.
+   */
+  rollingTranscriptions: Map<string, DetailedTranscription | 'failed'>;
+  /** In-flight rolling transcription jobs so /voice stop can await stragglers (#96). */
+  rollingJobs: Set<Promise<void>>;
+  /** Running count of chunks handed to the rolling transcriber (log numbering, #96). */
+  rollingChunkCount: number;
+  /**
+   * Set at the start of /voice stop: chunks closed after this (the final open
+   * chunks finalized by stopAll) are handled by the stop-time batch pass under
+   * its 15-min cap, not enqueued as new rolling jobs (#96).
+   */
+  stopping: boolean;
 }
 
 const activeSessions: Map<string, VoiceSession> = new Map();
@@ -294,8 +311,59 @@ async function joinAndListen(
     optOutSet,
     notifiedUserIds: new Set(),
     recorder,
+    rollingTranscriptions: new Map(),
+    rollingJobs: new Set(),
+    rollingChunkCount: 0,
+    stopping: false,
   };
   activeSessions.set(guildId, session);
+
+  // Rolling transcription (#96): as each chunk is finalized on disk (5-min
+  // rotation, user leave, opt-out — the WAV is fully flushed when this fires),
+  // transcribe it immediately through the SAME serialized Whisper queue live
+  // captions use (no added concurrency; captions may lag by one chunk job).
+  // Results are cached in memory so the stop-time batch pass only transcribes
+  // the final still-open chunks plus any rolling failures — stop-time work
+  // becomes O(open chunks) instead of O(session length). Chunks closed during
+  // stopAll are deliberately NOT enqueued here (session.stopping): the
+  // stop-time pass owns them under its 15-min cap.
+  recorder.setOnChunkClosed((meta) => {
+    if (session.stopping) return;
+    let sizeOk = false;
+    try {
+      sizeOk = fs.statSync(meta.filePath).size > 1024; // same empty-WAV guard as the stop-time pass
+    } catch {
+      sizeOk = false;
+    }
+    if (!sizeOk) return;
+    const chunkNo = ++session.rollingChunkCount;
+    const startedMs = Date.now();
+    const job = (async () => {
+      const result = await transcribeAudioDetailed(meta.filePath, meta.username, session);
+      if (result === null) {
+        session.rollingTranscriptions.set(meta.filePath, 'failed');
+        console.warn(
+          `[VOICE] rolling: chunk ${chunkNo} transcription failed (stop-time pass will retry): ${meta.filePath}`,
+        );
+        return;
+      }
+      session.rollingTranscriptions.set(meta.filePath, result);
+      session.recorder.markChunkTranscribed(meta.filePath);
+      console.log(
+        `[VOICE] rolling: transcribed chunk ${chunkNo} (${Math.round((Date.now() - startedMs) / 1000)}s)`,
+      );
+    })().catch((err: any) => {
+      session.rollingTranscriptions.set(meta.filePath, 'failed');
+      console.error(
+        `[VOICE] rolling: chunk ${chunkNo} transcription error (stop-time pass will retry):`,
+        err?.message || err,
+      );
+    });
+    session.rollingJobs.add(job);
+    void job.finally(() => {
+      session.rollingJobs.delete(job);
+    });
+  });
 
   // Persist the session (#83) so a bot restart mid-meeting can recover it.
   // Saved immediately (threadId unknown yet) and updated below once the
@@ -584,6 +652,10 @@ async function stopAndIngest(interaction: CommandInteraction) {
   }
 
   const { connection, channelName, startedAt, speakingEvents } = session;
+
+  // From here on, chunks closed by stopAll below belong to the stop-time batch
+  // pass (bounded by its 15-min cap) — don't enqueue new rolling jobs (#96).
+  session.stopping = true;
 
   // Destroying the connection stops new speaking events and fires the Destroyed
   // handler (which removes the session from activeSessions). We keep using our
@@ -938,9 +1010,15 @@ async function forceLeave(interaction: CommandInteraction) {
  * into one "[HH:MM:SS] username: text" line. This restores conversational
  * interleaving instead of one merged blob per 5-minute chunk (#93).
  *
+ * Rolling transcription (#96): chunks already transcribed during the session
+ * are served from session.rollingTranscriptions (no Whisper call, no budget
+ * consumed) — only chunks with no cached result (typically the final open
+ * chunks closed at stopAll, plus any rolling failures) are transcribed here.
+ *
  * Posts a "processing…" message to the session thread and edits it when done.
- * Total batch time is capped at 15 minutes; on timeout, whatever completed is
- * kept and the remaining chunks are reported (with file paths) as unprocessed.
+ * Total residual batch time is capped at 15 minutes; on timeout, whatever
+ * completed is kept and the remaining chunks are reported (with file paths)
+ * as unprocessed.
  *
  * Returns merged === null when nothing was transcribed (no chunks / all
  * failed) so the caller can fall back to the live-caption transcript.
@@ -965,6 +1043,14 @@ async function transcribeSessionRecordings(
     return { merged: null, note: 'no recorded chunks to batch-transcribe' };
   }
 
+  // Rolling cache lookup (#96): a successful in-session transcription for the
+  // chunk, or null (never attempted, still in-flight, or 'failed' — all of
+  // which the stop-time pass transcribes itself).
+  const cachedResultFor = (c: ChunkMeta): DetailedTranscription | null => {
+    const r = session.rollingTranscriptions.get(c.filePath);
+    return r && r !== 'failed' ? r : null;
+  };
+
   // Post the "processing" notice to the session thread (or fallback channel).
   let target: any = session.transcriptThread;
   if (!target && session.client) {
@@ -975,52 +1061,84 @@ async function transcribeSessionRecordings(
   }
   let processingMsg: any = null;
   if (target && 'send' in target) {
+    const preCachedCount = usable.filter((c) => cachedResultFor(c) !== null).length;
     processingMsg = await target
       .send(
-        `⏳ Processing full session recording (${usable.length} chunk(s))… the final transcript will use this clean batch pass.`,
+        `⏳ Processing full session recording (${usable.length} chunk(s), ${preCachedCount} already transcribed during the session)… the final transcript will use this clean batch pass.`,
       )
       .catch(() => null);
   }
 
   const startedProcessing = Date.now();
   const deadline = startedProcessing + BATCH_TRANSCRIBE_TIMEOUT_MS;
+
+  // Await rolling stragglers (#96) — jobs still on the serialized Whisper
+  // queue — within the same global budget. The residual stop-time
+  // transcriptions below queue behind them anyway, so this adds no extra wall
+  // time; it just makes their cached results visible before we decide which
+  // chunks still need transcribing.
+  if (session.rollingJobs.size > 0) {
+    console.log(`[VOICE] Awaiting ${session.rollingJobs.size} rolling transcription straggler(s)…`);
+    let stragglerTimer: NodeJS.Timeout | undefined;
+    await Promise.race([
+      Promise.allSettled([...session.rollingJobs]),
+      new Promise<void>((resolve) => {
+        stragglerTimer = setTimeout(resolve, Math.max(0, deadline - Date.now()));
+      }),
+    ]);
+    if (stragglerTimer) clearTimeout(stragglerTimer);
+  }
   // Every usable segment across all chunks/users, stamped with its absolute
   // wall-clock time (chunk start + Whisper's per-segment offset) so speakers
   // interleave in the final transcript (#93).
   const entries: Array<{ atMs: number; username: string; text: string }> = [];
   const unprocessed: string[] = [];
   let transcribedCount = 0;
+  let cachedCount = 0; // chunks served from the rolling cache (#96)
+  let stopTranscribedCount = 0; // chunks transcribed here at stop
 
   for (const chunk of usable) {
-    const remaining = deadline - Date.now();
-    if (remaining <= 0) {
-      unprocessed.push(chunk.filePath);
-      continue;
+    // Rolling cache hit (#96): the chunk was already transcribed during the
+    // session — use it directly (no budget consumed, works even past the cap).
+    const cached = cachedResultFor(chunk);
+    let outcome: DetailedTranscription;
+    if (cached) {
+      cachedCount++;
+      outcome = cached;
+    } else {
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) {
+        unprocessed.push(chunk.filePath);
+        continue;
+      }
+      let raced: DetailedTranscription | 'timeout' | null = null;
+      let capTimer: NodeJS.Timeout | undefined;
+      try {
+        // Race each chunk against the remaining global budget. We can't cancel
+        // the underlying Whisper call, but we stop waiting for it.
+        raced = await Promise.race([
+          transcribeAudioDetailed(chunk.filePath, chunk.username, session),
+          new Promise<'timeout'>((resolve) => {
+            capTimer = setTimeout(() => resolve('timeout'), remaining);
+          }),
+        ]);
+      } catch (err: any) {
+        console.error(
+          `[VOICE] Batch transcription failed for chunk ${chunk.filePath}:`,
+          err?.message || err,
+        );
+      } finally {
+        if (capTimer) clearTimeout(capTimer);
+      }
+      if (raced === 'timeout') {
+        unprocessed.push(chunk.filePath);
+        continue;
+      }
+      if (raced === null) continue; // transcription failed — nothing usable from this chunk
+      stopTranscribedCount++;
+      session.recorder.markChunkTranscribed(chunk.filePath);
+      outcome = raced;
     }
-    let outcome: DetailedTranscription | 'timeout' | null = null;
-    let capTimer: NodeJS.Timeout | undefined;
-    try {
-      // Race each chunk against the remaining global budget. We can't cancel
-      // the underlying Whisper call, but we stop waiting for it.
-      outcome = await Promise.race([
-        transcribeAudioDetailed(chunk.filePath, chunk.username, session),
-        new Promise<'timeout'>((resolve) => {
-          capTimer = setTimeout(() => resolve('timeout'), remaining);
-        }),
-      ]);
-    } catch (err: any) {
-      console.error(
-        `[VOICE] Batch transcription failed for chunk ${chunk.filePath}:`,
-        err?.message || err,
-      );
-    } finally {
-      if (capTimer) clearTimeout(capTimer);
-    }
-    if (outcome === 'timeout') {
-      unprocessed.push(chunk.filePath);
-      continue;
-    }
-    if (outcome === null) continue; // transcription failed — nothing usable from this chunk
     transcribedCount++;
     const chunkStartMs = new Date(chunk.startedAt).getTime();
     for (const seg of outcome.segments) {
@@ -1073,9 +1191,9 @@ async function transcribeSessionRecordings(
   flushCurrent();
 
   const elapsedSec = Math.round((Date.now() - startedProcessing) / 1000);
-  let note = `${transcribedCount}/${usable.length} chunk(s) transcribed in ${elapsedSec}s`;
+  let note = `${transcribedCount}/${usable.length} chunk(s) (${cachedCount} pre-transcribed during session, ${stopTranscribedCount} at stop) in ${elapsedSec}s`;
   if (unprocessed.length > 0) {
-    note += `; ⚠️ batch cap (${BATCH_TRANSCRIBE_TIMEOUT_MS / 60000} min) hit — ${unprocessed.length} chunk(s) left unprocessed: ${unprocessed.join(', ')}`;
+    note += `; ⚠️ batch cap (${BATCH_TRANSCRIBE_TIMEOUT_MS / 60000} min) hit — ${cachedCount} chunk(s) served from the rolling cache, ${stopTranscribedCount} transcribed at stop, ${unprocessed.length} left unprocessed: ${unprocessed.join(', ')}`;
   }
 
   if (processingMsg && typeof processingMsg.edit === 'function') {
