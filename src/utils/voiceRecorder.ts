@@ -64,6 +64,13 @@ export interface ChunkMeta {
    * startedAt + offset for those.
    */
   checkpoints?: ChunkCheckpoint[];
+  /**
+   * True once the chunk has been transcribed (rolling pass during the session
+   * or the stop-time batch pass, #96). Only this FACT is persisted to the
+   * manifest — segment text stays in memory; the final transcript export is
+   * the source of truth for text.
+   */
+  transcribed?: boolean;
 }
 
 /**
@@ -175,6 +182,14 @@ export class SessionRecorder {
 
   private stopped = false;
 
+  /**
+   * Rolling transcription hook (#96): invoked whenever a chunk is finalized
+   * (5-min rotation, closeUser on leave/opt-out, and each chunk closed during
+   * stopAll). Fires strictly AFTER the chunk's ffmpeg writer has exited, so
+   * the WAV (including its rewritten header) is fully flushed on disk.
+   */
+  private onChunkClosed?: (meta: ChunkMeta) => void;
+
   constructor(
     private readonly guildId: string,
     private readonly sessionStartTs: number,
@@ -244,6 +259,24 @@ export class SessionRecorder {
   /** True if this user currently has a continuous recording open. */
   isRecording(userId: string): boolean {
     return this.users.has(userId);
+  }
+
+  /** Registers the rolling-transcription hook (#96) — see onChunkClosed. */
+  setOnChunkClosed(cb: (meta: ChunkMeta) => void): void {
+    this.onChunkClosed = cb;
+  }
+
+  /**
+   * Records in the manifest that a chunk has been transcribed (#96) so
+   * crash-recovery tooling can see what was already processed. Segment text
+   * is intentionally NOT persisted — it lives in memory until the final
+   * transcript export.
+   */
+  markChunkTranscribed(filePath: string): void {
+    const meta = this.chunks.find((c) => c.filePath === filePath);
+    if (!meta || meta.transcribed) return;
+    meta.transcribed = true;
+    this.persistManifest();
   }
 
   /**
@@ -360,9 +393,27 @@ export class SessionRecorder {
 
   private closeChunk(state: UserRecorderState): void {
     if (!state.chunkFfmpeg) return;
-    safeEndStdin(state.chunkFfmpeg);
+    const ffmpeg = state.chunkFfmpeg;
+    const meta = state.chunkMeta;
+    safeEndStdin(ffmpeg);
     state.chunkFfmpeg = null;
     state.chunkMeta = null;
+    // Rolling transcription (#96): the callback must only see a fully flushed
+    // WAV, so wait for the ffmpeg writer to exit ('close' fires after the
+    // process finalized the file, header rewrite included). This listener is
+    // attached AFTER trackFfmpegClose's, so the manifest persist in that
+    // handler runs first. If ffmpeg errors without closing, the callback never
+    // fires — the stop-time batch pass covers that chunk instead.
+    if (meta && this.onChunkClosed) {
+      const cb = this.onChunkClosed;
+      ffmpeg.once('close', () => {
+        try {
+          cb(meta);
+        } catch (err) {
+          console.error(`[VOICE REC] onChunkClosed handler error for ${meta.username}:`, err);
+        }
+      });
+    }
   }
 
   private openUtterance(state: UserRecorderState, now: number): void {
