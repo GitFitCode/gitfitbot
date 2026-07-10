@@ -33,7 +33,7 @@ import {
   saveVoiceSession,
 } from '../utils/localdb';
 import { maybeDeleteSessionAudio } from '../utils/voiceLifecycle';
-import { ChunkMeta, SessionRecorder } from '../utils/voiceRecorder';
+import { ChunkMeta, mapPcmToWallMs, SessionRecorder } from '../utils/voiceRecorder';
 
 interface VoiceSession {
   connection: VoiceConnection;
@@ -931,7 +931,9 @@ async function forceLeave(interaction: CommandInteraction) {
  * local-Whisper serialization, the OpenAI fallback, and (relaxed) segment
  * quality filtering — and interleaves Whisper's per-segment start offsets
  * across ALL chunks and users: each segment gets an absolute timestamp
- * (chunk start + segment offset), everything is sorted by that time, and
+ * (segment offset mapped through the chunk's audio-time→wall-clock
+ * checkpoints, falling back to chunk start + offset for legacy chunks, #94),
+ * everything is sorted by that time, and
  * consecutive same-speaker segments within SEGMENT_MERGE_WINDOW_MS are merged
  * into one "[HH:MM:SS] username: text" line. This restores conversational
  * interleaving instead of one merged blob per 5-minute chunk (#93).
@@ -1022,8 +1024,16 @@ async function transcribeSessionRecordings(
     transcribedCount++;
     const chunkStartMs = new Date(chunk.startedAt).getTime();
     for (const seg of outcome.segments) {
+      // Chunk WAVs contain speech only (no packets arrive during silence), so
+      // Whisper's within-chunk offsets drift earlier than wall clock as
+      // silence accumulates (live test 2026-07-10: a line stamped 01:04:45
+      // held speech from ~01:07). Map the offset through the chunk's
+      // audio-time→wall-clock checkpoints; chunks from older manifests have
+      // no checkpoints, so keep chunkStart + offset as the fallback (#94).
+      const segStartMs = seg.startSec * 1000;
+      const atMs = mapPcmToWallMs(chunk.checkpoints, segStartMs) ?? chunkStartMs + segStartMs;
       entries.push({
-        atMs: chunkStartMs + seg.startSec * 1000,
+        atMs,
         username: chunk.username,
         text: seg.text,
       });
@@ -1096,15 +1106,46 @@ function normalizeForEchoCheck(text: string): string {
 const NORMALIZED_WHISPER_PROMPT = normalizeForEchoCheck(WHISPER_INITIAL_PROMPT);
 
 /**
+ * Distinctive multi-word core phrases from WHISPER_INITIAL_PROMPT (normalized).
+ * Whisper sometimes hallucinates a PARAPHRASE of the prompt rather than the
+ * prompt verbatim (live test 2026-07-10: "It's a casual, informal English
+ * voice chat." — "itsa…" vs "thisisa…" defeats the mutual-substring check).
+ * Any short output containing one of these full phrases is prompt bleed, not
+ * real conversation: nobody says "casual, informal English voice chat" on a
+ * call by coincidence. Phrases must be long/specific enough that legit speech
+ * mentioning e.g. "our discord call" does NOT contain them.
+ */
+const WHISPER_PROMPT_CORE_PHRASES = [
+  'casualinformalenglishvoicechat',
+  'discordcallbetweencolleagues',
+].map(normalizeForEchoCheck);
+
+/**
+ * Raw-length ceiling for the core-phrase echo check: a genuine long utterance
+ * could conceivably quote part of the prompt mid-sentence, but a short output
+ * that contains a full core phrase is essentially the prompt itself.
+ */
+const PROMPT_ECHO_MAX_LEN = 120;
+
+/**
  * True when a transcription is (substantially) the Whisper initial_prompt
- * echoed back: the normalized text is a substring of the normalized prompt (or
- * vice versa) and is long enough (>15 normalized chars) that a real utterance
- * matching it by coincidence is implausible (#93).
+ * echoed back (#93):
+ *  1. mutual-substring: the normalized text is a substring of the normalized
+ *     prompt (or vice versa) and is long enough (>15 normalized chars) that a
+ *     real utterance matching it by coincidence is implausible; OR
+ *  2. paraphrase: the text is short (<PROMPT_ECHO_MAX_LEN raw chars) and its
+ *     normalized form contains a distinctive prompt core phrase.
  */
 function isPromptEcho(text: string): boolean {
   const norm = normalizeForEchoCheck(text);
   if (norm.length <= 15) return false;
-  return NORMALIZED_WHISPER_PROMPT.includes(norm) || norm.includes(NORMALIZED_WHISPER_PROMPT);
+  if (NORMALIZED_WHISPER_PROMPT.includes(norm) || norm.includes(NORMALIZED_WHISPER_PROMPT)) {
+    return true;
+  }
+  if (text.length < PROMPT_ECHO_MAX_LEN) {
+    return WHISPER_PROMPT_CORE_PHRASES.some((phrase) => norm.includes(phrase));
+  }
+  return false;
 }
 
 /**
@@ -1181,8 +1222,17 @@ interface SegmentQualityFilter {
   maxNoSpeechProb: number;
 }
 
-/** Strict thresholds for live captions — posted in real time, so favor precision. */
-const CAPTION_SEGMENT_FILTER: SegmentQualityFilter = { minAvgLogprob: -1.0, maxNoSpeechProb: 0.6 };
+/**
+ * Strict thresholds for live captions — posted in real time, so favor
+ * precision. Tightened after the 2026-07-10 live test: background music/noise
+ * produced junk captions ("Relaxing audio available for free…") that the
+ * batch filter caught but the old caption thresholds (-1.0 / 0.6) let through.
+ * - minAvgLogprob -0.8: Whisper must be fairly confident in the decode; noise
+ *   hallucinations typically land below this.
+ * - maxNoSpeechProb 0.5: drop any segment Whisper thinks is more likely
+ *   non-speech than speech.
+ */
+const CAPTION_SEGMENT_FILTER: SegmentQualityFilter = { minAvgLogprob: -0.8, maxNoSpeechProb: 0.5 };
 
 /**
  * Relaxed thresholds for the batch pass (#93): the live test showed real
@@ -1333,9 +1383,25 @@ async function requestWhisperVerbose(
 }
 
 /**
+ * True when the majority of non-whitespace characters are non-ASCII. Our
+ * Whisper calls pin language=en, so a mostly non-latin result on an English
+ * call is a noise hallucination (live test 2026-07-10: "الف limbs",
+ * "It all memory remin desafukan"-style junk from background music), not
+ * speech. Used on the CAPTION path only — the batch pass has its own quality
+ * thresholds and is the durable record, so it stays recall-biased.
+ */
+function isMajorityNonAscii(text: string): boolean {
+  const chars = [...text].filter((c) => !/\s/.test(c));
+  if (chars.length === 0) return false;
+  const nonAscii = chars.filter((c) => (c.codePointAt(0) ?? 0) > 127).length;
+  return nonAscii * 2 > chars.length;
+}
+
+/**
  * Transcribe an audio file to a single merged string — the live-caption path.
  * Applies the STRICT caption segment filter and the shared sanitize() guards
- * (including the prompt-echo filter).
+ * (including the prompt-echo filter), plus a majority-non-ASCII drop (the
+ * session pins language=en, so non-latin output is hallucination).
  */
 async function transcribeAudio(
   filePath: string,
@@ -1345,18 +1411,34 @@ async function transcribeAudio(
   const data = await requestWhisperVerbose(filePath, speaker, sessionForTracking);
   if (data === null) return `[transcription failed for ${speaker}]`;
 
-  // Prefer good segments if available (both servers return them)
+  // Prefer good segments if available (both servers return them).
+  const rawSegments = Array.isArray(data.segments) ? data.segments : [];
   let t = '';
-  if (Array.isArray(data.segments)) {
-    const good = filterSegments(data.segments, CAPTION_SEGMENT_FILTER);
+  if (rawSegments.length > 0) {
+    const good = filterSegments(rawSegments, CAPTION_SEGMENT_FILTER);
     if (good.length > 0) {
       t = good
         .map((seg) => seg.text || '')
         .join(' ')
         .trim();
     }
+    // NO fallback to raw data.text here: if Whisper returned segments but
+    // every one failed the quality filter, the whole clip is noise — the raw
+    // text is exactly the hallucination we just filtered out (2026-07-10 live
+    // test: "cabeça.gov", "Relaxing audio available for free…"). The batch
+    // path keeps its text fallback; captions favor precision.
+  } else {
+    // Segment timing genuinely unavailable (some servers/formats return text
+    // only) — the raw text is all we have.
+    t = (data.text || '').trim();
   }
-  if (!t) t = (data.text || '').trim();
+
+  // language=en is pinned on the transcribe request, so a majority-non-ASCII
+  // result is a noise hallucination — never caption it.
+  if (isMajorityNonAscii(t)) {
+    console.log(`[VOICE] ⚠️ Dropped non-latin caption for ${speaker}: ${t.substring(0, 60)}`);
+    return '[no speech detected]';
+  }
 
   const cleanedT = sanitize(t);
   if (cleanedT && !cleanedT.includes('no speech')) return cleanedT;
