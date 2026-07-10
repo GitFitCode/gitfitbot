@@ -706,17 +706,19 @@ async function stopAndIngest(interaction: CommandInteraction) {
     ? `## Digest\n\n${voiceDigest}\n\n${transcriptStub}`
     : transcriptStub;
 
-  // Ingest to conduit (best effort using Supabase if configured, else local export)
+  // Ingest to conduit via the intake HTTP endpoint (best effort — the local
+  // export below always happens, so a failed ingest never loses the transcript).
   const ingestResult = await ingestToConduit({
     title: `Discord VC: ${channelName} @ ${startedAt.toISOString().slice(0, 16)}`,
     body: bodyWithDigest,
     source_type: 'discord_voice_transcript',
+    captured_at: endedAt.toISOString(),
     metadata: {
       guild_id: guild.id,
       channel_id: session.channelId,
       channel_name: channelName,
-      started_at: startedAt,
-      ended_at: endedAt,
+      started_at: startedAt.toISOString(),
+      ended_at: endedAt.toISOString(),
       participants,
       event_count: speakingEvents.length,
       bot: 'gitfitbot',
@@ -733,9 +735,16 @@ async function stopAndIngest(interaction: CommandInteraction) {
   const filePath = path.join(exportDir, `${slug}.md`);
   await fs.writeFile(filePath, bodyWithDigest, 'utf8');
 
+  // Honest ingest status for both summary messages: doc id on success (noting
+  // idempotent resubmits), the failure reason + local export path on failure.
+  const ingestNote = ingestResult.ok
+    ? `✅ Ingested to Conduit (doc ID: ${ingestResult.id ?? 'unknown'}${ingestResult.alreadyImported ? ' — already imported previously' : ''})`
+    : `⚠️ Conduit ingest failed: ${ingestResult.error ?? 'unknown error'} — transcript saved locally at ${filePath}`;
+
   const summary =
     `**Session ended.** Duration ~${durationMin}m. ` +
-    `Transcript saved to ${filePath}. Ingest status: ${ingestResult.ok ? 'OK (doc ID: ' + (ingestResult.id ?? 'unknown') + ')' : 'logged (no full conduit yet)'}.\n\n` +
+    `Transcript saved to ${filePath}.\n` +
+    `${ingestNote}\n\n` +
     `Final transcript: ${usedBatchTranscript ? `batch pass over ${recordedChunks.length} recorded chunk(s)` : 'live captions (batch pass produced nothing)'}.\n` +
     `Digest: ${digestNote}.\n` +
     `Usage: ${localCount} local + ${openaiCount} OpenAI transcriptions (~${Math.round(totalSeconds)}s audio). Rough OpenAI cost ~$${roughCost}.\n` +
@@ -756,7 +765,7 @@ async function stopAndIngest(interaction: CommandInteraction) {
       `✅ **Transcription session in \`${channelName}\` ended.**\n` +
       `Duration: ~${durationMin}m | Live segments: ${session.transcripts?.length || 0} | Recorded chunks: ${recordedChunks.length}\n` +
       `Usage: ${localCount} local + ${openaiCount} OpenAI (~${Math.round(totalSeconds)}s). Rough OpenAI cost ~$${roughCost}.\n` +
-      `${ingestResult.ok ? '✅ Ingested to Conduit (doc ID logged in bot)' : '⚠️ Ingest may have failed — check logs'}\n` +
+      `${ingestNote}\n` +
       `Full transcript saved locally too.`;
     const refId = session.startMessage?.id;
     const payload: any = { content: summaryContent };
@@ -1173,72 +1182,111 @@ async function transcribeAudio(
   }
 }
 
+/** Result of a conduit intake POST — surfaced verbatim in the Discord summaries. */
+interface ConduitIngestResult {
+  ok: boolean;
+  /** source document id returned by conduit (on success) */
+  id?: string;
+  /** intake batch id returned by conduit (on success) */
+  batchId?: string;
+  /** true when conduit had already imported this session (idempotent resubmit) */
+  alreadyImported?: boolean;
+  /** human-readable failure reason (on failure) */
+  error?: string;
+}
+
 /**
- * Ingest helper: tries Supabase (conduit schema source_documents) if env present, else logs.
- * Matches the conduit.read model used across your stack (chip etc).
+ * Ingest helper: POSTs the transcript document to conduit's intake HTTP
+ * endpoint (`conduit web serve`, POST <base>/intake/documents) with a bearer
+ * token. This replaces the old direct SQL/supabase-js writes into
+ * conduit.source_documents, so voice transcripts go through conduit's
+ * intake-batch/source-lane pipeline (see GitFitCode/conduit#1103).
+ *
+ * Conduit dedupes on bot:source_type:channel_id:started_at, so resubmitting
+ * the same session returns 201 with already_imported=true.
+ *
+ * Retries once after 5s on network errors and 5xx responses. When
+ * CONDUIT_INGEST_URL is unset, no network call is made — the local export in
+ * stopAndIngest still happens regardless.
  */
 async function ingestToConduit(doc: {
   title: string;
   body: string;
   source_type: string;
-  metadata: Record<string, any>;
-}) {
-  // Use CONDUIT_ prefixed creds from fyx/.env for the conduit system if available,
-  // falling back to regular SUPABASE for compatibility.
-  const SUPABASE_DB_URL = process.env.CONDUIT_SUPABASE_DB_URL || process.env.SUPABASE_DB_URL;
-  const SUPABASE_URL = process.env.CONDUIT_SUPABASE_URL || process.env.SUPABASE_URL;
-  const SUPABASE_ANON_KEY = process.env.CONDUIT_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  /** ISO8601 capture time (session end time) */
+  captured_at: string;
+  metadata: Record<string, unknown>;
+}): Promise<ConduitIngestResult> {
+  const url = process.env.CONDUIT_INGEST_URL;
+  if (!url) {
+    console.log(
+      '[CONDUIT INGEST] CONDUIT_INGEST_URL not configured — skipping ingest (local export still happens).',
+    );
+    return { ok: false, error: 'CONDUIT_INGEST_URL not configured' };
+  }
+  const token = process.env.CONDUIT_INGEST_TOKEN;
 
-  // Prefer direct pg if available (used by projectsDb and conduit schema)
-  if (SUPABASE_DB_URL) {
+  const REQUEST_TIMEOUT_MS = 30_000;
+  const RETRY_DELAY_MS = 5_000;
+
+  const attempt = async (): Promise<{ retryable: boolean; result: ConduitIngestResult }> => {
+    let res: Response;
     try {
-      const { Pool } = await import('pg');
-      const pool = new Pool({ connectionString: SUPABASE_DB_URL });
-      // Insert into conduit.source_documents if table exists in this Supabase
-      const sql = `
-        INSERT INTO conduit.source_documents (title, body, source_type, captured_at, metadata)
-        VALUES ($1, $2, $3, NOW(), $4)
-        RETURNING id
-      `;
-      const res = await pool.query(sql, [doc.title, doc.body, doc.source_type, doc.metadata]);
-      await pool.end();
-      console.log('[CONDUIT INGEST] Inserted source_document id=', res.rows[0]?.id);
-      return { ok: true, id: res.rows[0]?.id };
+      res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(doc),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
     } catch (e: any) {
-      console.warn(
-        '[CONDUIT INGEST] pg insert failed (table may not exist or perms), falling back:',
-        e.message,
-      );
+      // Network-level failure (conduit down, DNS, timeout) — retryable.
+      return {
+        retryable: true,
+        result: { ok: false, error: `network error: ${e?.message || String(e)}` },
+      };
     }
+
+    if (res.status === 201) {
+      const data: any = await res.json().catch(() => ({}));
+      return {
+        retryable: false,
+        result: {
+          ok: true,
+          id: data?.id,
+          batchId: data?.batch_id,
+          alreadyImported: data?.already_imported === true,
+        },
+      };
+    }
+
+    // 401 bad token, 400 validation, 503 misconfigured, etc. Only 5xx is retryable.
+    const text = await res.text().catch(() => '');
+    return {
+      retryable: res.status >= 500,
+      result: { ok: false, error: `HTTP ${res.status}: ${text.slice(0, 300) || res.statusText}` },
+    };
+  };
+
+  let { retryable, result } = await attempt();
+  if (!result.ok && retryable) {
+    console.warn(
+      `[CONDUIT INGEST] Attempt failed (${result.error}) — retrying once in ${RETRY_DELAY_MS / 1000}s...`,
+    );
+    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+    ({ result } = await attempt());
   }
 
-  // Fallback: use supabase-js if anon keys present (may be RLS limited for writes)
-  if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-    try {
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      const { data, error } = await supabase
-        .schema('conduit')
-        .from('source_documents')
-        .insert({
-          title: doc.title,
-          body: doc.body,
-          source_type: doc.source_type,
-          captured_at: new Date().toISOString(),
-          metadata: doc.metadata,
-        })
-        .select('id')
-        .single();
-      if (error) throw error;
-      console.log('[CONDUIT INGEST] supabase insert id=', data?.id);
-      return { ok: true, id: data?.id };
-    } catch (e: any) {
-      console.warn('[CONDUIT INGEST] supabase fallback failed:', e.message);
-    }
+  if (result.ok) {
+    console.log(
+      `[CONDUIT INGEST] Ingested doc id=${result.id} batch_id=${result.batchId}${result.alreadyImported ? ' (already imported)' : ''}`,
+    );
+  } else {
+    console.error('[CONDUIT INGEST] Ingest failed:', result.error);
   }
-
-  console.log('[CONDUIT INGEST] (stub) would insert:', JSON.stringify(doc, null, 2).slice(0, 500));
-  return { ok: false };
+  return result;
 }
 
 /**

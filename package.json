@@ -22,7 +22,6 @@
     "@discordjs/opus": "latest",
     "@discordjs/voice": "latest",
     "@notionhq/client": "latest",
-    "@supabase/supabase-js": "latest",
     "@types/pg": "^8.20.0",
     "cron": "latest",
     "dayjs": "latest",
