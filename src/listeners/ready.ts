@@ -5,6 +5,7 @@
 import { ActivityType, Client } from 'discord.js';
 import Commands from '../Commands';
 import { AUTOBOT, CronJobs, GITFITBOT, loadPersistedModel } from '../utils';
+import { recoverStaleVoiceSessions, sweepOldAudioDirs } from '../utils/voiceLifecycle';
 
 export default (client: Client): void => {
   client.on('ready', async () => {
@@ -42,6 +43,16 @@ export default (client: Client): void => {
       await client.application.commands.set(Commands, guildId);
     } else {
       await client.application.commands.set(Commands);
+    }
+
+    // Voice session lifecycle (#83): recover any session interrupted by the
+    // restart (leave the VC, post the salvage note, clear the record), then
+    // run the audio retention sweep — never touching just-recovered dirs.
+    try {
+      const preservedDirs = await recoverStaleVoiceSessions(client);
+      await sweepOldAudioDirs(preservedDirs);
+    } catch (e: any) {
+      console.error('[VOICE LIFECYCLE] Startup recovery/sweep failed:', e?.message || e);
     }
 
     console.log(`${client.user.username} is online`);
