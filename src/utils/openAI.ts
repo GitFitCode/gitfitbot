@@ -16,6 +16,7 @@ import {
   OPEN_AI_API_RESPONSE_ERROR_MSG,
   PROJECT_DIGEST_SYSTEM_PROMPT,
   PROJECT_PULSE_SYSTEM_PROMPT,
+  VOICE_DIGEST_SYSTEM_PROMPT,
 } from './constants';
 import { getSetting, setSetting } from './localdb';
 
@@ -113,6 +114,26 @@ export async function getProjectDigestResponse(
 }
 
 /**
+ * Summarizes a speaker-labeled voice-call transcript into a structured digest
+ * (TL;DR, discussion points, decisions, action items). Same model + hardening
+ * approach as the project digest.
+ *
+ * @param {string} input - Call metadata + speaker-labeled transcript.
+ * @returns {Promise<string>} - The markdown digest.
+ */
+export async function getVoiceDigestResponse(input: string): Promise<string> {
+  const message = await anthropic.messages.create({
+    // Digests use a stronger model than the active chat model (default Sonnet).
+    model: process.env.ANTHROPIC_DIGEST_MODEL || ANTHROPIC_CONFIG.DIGEST_MODEL,
+    max_tokens: ANTHROPIC_CONFIG.MAX_TOKENS.DIGEST,
+    system: VOICE_DIGEST_SYSTEM_PROMPT,
+    messages: [{ role: 'user', content: input }],
+  });
+
+  return extractText(message);
+}
+
+/**
  * Produces a short (1-2 sentence) weekly status blurb for a single project.
  *
  * @param {string} prompt - Project name + recent messages.
@@ -133,4 +154,5 @@ export default {
   getChatOpenAIPromptResponse,
   getProjectDigestResponse,
   getProjectPulseResponse,
+  getVoiceDigestResponse,
 };
