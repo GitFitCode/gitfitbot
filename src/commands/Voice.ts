@@ -25,7 +25,14 @@ import { request } from 'undici';
 import { SlashCommand } from '../Command';
 import { COMMAND_VOICE } from '../utils/constants';
 import { buildVoiceDigestPayload, generateVoiceDigest } from '../utils/digest';
-import { addVoiceOptOut, fetchAllVoiceOptOuts, removeVoiceOptOut } from '../utils/localdb';
+import {
+  addVoiceOptOut,
+  clearVoiceSession,
+  fetchAllVoiceOptOuts,
+  removeVoiceOptOut,
+  saveVoiceSession,
+} from '../utils/localdb';
+import { maybeDeleteSessionAudio } from '../utils/voiceLifecycle';
 import { ChunkMeta, SessionRecorder } from '../utils/voiceRecorder';
 
 interface VoiceSession {
@@ -288,6 +295,18 @@ async function joinAndListen(
   };
   activeSessions.set(guildId, session);
 
+  // Persist the session (#83) so a bot restart mid-meeting can recover it.
+  // Saved immediately (threadId unknown yet) and updated below once the
+  // transcript thread exists — a crash in between still leaves a record.
+  await saveVoiceSession({
+    guildId,
+    channelId: voiceChannel.id,
+    startedAt: startedAt.toISOString(),
+    audioDir: recorder.sessionDir,
+  }).catch((e: any) => {
+    console.warn('[VOICE] Failed to persist session record:', e?.message || e);
+  });
+
   // Consent notice: tell everyone currently on the call that recording +
   // transcription started (mid-session joiners are handled by the
   // voiceStateUpdate listener using the same mechanism).
@@ -365,6 +384,20 @@ async function joinAndListen(
     } catch (e) {
       console.warn('[VOICE] Failed to announce start:', e);
     }
+  }
+
+  // The transcript thread arrived after the initial save — update the
+  // persisted record with its ID so restart recovery can post there (#83).
+  if (session.transcriptThread?.id) {
+    await saveVoiceSession({
+      guildId,
+      channelId: voiceChannel.id,
+      threadId: session.transcriptThread.id,
+      startedAt: startedAt.toISOString(),
+      audioDir: recorder.sessionDir,
+    }).catch((e: any) => {
+      console.warn('[VOICE] Failed to update session record with thread ID:', e?.message || e);
+    });
   }
 
   console.log(`[VOICE] Session started in guild ${guildId} channel ${voiceChannel.id}`);
@@ -735,6 +768,22 @@ async function stopAndIngest(interaction: CommandInteraction) {
   const filePath = path.join(exportDir, `${slug}.md`);
   await fs.writeFile(filePath, bodyWithDigest, 'utf8');
 
+  // Clean stop (#83): the transcript export is on disk, so the persisted
+  // session record is no longer needed for crash recovery.
+  await clearVoiceSession(guild.id).catch((e: any) => {
+    console.warn('[VOICE] Failed to clear persisted session record:', e?.message || e);
+  });
+
+  // Retention (#83): delete the session audio dir (VOICE_AUDIO_RETENTION=delete)
+  // only when the export write above succeeded (we're past it) AND ingest
+  // succeeded or is unconfigured (the local export is then the source of
+  // truth). An ingest FAILURE always keeps the audio so nothing is lost.
+  const ingestUnconfigured = !process.env.CONDUIT_INGEST_URL;
+  let audioDeleted = false;
+  if (ingestResult.ok || ingestUnconfigured) {
+    audioDeleted = await maybeDeleteSessionAudio(session.recorder.sessionDir);
+  }
+
   // Honest ingest status for both summary messages: doc id on success (noting
   // idempotent resubmits), the failure reason + local export path on failure.
   const ingestNote = ingestResult.ok
@@ -748,7 +797,7 @@ async function stopAndIngest(interaction: CommandInteraction) {
     `Final transcript: ${usedBatchTranscript ? `batch pass over ${recordedChunks.length} recorded chunk(s)` : 'live captions (batch pass produced nothing)'}.\n` +
     `Digest: ${digestNote}.\n` +
     `Usage: ${localCount} local + ${openaiCount} OpenAI transcriptions (~${Math.round(totalSeconds)}s audio). Rough OpenAI cost ~$${roughCost}.\n` +
-    `Recording dir: ${session.recorder.sessionDir}`;
+    `Recording dir: ${session.recorder.sessionDir}${audioDeleted ? ' (audio deleted per VOICE_AUDIO_RETENTION=delete)' : ''}`;
 
   await interaction.followUp({ content: summary });
 
@@ -834,6 +883,13 @@ async function forceLeave(interaction: CommandInteraction) {
     console.warn('[VOICE] Error during force leave destroy:', e);
   }
   activeSessions.delete(guild.id);
+
+  // Force leave ends the session too — clear the persisted record so the
+  // next boot doesn't treat it as an interrupted session (#83). The audio
+  // dir is kept (no export/ingest happened) for the retention sweep.
+  await clearVoiceSession(guild.id).catch((e: any) => {
+    console.warn('[VOICE] Failed to clear persisted session record:', e?.message || e);
+  });
 
   await interaction.followUp({
     content: `Force left voice channel ${session.channelName}. Session cleared (no ingest performed).`,

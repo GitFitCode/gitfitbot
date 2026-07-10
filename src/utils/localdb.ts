@@ -122,6 +122,78 @@ export async function fetchAllVoiceOptOuts(): Promise<string[]> {
   return result.rows.map((row) => row.id);
 }
 
+export interface VoiceSessionRecord {
+  _id: string; // Discord guild ID (one active session per guild)
+  guildId: string;
+  channelId: string;
+  threadId?: string;
+  startedAt: string; // ISO timestamp of session start
+  audioDir: string; // session recording dir (audio/<guildId>-<sessionStartTs>)
+}
+
+let voiceSessionsDB: PouchDB.Database<VoiceSessionRecord>;
+
+/** Opens (once) the database of active (persisted) voice transcription sessions. */
+function openVoiceSessionsDatabase() {
+  if (!voiceSessionsDB) {
+    voiceSessionsDB = new PouchDB<VoiceSessionRecord>('voice_sessions_db');
+  }
+}
+
+/**
+ * Persists an active voice session's metadata (upsert, keyed by guild ID) so a
+ * bot restart mid-meeting can detect and recover/clean up the session (#83).
+ *
+ * @param {object} session - Session metadata: guildId, channelId, optional threadId, startedAt (ISO), audioDir.
+ */
+export async function saveVoiceSession(session: {
+  guildId: string;
+  channelId: string;
+  threadId?: string;
+  startedAt: string;
+  audioDir: string;
+}): Promise<void> {
+  openVoiceSessionsDatabase();
+  try {
+    const doc = await voiceSessionsDB.get(session.guildId);
+    await voiceSessionsDB.put({ ...doc, ...session });
+  } catch {
+    await voiceSessionsDB.put({ _id: session.guildId, ...session });
+  }
+}
+
+/**
+ * Clears the persisted voice session for a guild (clean stop or recovery done).
+ * No-op if no session is persisted.
+ *
+ * @param {string} guildId - The Discord guild ID whose session record to clear.
+ */
+export async function clearVoiceSession(guildId: string): Promise<void> {
+  openVoiceSessionsDatabase();
+  try {
+    const doc = await voiceSessionsDB.get(guildId);
+    await voiceSessionsDB.remove(doc);
+  } catch {
+    // NO-OP: no persisted session for this guild.
+  }
+}
+
+/**
+ * Fetches all persisted voice sessions. Called on bot startup: any record
+ * still present means the previous process died mid-session (stale session).
+ *
+ * @returns {Promise<VoiceSessionRecord[]>} All stale persisted session records.
+ */
+export async function getStaleVoiceSessions(): Promise<VoiceSessionRecord[]> {
+  openVoiceSessionsDatabase();
+
+  const result = await voiceSessionsDB.allDocs({ include_docs: true });
+
+  return result.rows
+    .map((row) => row.doc)
+    .filter((doc): doc is PouchDB.Core.ExistingDocument<VoiceSessionRecord> => Boolean(doc));
+}
+
 /**
  * Opens a new connection to the Attendees database.
  */
