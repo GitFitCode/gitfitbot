@@ -46,7 +46,17 @@ export interface ChunkMeta {
   filePath: string;
 }
 
-export type UtteranceHandler = (wavPath: string, userId: string, username: string) => void;
+export type UtteranceHandler = (
+  wavPath: string,
+  userId: string,
+  username: string,
+  /**
+   * Epoch ms when the first audio of this utterance arrived (utterance START).
+   * Live captions must be stamped with this, not the transcription completion
+   * time — Whisper can finish 20-40s after the words were spoken (#93).
+   */
+  startedAtMs: number,
+) => void;
 
 const CHUNK_ROTATE_MS = 5 * 60 * 1000; // rotate chunk files every 5 minutes
 const UTTERANCE_SILENCE_MS = 3500; // same boundary the old AfterSilence path used
@@ -293,10 +303,11 @@ export class SessionRecorder {
     state.uttPath = uttPath;
 
     const { userId, username } = state;
+    const utteranceStartedAtMs = now; // first PCM of this utterance = utterance start (#93)
     const closePromise = new Promise<void>((resolve) => {
       ffmpeg.on('close', () => {
         try {
-          this.onUtterance(uttPath, userId, username);
+          this.onUtterance(uttPath, userId, username, utteranceStartedAtMs);
         } catch (err) {
           console.error(`[VOICE REC] onUtterance handler error for ${username}:`, err);
         }

@@ -262,12 +262,14 @@ async function joinAndListen(
     guildId,
     startedAt.getTime(),
     (uid) => session.optOutSet.has(uid),
-    (wavPath, _uid, username) => {
+    (wavPath, _uid, username, utteranceStartMs) => {
       // Track the async caption transcription so /voice stop can drain
       // in-flight work before finalizing (same contract as before, #82).
-      const work = handleUtteranceFile(session, wavPath, username).catch((err) => {
-        console.error(`[VOICE] Live-caption pipeline error for ${username}:`, err);
-      });
+      const work = handleUtteranceFile(session, wavPath, username, utteranceStartMs).catch(
+        (err) => {
+          console.error(`[VOICE] Live-caption pipeline error for ${username}:`, err);
+        },
+      );
       session.pendingTranscriptions.add(work);
       void work.finally(() => {
         session.pendingTranscriptions.delete(work);
@@ -471,6 +473,7 @@ async function handleUtteranceFile(
   session: VoiceSession,
   filePath: string,
   username: string,
+  utteranceStartMs: number,
 ): Promise<void> {
   session.audioPaths.push(filePath);
 
@@ -489,7 +492,10 @@ async function handleUtteranceFile(
   console.log(`[VOICE] Starting transcription for ${username}...`);
   const text = await transcribeAudio(filePath, username, session);
   const cleaned = (text || '').trim();
-  const ts = new Date().toISOString().slice(11, 19);
+  // Stamp the line with the utterance START time (threaded from the recorder's
+  // segmenter), not "now" — transcription completes 20-40s after the words were
+  // actually spoken, which skewed every caption timestamp (#93).
+  const ts = new Date(utteranceStartMs).toISOString().slice(11, 19);
 
   // Track audio usage for cost awareness
   const audioSeconds = Math.round(stats.size / 192000); // approx for 48kHz stereo 16-bit
@@ -656,8 +662,13 @@ async function stopAndIngest(interaction: CommandInteraction) {
     let currSpeaker = '';
     let currLines: string[] = [];
     for (const line of session.transcripts) {
-      // lines are like "[timestamp] Speaker: text" or "[Speaker] text"
-      const m = line.match(/^\[.*?\]?\s*(.+?):\s*(.*)$/);
+      // Lines come in two forms (#93):
+      //   "[00:38:42] sirrele: text"  -> speaker "sirrele" (bracketed timestamp prefix)
+      //   "sirrele: text"             -> speaker "sirrele" (no prefix)
+      // The bracketed prefix must be consumed explicitly; the old lazy pattern
+      // (/^\[.*?\]?\s*(.+?):\s*(.*)$/) captured "00" as the speaker from the
+      // timestamp. Speaker names cannot contain ':' or brackets.
+      const m = line.match(/^(?:\[[^\]]*\]\s*)?([^:[\]]+?):\s*(.*)$/);
       const speaker = m && m[1] ? m[1].trim() : 'Unknown';
       const content = m && m[2] !== undefined ? m[2].trim() : line;
       if (speaker !== currSpeaker) {
@@ -914,12 +925,16 @@ async function forceLeave(interaction: CommandInteraction) {
 }
 
 /**
- * Batch transcription pass over the continuous chunk recordings (#79).
+ * Batch transcription pass over the continuous chunk recordings (#79, #93).
  *
- * Runs each recorded chunk (chronological across all users) through
- * transcribeAudio — which already handles local-Whisper serialization, the
- * OpenAI fallback, and segment quality filtering — and merges the results by
- * chunk start time into "[HH:MM:SS] username: text" lines.
+ * Runs each recorded chunk through transcribeAudioDetailed — which handles
+ * local-Whisper serialization, the OpenAI fallback, and (relaxed) segment
+ * quality filtering — and interleaves Whisper's per-segment start offsets
+ * across ALL chunks and users: each segment gets an absolute timestamp
+ * (chunk start + segment offset), everything is sorted by that time, and
+ * consecutive same-speaker segments within SEGMENT_MERGE_WINDOW_MS are merged
+ * into one "[HH:MM:SS] username: text" line. This restores conversational
+ * interleaving instead of one merged blob per 5-minute chunk (#93).
  *
  * Posts a "processing…" message to the session thread and edits it when done.
  * Total batch time is capped at 15 minutes; on timeout, whatever completed is
@@ -929,6 +944,9 @@ async function forceLeave(interaction: CommandInteraction) {
  * failed) so the caller can fall back to the live-caption transcript.
  */
 const BATCH_TRANSCRIBE_TIMEOUT_MS = 15 * 60 * 1000;
+
+/** Consecutive segments from the same speaker closer than this merge into one line. */
+const SEGMENT_MERGE_WINDOW_MS = 10_000;
 
 async function transcribeSessionRecordings(
   session: VoiceSession,
@@ -964,7 +982,10 @@ async function transcribeSessionRecordings(
 
   const startedProcessing = Date.now();
   const deadline = startedProcessing + BATCH_TRANSCRIBE_TIMEOUT_MS;
-  const lines: string[] = [];
+  // Every usable segment across all chunks/users, stamped with its absolute
+  // wall-clock time (chunk start + Whisper's per-segment offset) so speakers
+  // interleave in the final transcript (#93).
+  const entries: Array<{ atMs: number; username: string; text: string }> = [];
   const unprocessed: string[] = [];
   let transcribedCount = 0;
 
@@ -974,15 +995,15 @@ async function transcribeSessionRecordings(
       unprocessed.push(chunk.filePath);
       continue;
     }
-    let text: string | null = null;
+    let outcome: DetailedTranscription | 'timeout' | null = null;
     let capTimer: NodeJS.Timeout | undefined;
     try {
       // Race each chunk against the remaining global budget. We can't cancel
       // the underlying Whisper call, but we stop waiting for it.
-      text = await Promise.race([
-        transcribeAudio(chunk.filePath, chunk.username, session),
-        new Promise<null>((resolve) => {
-          capTimer = setTimeout(() => resolve(null), remaining);
+      outcome = await Promise.race([
+        transcribeAudioDetailed(chunk.filePath, chunk.username, session),
+        new Promise<'timeout'>((resolve) => {
+          capTimer = setTimeout(() => resolve('timeout'), remaining);
         }),
       ]);
     } catch (err: any) {
@@ -993,20 +1014,53 @@ async function transcribeSessionRecordings(
     } finally {
       if (capTimer) clearTimeout(capTimer);
     }
-    if (text === null) {
+    if (outcome === 'timeout') {
       unprocessed.push(chunk.filePath);
       continue;
     }
+    if (outcome === null) continue; // transcription failed — nothing usable from this chunk
     transcribedCount++;
-    const cleaned = (text || '').trim();
-    const isLowValue =
-      !cleaned ||
-      cleaned.includes('no speech') ||
-      cleaned.includes('transcription failed') ||
-      cleaned.includes('transcription error');
-    if (isLowValue) continue;
-    lines.push(`[${chunk.startedAt.slice(11, 19)}] ${chunk.username}: ${cleaned}`);
+    const chunkStartMs = new Date(chunk.startedAt).getTime();
+    for (const seg of outcome.segments) {
+      entries.push({
+        atMs: chunkStartMs + seg.startSec * 1000,
+        username: chunk.username,
+        text: seg.text,
+      });
+    }
   }
+
+  // Interleave: sort all segments by absolute time, then merge consecutive
+  // same-speaker segments within SEGMENT_MERGE_WINDOW_MS into one line so the
+  // transcript reads as turns, not choppy per-segment fragments (#93).
+  entries.sort((a, b) => a.atMs - b.atMs);
+  const lines: string[] = [];
+  let current: { atMs: number; lastMs: number; username: string; texts: string[] } | null = null;
+  const flushCurrent = (): void => {
+    if (!current) return;
+    const ts = new Date(current.atMs).toISOString().slice(11, 19);
+    lines.push(`[${ts}] ${current.username}: ${current.texts.join(' ')}`);
+    current = null;
+  };
+  for (const entry of entries) {
+    if (
+      current &&
+      current.username === entry.username &&
+      entry.atMs - current.lastMs <= SEGMENT_MERGE_WINDOW_MS
+    ) {
+      current.texts.push(entry.text);
+      current.lastMs = entry.atMs;
+    } else {
+      flushCurrent();
+      current = {
+        atMs: entry.atMs,
+        lastMs: entry.atMs,
+        username: entry.username,
+        texts: [entry.text],
+      };
+    }
+  }
+  flushCurrent();
 
   const elapsedSec = Math.round((Date.now() - startedProcessing) / 1000);
   let note = `${transcribedCount}/${usable.length} chunk(s) transcribed in ${elapsedSec}s`;
@@ -1026,80 +1080,157 @@ async function transcribeSessionRecordings(
 }
 
 /**
- * Transcribe an audio file using OpenAI Whisper (or return placeholder).
- * Prepares for easy swap to self-hosted whisper-live-server WS streaming.
+ * The initial_prompt sent to the local Whisper server to bias decoding toward
+ * casual English conversation. Whisper sometimes hallucinates this prompt back
+ * as the "transcription" of silence/noise, so sanitize() drops any output that
+ * substantially matches it (#93).
  */
+const WHISPER_INITIAL_PROMPT =
+  'This is a casual, informal English voice chat in a Discord call between colleagues. People are discussing work, products, tech, and random things. Use natural language.';
+
+/** Lowercase and strip punctuation/whitespace so echo comparison ignores formatting. */
+function normalizeForEchoCheck(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+const NORMALIZED_WHISPER_PROMPT = normalizeForEchoCheck(WHISPER_INITIAL_PROMPT);
+
+/**
+ * True when a transcription is (substantially) the Whisper initial_prompt
+ * echoed back: the normalized text is a substring of the normalized prompt (or
+ * vice versa) and is long enough (>15 normalized chars) that a real utterance
+ * matching it by coincidence is implausible (#93).
+ */
+function isPromptEcho(text: string): boolean {
+  const norm = normalizeForEchoCheck(text);
+  if (norm.length <= 15) return false;
+  return NORMALIZED_WHISPER_PROMPT.includes(norm) || norm.includes(NORMALIZED_WHISPER_PROMPT);
+}
+
+/**
+ * Cleans a raw Whisper result string: drops JSON echoes, server filler, and
+ * initial_prompt hallucinations. Used by BOTH the live-caption path and the
+ * batch path (per segment), so the prompt-echo filter covers everything (#93).
+ */
+function sanitize(raw: any): string {
+  let s = '';
+  if (typeof raw === 'string') s = raw.trim();
+  else if (raw && typeof raw === 'object' && 'text' in raw)
+    s = String((raw as any).text || '').trim();
+  else s = String(raw || '').trim();
+
+  if (!s) return '[no speech detected]';
+
+  // Hard guard: never let the raw Whisper JSON response (or its string form) or weird server echoes become live text
+  if (
+    s.startsWith('{') &&
+    (s.includes('"text"') || s.includes('"segments"') || s.includes('language'))
+  ) {
+    return '[no speech detected]';
+  }
+  if (s.includes('"text":') && s.includes('"segments"')) {
+    return '[no speech detected]';
+  }
+  // Drop obvious non-transcript server responses
+  if (/^\s*\{.*"language".*\}\s*$/.test(s)) return '[no speech detected]';
+
+  // Drop non-latin short results ONLY if they look like pure server filler (very short, no latin)
+  if (s.length > 1 && s.length < 20 && !/[a-zA-Z]/.test(s)) {
+    return '[no speech detected]';
+  }
+
+  // Whisper hallucinating its own initial_prompt back on silence/noise (#93)
+  if (isPromptEcho(s)) return '[no speech detected]';
+
+  return s; // let short phrases through; the isLowValue in handler will decide live posting
+}
+
+// Safe body readers to avoid undici AssertionError when body is in bad state (e.g. after abort/timeout)
+async function safeText(b: any): Promise<string> {
+  if (!b) return '';
+  try {
+    return await b.text();
+  } catch (e: any) {
+    return e.message || '';
+  }
+}
+async function safeJson(b: any): Promise<any> {
+  if (!b) return {};
+  try {
+    return await b.json();
+  } catch {
+    const txt = await safeText(b);
+    return { text: txt };
+  }
+}
+
+interface WhisperSegment {
+  start?: number;
+  text?: string;
+  avg_logprob?: number;
+  no_speech_prob?: number;
+}
+
+interface WhisperVerboseResponse {
+  text?: string;
+  segments?: WhisperSegment[];
+}
+
+interface SegmentQualityFilter {
+  minAvgLogprob: number;
+  maxNoSpeechProb: number;
+}
+
+/** Strict thresholds for live captions — posted in real time, so favor precision. */
+const CAPTION_SEGMENT_FILTER: SegmentQualityFilter = { minAvgLogprob: -1.0, maxNoSpeechProb: 0.6 };
+
+/**
+ * Relaxed thresholds for the batch pass (#93): the live test showed real
+ * speech that the caption path caught being dropped from the batch transcript.
+ * The batch pass is the durable record, so favor recall.
+ */
+const BATCH_SEGMENT_FILTER: SegmentQualityFilter = { minAvgLogprob: -1.2, maxNoSpeechProb: 0.75 };
+
+function filterSegments(
+  segments: WhisperSegment[],
+  filter: SegmentQualityFilter,
+): WhisperSegment[] {
+  return segments.filter(
+    (seg) =>
+      (seg.avg_logprob ?? -2) > filter.minAvgLogprob &&
+      (seg.no_speech_prob ?? 1) < filter.maxNoSpeechProb,
+  );
+}
+
 let openaiQuotaExceeded = false;
 let localQueue: Promise<any> = Promise.resolve();
 
-async function transcribeAudio(
+/**
+ * Shared Whisper transport: local self-hosted server first (serialized via a
+ * queue, one retry), OpenAI verbose_json as fallback. Returns the parsed
+ * verbose response (text + segments) or null when both paths failed, leaving
+ * quality filtering / flattening to the callers (transcribeAudio for captions,
+ * transcribeAudioDetailed for the batch pass).
+ */
+async function requestWhisperVerbose(
   filePath: string,
   speaker: string,
   sessionForTracking?: any,
-): Promise<string> {
+): Promise<WhisperVerboseResponse | null> {
   const fileBuffer = await fs.promises.readFile(filePath);
   const filename = path.basename(filePath) || 'speech.wav';
-
-  const sanitize = (raw: any): string => {
-    let s = '';
-    if (typeof raw === 'string') s = raw.trim();
-    else if (raw && typeof raw === 'object' && 'text' in raw)
-      s = String((raw as any).text || '').trim();
-    else s = String(raw || '').trim();
-
-    if (!s) return '[no speech detected]';
-
-    // Hard guard: never let the raw Whisper JSON response (or its string form) or weird server echoes become live text
-    if (
-      s.startsWith('{') &&
-      (s.includes('"text"') || s.includes('"segments"') || s.includes('language'))
-    ) {
-      return '[no speech detected]';
-    }
-    if (s.includes('"text":') && s.includes('"segments"')) {
-      return '[no speech detected]';
-    }
-    // Drop obvious non-transcript server responses
-    if (/^\s*\{.*"language".*\}\s*$/.test(s)) return '[no speech detected]';
-
-    // Drop non-latin short results ONLY if they look like pure server filler (very short, no latin)
-    if (s.length > 1 && s.length < 20 && !/[a-zA-Z]/.test(s)) {
-      return '[no speech detected]';
-    }
-
-    return s; // let short phrases through; the isLowValue in handler will decide live posting
-  };
-
-  // Safe body readers to avoid undici AssertionError when body is in bad state (e.g. after abort/timeout)
-  const safeText = async (b: any): Promise<string> => {
-    if (!b) return '';
-    try {
-      return await b.text();
-    } catch (e: any) {
-      return e.message || '';
-    }
-  };
-  const safeJson = async (b: any): Promise<any> => {
-    if (!b) return {};
-    try {
-      return await b.json();
-    } catch {
-      const txt = await safeText(b);
-      return { text: txt };
-    }
-  };
 
   // Support local self-hosted Whisper using undici for reliable multipart
   if (process.env.WHISPER_SERVER_URL) {
     const localUrl = process.env.WHISPER_SERVER_URL;
     console.log(`[VOICE] Using local Whisper at ${localUrl} for ${speaker}`);
-    const attemptLocal = async () => {
+    const attemptLocal = async (): Promise<WhisperVerboseResponse | null> => {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 300000); // 5 minutes - Whisper can be slow
       try {
         const base = localUrl.replace(/\/$/, '');
         // Better params for quality on conversational/noisy audio
-        const url = `${base}/asr?output=json&task=transcribe&language=en&vad_filter=true&temperature=0&initial_prompt=This is a casual, informal English voice chat in a Discord call between colleagues. People are discussing work, products, tech, and random things. Use natural language.`;
+        const url = `${base}/asr?output=json&task=transcribe&language=en&vad_filter=true&temperature=0&initial_prompt=${WHISPER_INITIAL_PROMPT}`;
         const form = new FormData();
         form.append('audio_file', new Blob([fileBuffer]), filename);
 
@@ -1114,34 +1245,13 @@ async function transcribeAudio(
           const err = await safeText(body);
           console.error('Local whisper /asr error:', err);
           return null;
-        } else {
-          const data: any = await safeJson(body);
-
-          // Prefer good segments if available (the server returns them)
-          let t = '';
-          if (data.segments && Array.isArray(data.segments)) {
-            const good = data.segments.filter(
-              (seg: any) => (seg.avg_logprob || -2) > -1.0 && (seg.no_speech_prob || 1) < 0.6,
-            );
-            if (good.length > 0) {
-              t = good
-                .map((seg: any) => seg.text || '')
-                .join(' ')
-                .trim();
-            }
-          }
-          if (!t) t = (data.text || '').trim();
-
-          const cleanedT = sanitize(t);
-          if (cleanedT && !cleanedT.includes('no speech')) {
-            if (sessionForTracking) {
-              sessionForTracking.localTranscriptions =
-                (sessionForTracking.localTranscriptions || 0) + 1;
-            }
-            return cleanedT;
-          }
-          return '[no speech detected]';
         }
+        const data: any = await safeJson(body);
+        if (sessionForTracking) {
+          sessionForTracking.localTranscriptions =
+            (sessionForTracking.localTranscriptions || 0) + 1;
+        }
+        return data as WhisperVerboseResponse;
       } catch (e: any) {
         const msg = e.message || e.code || String(e);
         if (
@@ -1186,7 +1296,7 @@ async function transcribeAudio(
     if (openaiQuotaExceeded) {
       console.warn('[VOICE] Skipping OpenAI fallback due to previous quota error');
     }
-    return `[transcription failed for ${speaker}]`;
+    return null;
   }
   console.log(`[VOICE] Using OpenAI Whisper for ${speaker}`);
   try {
@@ -1209,33 +1319,88 @@ async function transcribeAudio(
           '!!! OPENAI QUOTA EXHAUSTED - add billing credits or disable OpenAI fallback to avoid costs. Relying on local Whisper only.',
         );
       }
-      return `[transcription failed for ${speaker}]`;
+      return null;
     }
     const data: any = await res.json().catch(() => ({}));
-    let t = (data.text || '').trim();
-    if (data.segments && Array.isArray(data.segments)) {
-      const good = data.segments.filter(
-        (seg: any) => (seg.avg_logprob || -2) > -1.0 && (seg.no_speech_prob || 1) < 0.6,
-      );
-      if (good.length > 0)
-        t = good
-          .map((seg: any) => seg.text || '')
-          .join(' ')
-          .trim();
+    if (sessionForTracking) {
+      sessionForTracking.openaiTranscriptions = (sessionForTracking.openaiTranscriptions || 0) + 1;
     }
-    const cleanedT = sanitize(t);
-    if (cleanedT && !cleanedT.includes('no speech')) {
-      if (sessionForTracking) {
-        sessionForTracking.openaiTranscriptions =
-          (sessionForTracking.openaiTranscriptions || 0) + 1;
-      }
-      return cleanedT;
-    }
-    return '[no speech detected]';
+    return data as WhisperVerboseResponse;
   } catch (e: any) {
     console.error('transcribe error', e);
-    return `[transcription error for ${speaker}: ${e.message}]`;
+    return null;
   }
+}
+
+/**
+ * Transcribe an audio file to a single merged string — the live-caption path.
+ * Applies the STRICT caption segment filter and the shared sanitize() guards
+ * (including the prompt-echo filter).
+ */
+async function transcribeAudio(
+  filePath: string,
+  speaker: string,
+  sessionForTracking?: any,
+): Promise<string> {
+  const data = await requestWhisperVerbose(filePath, speaker, sessionForTracking);
+  if (data === null) return `[transcription failed for ${speaker}]`;
+
+  // Prefer good segments if available (both servers return them)
+  let t = '';
+  if (Array.isArray(data.segments)) {
+    const good = filterSegments(data.segments, CAPTION_SEGMENT_FILTER);
+    if (good.length > 0) {
+      t = good
+        .map((seg) => seg.text || '')
+        .join(' ')
+        .trim();
+    }
+  }
+  if (!t) t = (data.text || '').trim();
+
+  const cleanedT = sanitize(t);
+  if (cleanedT && !cleanedT.includes('no speech')) return cleanedT;
+  return '[no speech detected]';
+}
+
+interface DetailedTranscription {
+  /** Usable segments with their start offset (seconds) within the audio file. */
+  segments: Array<{ startSec: number; text: string }>;
+}
+
+/**
+ * Transcribe an audio file keeping Whisper's per-segment timing — the batch
+ * path (#93). Applies the RELAXED batch segment filter (favor recall for the
+ * durable record) and sanitize() — including the prompt-echo filter — per
+ * segment. Returns null when transcription failed entirely so the caller can
+ * distinguish failure from "transcribed fine but contained no usable speech".
+ */
+async function transcribeAudioDetailed(
+  filePath: string,
+  speaker: string,
+  sessionForTracking?: any,
+): Promise<DetailedTranscription | null> {
+  const data = await requestWhisperVerbose(filePath, speaker, sessionForTracking);
+  if (data === null) return null;
+
+  const rawSegments = Array.isArray(data.segments) ? data.segments : [];
+  const segments: Array<{ startSec: number; text: string }> = [];
+  for (const seg of filterSegments(rawSegments, BATCH_SEGMENT_FILTER)) {
+    const cleaned = sanitize((seg.text || '').trim());
+    if (!cleaned || cleaned.includes('no speech')) continue;
+    segments.push({ startSec: typeof seg.start === 'number' ? seg.start : 0, text: cleaned });
+  }
+
+  // No segment timing available (some servers/formats return text only):
+  // treat the whole result as one segment at the start of the file.
+  if (segments.length === 0 && rawSegments.length === 0) {
+    const cleaned = sanitize((data.text || '').trim());
+    if (cleaned && !cleaned.includes('no speech')) {
+      segments.push({ startSec: 0, text: cleaned });
+    }
+  }
+
+  return { segments };
 }
 
 /** Result of a conduit intake POST — surfaced verbatim in the Discord summaries. */
