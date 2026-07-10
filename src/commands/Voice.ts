@@ -24,6 +24,7 @@ import * as path from 'path';
 import { request } from 'undici';
 import { SlashCommand } from '../Command';
 import { COMMAND_VOICE } from '../utils/constants';
+import { buildVoiceDigestPayload, generateVoiceDigest } from '../utils/digest';
 import { addVoiceOptOut, fetchAllVoiceOptOuts, removeVoiceOptOut } from '../utils/localdb';
 import { ChunkMeta, SessionRecorder } from '../utils/voiceRecorder';
 
@@ -655,6 +656,30 @@ async function stopAndIngest(interaction: CommandInteraction) {
   const totalSeconds = session.estimatedAudioSeconds || 0;
   const roughCost = (openaiCount * 0.006).toFixed(4); // very rough, since OpenAI Whisper ~$0.006/min
 
+  // Digest the final transcript through the Sonnet digest pipeline (#81).
+  // Skipped (null) for empty/trivial transcripts; a digest API failure must
+  // never break the export/ingest below — catch, log, note in the summary.
+  const digestMeta = { channelName, startedAt, endedAt, participants };
+  let voiceDigest: string | null = null;
+  let digestFailed = false;
+  try {
+    voiceDigest = await generateVoiceDigest(realTranscripts, digestMeta);
+  } catch (e: any) {
+    digestFailed = true;
+    console.error(
+      '[VOICE] Digest generation failed (continuing with export/ingest):',
+      e?.message || e,
+    );
+  }
+  let digestNote: string;
+  if (digestFailed) {
+    digestNote = '⚠️ failed (see logs) — export/ingest unaffected';
+  } else if (voiceDigest) {
+    digestNote = 'posted to the session thread';
+  } else {
+    digestNote = 'skipped (nothing substantive to digest)';
+  }
+
   const transcriptStub =
     `# Voice Session Transcript (GitFitBot → Conduit)\n\n` +
     `**Channel**: ${channelName}\n` +
@@ -675,10 +700,16 @@ async function stopAndIngest(interaction: CommandInteraction) {
     `**Utterance audio files**: ${session.audioPaths?.join(', ') || 'none'}\n` +
     `**Note**: Audio is recorded continuously per user in 5-minute chunks; the "Transcribed conversation" above comes from a full-quality batch pass over those chunks at stop${usedBatchTranscript ? '' : ' (batch produced nothing — live captions used as fallback)'}. Prefer local Whisper to avoid costs. Local errors fall back to OpenAI.\n`;
 
+  // Conduit + local export get the digest prepended so a reader (and the
+  // conduit brain) sees the summary before the full transcript (#81).
+  const bodyWithDigest = voiceDigest
+    ? `## Digest\n\n${voiceDigest}\n\n${transcriptStub}`
+    : transcriptStub;
+
   // Ingest to conduit (best effort using Supabase if configured, else local export)
   const ingestResult = await ingestToConduit({
     title: `Discord VC: ${channelName} @ ${startedAt.toISOString().slice(0, 16)}`,
-    body: transcriptStub,
+    body: bodyWithDigest,
     source_type: 'discord_voice_transcript',
     metadata: {
       guild_id: guild.id,
@@ -700,12 +731,13 @@ async function stopAndIngest(interaction: CommandInteraction) {
   await fs.mkdir(exportDir, { recursive: true });
   const slug = `${channelName.replace(/\s+/g, '-')}-${startedAt.toISOString().slice(0, 16).replace(/[:T]/g, '-')}`;
   const filePath = path.join(exportDir, `${slug}.md`);
-  await fs.writeFile(filePath, transcriptStub, 'utf8');
+  await fs.writeFile(filePath, bodyWithDigest, 'utf8');
 
   const summary =
     `**Session ended.** Duration ~${durationMin}m. ` +
     `Transcript saved to ${filePath}. Ingest status: ${ingestResult.ok ? 'OK (doc ID: ' + (ingestResult.id ?? 'unknown') + ')' : 'logged (no full conduit yet)'}.\n\n` +
     `Final transcript: ${usedBatchTranscript ? `batch pass over ${recordedChunks.length} recorded chunk(s)` : 'live captions (batch pass produced nothing)'}.\n` +
+    `Digest: ${digestNote}.\n` +
     `Usage: ${localCount} local + ${openaiCount} OpenAI transcriptions (~${Math.round(totalSeconds)}s audio). Rough OpenAI cost ~$${roughCost}.\n` +
     `Recording dir: ${session.recorder.sessionDir}`;
 
@@ -732,6 +764,21 @@ async function stopAndIngest(interaction: CommandInteraction) {
       payload.messageReference = { messageId: refId };
     }
     await summaryTarget.send(payload).catch(() => {});
+
+    // Post the digest (embed + full transcript .md, matching /project-digest's
+    // output style) — or a brief note when there was nothing to digest (#81).
+    if (voiceDigest) {
+      await summaryTarget
+        .send(buildVoiceDigestPayload(voiceDigest, digestMeta, bodyWithDigest))
+        .catch((e: any) => {
+          console.warn('[VOICE] Failed to post digest to thread:', e?.message || e);
+        });
+    } else {
+      const noDigestNote = digestFailed
+        ? '⚠️ Digest generation failed (API error) — the full transcript was still exported and ingested. Check bot logs.'
+        : '📋 Nothing substantive to digest from this session (transcript was empty or trivial).';
+      await summaryTarget.send(noDigestNote).catch(() => {});
+    }
   }
 
   console.log(`[VOICE] Session fully ended for guild ${guild.id}. Ingest result:`, ingestResult);

@@ -126,7 +126,7 @@
 **Actions** (required):
 
 - `join` [channel] : Bot joins (defaults to CHECKINS or VIRTUAL_OFFICE env), starts listening for speakers. **Restricted** — see the consent & recording policy below.
-- `stop` : Leaves VC, batch-transcribes the full session recording, produces the final transcript + metadata, saves locally to exports/voice/, ingests to conduit.source_documents (via Supabase if configured).
+- `stop` : Leaves VC, batch-transcribes the full session recording, produces the final transcript + metadata, **generates a digest** (TL;DR, key discussion points, decisions, action items with owners) via the same Sonnet pipeline as `/project-digest` and posts it to the session thread as an embed with the full transcript attached as a `.md` file, saves locally to exports/voice/, ingests to conduit.source_documents (via Supabase if configured) with a `## Digest` section prepended to the document body. Empty/trivial transcripts get a brief "nothing substantive to digest" note instead (no LLM call); a digest API failure is noted but never blocks the export/ingest.
 - `status` : Shows the active session (channel, duration, segment/file counts) for the guild.
 - `leave` : Force-disconnects the bot and clears the session without ingesting.
 - `optout` : Opt yourself out of voice capture and transcription (persisted across sessions and restarts). Replies ephemerally.
