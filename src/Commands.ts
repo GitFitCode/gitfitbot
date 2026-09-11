@@ -12,6 +12,7 @@ import Model from './commands/Model';
 import NextSpeaker from './commands/NextSpeaker';
 import Ping from './commands/Ping';
 import ProjectDigest from './commands/ProjectDigest';
+import Project from './commands/Project';
 import Standup from './commands/Standup';
 import Support from './commands/Support';
 import Test from './commands/Test';
@@ -28,6 +29,7 @@ const Commands: SlashCommand[] = [
   NextSpeaker,
   Ping,
   ProjectDigest,
+  Project,
   Standup,
   Support,
   Test,
