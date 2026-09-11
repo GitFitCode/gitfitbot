@@ -11,10 +11,10 @@ import {
   ModalSubmitInteraction,
 } from 'discord.js';
 import Commands from '../Commands';
-import { COMMAND_STANDUP, handleDigestButton, handleDigestModal } from '../utils';
+import { COMMAND_PROJECT, COMMAND_STANDUP, handleDigestButton, handleDigestModal } from '../utils';
 
 // All commands that invoke a modal should be listed here.
-const dontDeferCommandsList = [COMMAND_STANDUP.COMMAND_NAME];
+const dontDeferCommandsList = [COMMAND_STANDUP.COMMAND_NAME, COMMAND_PROJECT.COMMAND_NAME];
 
 /**
  * Handles slash command interactions.

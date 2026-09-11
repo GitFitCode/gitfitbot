@@ -11,6 +11,7 @@
 - [`/test` - A test command where the bot will respond with `Test.`](#test---a-test-command-where-the-bot-will-respond-with-test)
 - [`/tictactoe` - Tic Tac Toe game that can be playes with AI or a human opponent](#tictactoe---tic-tac-toe-game-that-can-be-playes-with-ai-or-a-human-opponent)
 - [`/standup` - Provide standup update](#standup---provide-standup-update)
+- [`/project` - Open authenticated project setup](#project---open-authenticated-project-setup)
 
 ---
 
@@ -120,6 +121,10 @@
 1. Opponent - **OPTIONAL**
 
 ### `/standup` - Provide standup update
+
+### `/project` - Open authenticated project setup
+
+Opens the hub's authenticated `/projects/new` setup flow in an ephemeral reply. Requires `HUB_PUBLIC_ORIGIN` to be an explicit public HTTPS origin (without a path, query, fragment, or credentials); no hub API calls or project data are made by the bot.
 
 ### `/voice` - Otter.ai style: join voice channel for transcription & recording (ingests to Conduit)
 

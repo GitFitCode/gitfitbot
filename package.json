@@ -13,7 +13,8 @@
     "pre-build": "rm -rf ./dist",
     "prepare": "husky",
     "start": "node -r newrelic ./dist/src/index.js",
-    "typecheck": "tsc --pretty --noEmit --incremental false"
+    "typecheck": "tsc --pretty --noEmit --incremental false",
+    "test:project": "node --test --experimental-strip-types test/project.test.ts"
   },
   "author": "GitFitCode",
   "license": "GNU GPLv3",

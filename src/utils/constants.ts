@@ -305,6 +305,17 @@ export const COMMAND_PROJECT_DIGEST = {
     'Pick a project thread by name. Leave empty to digest the thread you run this in.',
 };
 
+// Open-only hub onboarding. The origin is deliberately not defaulted: a
+// misconfigured bot must never send members to an untrusted or local host.
+export const COMMAND_PROJECT = {
+  COMMAND_NAME: 'project',
+  COMMAND_DESCRIPTION: 'Open authenticated project setup in the GitFitCode hub.',
+  HUB_ORIGIN_ENV: 'HUB_PUBLIC_ORIGIN',
+  SETUP_PATH: '/projects/new',
+  UNCONFIGURED_MESSAGE:
+    'Project setup is temporarily unavailable: the hub public origin is not configured.',
+};
+
 // Component IDs + copy for digest correction/feedback interactions. Button and
 // modal custom IDs are suffixed with `:<postId>` at build time.
 export const DIGEST_INTERACTION = {

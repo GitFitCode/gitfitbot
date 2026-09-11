@@ -6,4 +6,5 @@ export * from './localdb';
 export * from './notion';
 export * from './openAI';
 export * from './projectsDb';
+export * from './project';
 export * from './types';
