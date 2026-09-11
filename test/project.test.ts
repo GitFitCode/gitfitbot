@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { getProjectSetupUrl } from '../src/utils/project.ts';
-import Project from '../src/commands/Project.ts';
+import { getProjectSetupUrl } from '../src/utils/project';
+import Project from '../src/commands/Project';
+import { shouldDeferCommand } from '../src/utils/project';
 
 test('builds only the fixed authenticated setup path', () => {
   assert.equal(getProjectSetupUrl('https://hub.example.com'), 'https://hub.example.com/projects/new');
@@ -37,4 +38,10 @@ test('handler gives truthful ephemeral unconfigured response without editing', a
   } as any;
   await Project.run({} as any, interaction);
   assert.deepEqual(calls, [{ ephemeral: true, content: 'Project setup is temporarily unavailable: the hub public origin is not configured.', fetchReply: true }]);
+});
+
+test('router deferral policy exempts project and standup only', () => {
+  assert.equal(shouldDeferCommand('project'), false);
+  assert.equal(shouldDeferCommand('standup'), false);
+  assert.equal(shouldDeferCommand('ping'), true);
 });

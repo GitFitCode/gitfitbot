@@ -1,12 +1,7 @@
 import type { Client, CommandInteraction } from 'discord.js';
 import type { SlashCommand } from '../Command';
-import { getProjectSetupUrl } from '../utils/project.ts';
-
-const COMMAND_PROJECT = {
-  COMMAND_NAME: 'project',
-  COMMAND_DESCRIPTION: 'Open authenticated project setup in the GitFitCode hub.',
-  UNCONFIGURED_MESSAGE: 'Project setup is temporarily unavailable: the hub public origin is not configured.',
-};
+import { COMMAND_PROJECT } from '../utils/constants';
+import { getProjectSetupUrl } from '../utils/project';
 
 const Project: SlashCommand = {
   name: COMMAND_PROJECT.COMMAND_NAME,

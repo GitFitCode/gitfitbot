@@ -12,10 +12,9 @@ import {
 } from 'discord.js';
 import Commands from '../Commands';
 import { COMMAND_PROJECT, COMMAND_STANDUP, handleDigestButton, handleDigestModal } from '../utils';
+import { shouldDeferCommand } from '../utils/project';
 
 // All commands that invoke a modal should be listed here.
-const dontDeferCommandsList = [COMMAND_STANDUP.COMMAND_NAME, COMMAND_PROJECT.COMMAND_NAME];
-
 /**
  * Handles slash command interactions.
  *
@@ -38,7 +37,7 @@ const handleSlashCommand = async (
 
   // Ensure interaction token remains valid for long running tasks.
   // https://discordjs.guide/slash-commands/response-methods.html#deferred-responses
-  if (!dontDeferCommandsList.includes(interaction.commandName)) {
+  if (shouldDeferCommand(interaction.commandName)) {
     await interaction.deferReply();
   }
 
