@@ -5,5 +5,6 @@ export * from './helpers';
 export * from './localdb';
 export * from './notion';
 export * from './openAI';
+export * from './projectInit';
 export * from './projectsDb';
 export * from './types';

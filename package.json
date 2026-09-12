@@ -9,16 +9,19 @@
     "dev": "pnpm i && ts-node ./src/index.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "mcp:project-init": "node ./dist/src/mcp/projectInit.js",
     "pm2": "pnpm build && pm2 start ./dist/src/index.js --name gitfitbot",
     "pre-build": "rm -rf ./dist",
     "prepare": "husky",
     "start": "node -r newrelic ./dist/src/index.js",
+    "test:project-init": "node --test --require ts-node/register tests/project-init.test.ts",
     "typecheck": "tsc --pretty --noEmit --incremental false"
   },
   "author": "GitFitCode",
   "license": "GNU GPLv3",
   "dependencies": {
     "@anthropic-ai/sdk": "latest",
+    "@modelcontextprotocol/sdk": "1.30.0",
     "@discordjs/opus": "latest",
     "@discordjs/voice": "latest",
     "@notionhq/client": "latest",
@@ -36,7 +39,8 @@
     "pouchdb-node": "latest",
     "prism-media": "latest",
     "undici": "latest",
-    "ws": "^8.21.0"
+    "ws": "^8.21.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@commitlint/cli": "latest",
