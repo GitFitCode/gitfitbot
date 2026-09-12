@@ -171,6 +171,7 @@ test('standup modal behavior remains available', async () => {
 
 async function withMcpClient(
   origin: string | undefined,
+  launch: 'node' | 'pnpm',
   callback: (client: McpClient) => Promise<void>,
 ): Promise<void> {
   assert.equal(existsSync('dist/src/mcp/projectInit.js'), true, 'run pnpm build before this test');
@@ -181,8 +182,8 @@ async function withMcpClient(
     ...environment
   } = process.env;
   const transport = new StdioClientTransport({
-    command: process.execPath,
-    args: ['dist/src/mcp/projectInit.js'],
+    command: launch === 'node' ? process.execPath : 'pnpm',
+    args: launch === 'node' ? ['dist/src/mcp/projectInit.js'] : ['--silent', 'mcp:project-init'],
     cwd: process.cwd(),
     env: Object.fromEntries(
       Object.entries({ ...environment, GFC_PROJECT_HUB_ORIGIN: origin }).filter(
@@ -199,29 +200,46 @@ async function withMcpClient(
   }
 }
 
-test('built MCP entry is protocol-clean, read-only, and returns the Discord URL without Discord credentials', async () => {
-  await withMcpClient('https://hub.gitfitcode.org', async (client) => {
+test('built MCP entry accepts omitted or empty arguments and rejects unknown fields', async () => {
+  await withMcpClient('https://hub.gitfitcode.org', 'node', async (client) => {
     const tools = await client.listTools();
     assert.equal(tools.tools[0].name, 'project_init');
     assert.equal(tools.tools[0].annotations?.readOnlyHint, true);
-    const result = await client.callTool({ name: 'project_init', arguments: {} });
-    assert.equal(result.isError, undefined);
-    assert.match(
-      (result as unknown as { content: { text: string }[] }).content[0].text,
-      /https:\/\/hub\.gitfitcode\.org\/projects\/new/,
-    );
-    assert.deepEqual((result as unknown as { structuredContent: unknown }).structuredContent, {
-      url: 'https://hub.gitfitcode.org/projects/new',
-      state: 'requires_browser_sign_in',
-    });
-    const bad = await client.callTool({ name: 'project_init', arguments: { identity: 'nope' } });
-    assert.equal(bad.isError, true);
+    for (const request of [{ name: 'project_init' }, { name: 'project_init', arguments: {} }]) {
+      const result = await client.callTool(request);
+      assert.equal(result.isError, undefined);
+      assert.match(
+        (result as unknown as { content: { text: string }[] }).content[0].text,
+        /https:\/\/hub\.gitfitcode\.org\/projects\/new/,
+      );
+      assert.deepEqual((result as unknown as { structuredContent: unknown }).structuredContent, {
+        url: 'https://hub.gitfitcode.org/projects/new',
+        state: 'requires_browser_sign_in',
+      });
+    }
+    for (const arguments_ of [{ identity: 'nope' }, { unexpected: 'value' }]) {
+      const bad = await client.callTool({ name: 'project_init', arguments: arguments_ });
+      assert.equal(bad.isError, true);
+    }
+  });
+});
+
+test('documented quiet pnpm launch is protocol-clean', async () => {
+  await withMcpClient('https://hub.gitfitcode.org', 'pnpm', async (client) => {
+    for (const request of [{ name: 'project_init' }, { name: 'project_init', arguments: {} }]) {
+      const result = await client.callTool(request);
+      assert.equal(result.isError, undefined);
+    }
+    for (const arguments_ of [{ identity: 'nope' }, { unexpected: 'value' }]) {
+      const bad = await client.callTool({ name: 'project_init', arguments: arguments_ });
+      assert.equal(bad.isError, true);
+    }
   });
 });
 
 test('built MCP entry returns safe errors for missing and invalid configuration', async () => {
   for (const origin of [undefined, 'https://hub.gitfitcode.org/path'])
-    await withMcpClient(origin, async (client) => {
+    await withMcpClient(origin, 'node', async (client) => {
       const result = await client.callTool({ name: 'project_init', arguments: {} });
       assert.equal(result.isError, true);
       assert.deepEqual((result as unknown as { content: { text: string }[] }).content, [
