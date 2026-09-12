@@ -11,6 +11,7 @@
 - [`/test` - A test command where the bot will respond with `Test.`](#test---a-test-command-where-the-bot-will-respond-with-test)
 - [`/tictactoe` - Tic Tac Toe game that can be playes with AI or a human opponent](#tictactoe---tic-tac-toe-game-that-can-be-playes-with-ai-or-a-human-opponent)
 - [`/standup` - Provide standup update](#standup---provide-standup-update)
+- [`/project init` - Start browser onboarding](#project-init---start-browser-onboarding)
 
 ---
 
@@ -120,6 +121,12 @@
 1. Opponent - **OPTIONAL**
 
 ### `/standup` - Provide standup update
+
+### `/project init` - Start browser onboarding
+
+Run this in a GitFitCode server to receive an ephemeral **Continue in hub** link. The browser hub requires sign-in and is where project setup is reviewed and saved; the command does not create a project or connect GitHub.
+
+Set `GFC_PROJECT_HUB_ORIGIN` to the HTTPS hub origin (HTTP is accepted only for loopback development). For an MCP client, build first and launch `pnpm mcp:project-init`; call `project_init` with `{}` to get the same URL and `requires_browser_sign_in` state. Later work may add reviewed direct MCP identity delegation and owner-reviewed voice drafts; neither is part of this handoff.
 
 ### `/voice` - Otter.ai style: join voice channel for transcription & recording (ingests to Conduit)
 
