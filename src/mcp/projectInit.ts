@@ -1,10 +1,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { getProjectInitUrl, ProjectInitConfigurationError } from '../utils/projectInit';
 
-const projectInitInputSchema: z.ZodTypeAny = z.object({}).strict();
+const projectInitInputSchema = z.object({}).strict().optional();
 
 async function runProjectInit(): Promise<CallToolResult> {
   try {
@@ -35,7 +35,7 @@ async function runProjectInit(): Promise<CallToolResult> {
 
 export function createProjectInitServer(): McpServer {
   const server = new McpServer({ name: 'gitfitbot-project-init', version: '1.22.0' });
-  server.registerTool<any, any>(
+  server.registerTool(
     'project_init',
     {
       description: 'Return the authenticated GitFitCode hub URL for starting project onboarding.',
