@@ -1,43 +1,48 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { getProjectInitUrl, ProjectInitConfigurationError } from '../utils/projectInit';
 
+const projectInitInputSchema: z.ZodTypeAny = z.object({}).strict();
+
+async function runProjectInit(): Promise<CallToolResult> {
+  try {
+    const url = getProjectInitUrl();
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Open ${url} in a browser, sign in, then review and save your project setup.`,
+        },
+      ],
+      structuredContent: { url, state: 'requires_browser_sign_in' },
+    };
+  } catch (error) {
+    if (error instanceof ProjectInitConfigurationError)
+      return {
+        isError: true,
+        content: [
+          {
+            type: 'text',
+            text: 'Project onboarding is temporarily unavailable. Please contact an administrator.',
+          },
+        ],
+      };
+    throw error;
+  }
+}
+
 export function createProjectInitServer(): McpServer {
   const server = new McpServer({ name: 'gitfitbot-project-init', version: '1.22.0' });
-  server.registerTool(
+  server.registerTool<any, any>(
     'project_init',
     {
       description: 'Return the authenticated GitFitCode hub URL for starting project onboarding.',
-      inputSchema: z.object({}).strict(),
+      inputSchema: projectInitInputSchema,
       annotations: { readOnlyHint: true, openWorldHint: false },
-    } as never,
-    async () => {
-      try {
-        const url = getProjectInitUrl();
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Open ${url} in a browser, sign in, then review and save your project setup.`,
-            },
-          ],
-          structuredContent: { url, state: 'requires_browser_sign_in' },
-        };
-      } catch (error) {
-        if (error instanceof ProjectInitConfigurationError)
-          return {
-            isError: true,
-            content: [
-              {
-                type: 'text',
-                text: 'Project onboarding is temporarily unavailable. Please contact an administrator.',
-              },
-            ],
-          };
-        throw error;
-      }
     },
+    async () => runProjectInit(),
   );
   return server;
 }

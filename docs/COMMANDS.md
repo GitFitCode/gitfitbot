@@ -126,7 +126,30 @@
 
 Run this in a GitFitCode server to receive an ephemeral **Continue in hub** link. The browser hub requires sign-in and is where project setup is reviewed and saved; the command does not create a project or connect GitHub.
 
-Set `GFC_PROJECT_HUB_ORIGIN` to the HTTPS hub origin (HTTP is accepted only for loopback development). For an MCP client, build first and launch `pnpm mcp:project-init`; call `project_init` with `{}` to get the same URL and `requires_browser_sign_in` state. Later work may add reviewed direct MCP identity delegation and owner-reviewed voice drafts; neither is part of this handoff.
+Set `GFC_PROJECT_HUB_ORIGIN` to the HTTPS hub origin (HTTP is accepted only for loopback development). Build before configuring a client:
+
+```sh
+pnpm build
+```
+
+Use a protocol-clean launch command: ordinary `pnpm mcp:project-init` writes pnpm's package banner to stdout, which corrupts stdio MCP. For example, a client configuration can use:
+
+```json
+{
+  "mcpServers": {
+    "gitfitbot-project-init": {
+      "command": "pnpm",
+      "args": ["--silent", "mcp:project-init"],
+      "cwd": "/path/to/gitfitbot",
+      "env": {
+        "GFC_PROJECT_HUB_ORIGIN": "https://hub.gitfitcode.org"
+      }
+    }
+  }
+}
+```
+
+Call `project_init` with `{}` to get the same URL as Discord and the `requires_browser_sign_in` state. The returned URL starts browser onboarding only; sign in, review, and save there to complete it. Later work may add reviewed direct MCP identity delegation and owner-reviewed voice drafts; neither is part of this handoff. If a future owner-approved publish step is added, it must create or link one post in the [gfc-projects forum](https://discord.com/channels/328054349420822530/1032761290919260262) and send updates to that post's thread, rather than treating a separate text channel or website-only record as the project destination.
 
 ### `/voice` - Otter.ai style: join voice channel for transcription & recording (ingests to Conduit)
 
