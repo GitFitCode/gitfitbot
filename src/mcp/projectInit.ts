@@ -55,7 +55,10 @@ export function createProjectInitServer(): Server {
     ],
   }));
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
-    if (request.params.name !== 'project_init' || Object.keys(request.params.arguments ?? {}).length > 0)
+    if (
+      request.params.name !== 'project_init' ||
+      Object.keys(request.params.arguments ?? {}).length > 0
+    )
       return invalidArguments;
     return runProjectInit();
   });
