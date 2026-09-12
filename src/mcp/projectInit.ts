@@ -1,10 +1,16 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { z } from 'zod/v4';
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+  type CallToolResult,
+} from '@modelcontextprotocol/sdk/types.js';
 import { getProjectInitUrl, ProjectInitConfigurationError } from '../utils/projectInit';
 
-const projectInitInputSchema = z.object({}).strict().optional();
+const invalidArguments: CallToolResult = {
+  isError: true,
+  content: [{ type: 'text', text: 'project_init does not accept arguments.' }],
+};
 
 async function runProjectInit(): Promise<CallToolResult> {
   try {
@@ -33,17 +39,26 @@ async function runProjectInit(): Promise<CallToolResult> {
   }
 }
 
-export function createProjectInitServer(): McpServer {
-  const server = new McpServer({ name: 'gitfitbot-project-init', version: '1.22.0' });
-  server.registerTool(
-    'project_init',
-    {
-      description: 'Return the authenticated GitFitCode hub URL for starting project onboarding.',
-      inputSchema: projectInitInputSchema,
-      annotations: { readOnlyHint: true, openWorldHint: false },
-    },
-    async () => runProjectInit(),
+export function createProjectInitServer(): Server {
+  const server = new Server(
+    { name: 'gitfitbot-project-init', version: '1.22.0' },
+    { capabilities: { tools: {} } },
   );
+  server.setRequestHandler(ListToolsRequestSchema, () => ({
+    tools: [
+      {
+        name: 'project_init',
+        description: 'Return the authenticated GitFitCode hub URL for starting project onboarding.',
+        inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+        annotations: { readOnlyHint: true, openWorldHint: false },
+      },
+    ],
+  }));
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    if (request.params.name !== 'project_init' || Object.keys(request.params.arguments ?? {}).length > 0)
+      return invalidArguments;
+    return runProjectInit();
+  });
   return server;
 }
 

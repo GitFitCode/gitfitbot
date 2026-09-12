@@ -205,6 +205,7 @@ test('built MCP entry accepts omitted or empty arguments and rejects unknown fie
     const tools = await client.listTools();
     assert.equal(tools.tools[0].name, 'project_init');
     assert.equal(tools.tools[0].annotations?.readOnlyHint, true);
+    assert.equal((tools.tools[0].inputSchema as { additionalProperties?: boolean }).additionalProperties, false);
     for (const request of [{ name: 'project_init' }, { name: 'project_init', arguments: {} }]) {
       const result = await client.callTool(request);
       assert.equal(result.isError, undefined);
@@ -226,6 +227,8 @@ test('built MCP entry accepts omitted or empty arguments and rejects unknown fie
 
 test('documented quiet pnpm launch is protocol-clean', async () => {
   await withMcpClient('https://hub.gitfitcode.org', 'pnpm', async (client) => {
+    const tools = await client.listTools();
+    assert.equal((tools.tools[0].inputSchema as { additionalProperties?: boolean }).additionalProperties, false);
     for (const request of [{ name: 'project_init' }, { name: 'project_init', arguments: {} }]) {
       const result = await client.callTool(request);
       assert.equal(result.isError, undefined);
