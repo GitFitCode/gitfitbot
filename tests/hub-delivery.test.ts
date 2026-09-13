@@ -867,6 +867,57 @@ test('reconcile regression: rechecks active threads after archived paging catche
   assert.equal(h.hub.requestsTo('checkpoint').length, 0);
 });
 
+test('reconcile regression: archive timestamps strictly older than the create window bound paging', async () => {
+  const windowStart = Date.parse(reconcileClaim().createWindow.start);
+
+  const capped = harness();
+  capped.forum.archivedPageSize = 1;
+  for (let i = 0; i < 51; i += 1)
+    capped.forum.addThread({
+      archived: true,
+      createdAt: windowStart - (i + 2) * 1_000,
+      archiveTimestamp: new Date(windowStart - (i + 1) * 1_000).toISOString(),
+      ownerId: OTHER_USER_ID,
+    });
+  await deliver(capped, reconcileClaim());
+  assertResult(capped, {
+    outcome: 'absent',
+    code: 'reconcile_absent',
+    scan: { activeComplete: true, archivedComplete: true },
+  });
+  assert.equal(capped.forum.callsTo('listArchivedPage').length, 1);
+
+  // Equality is not enough: a page boundary may hide another thread archived at window start.
+  const boundary = harness();
+  boundary.forum.archivedPageSize = 3;
+  for (const offsetMs of [2_000, 1_000, 0])
+    boundary.forum.addThread({
+      archived: true,
+      createdAt: windowStart - 1_000,
+      archiveTimestamp: new Date(windowStart + offsetMs).toISOString(),
+      ownerId: OTHER_USER_ID,
+    });
+  const hidden = markerThread(boundary.forum, {
+    archived: true,
+    createdAt: windowStart,
+    archiveTimestamp: new Date(windowStart).toISOString(),
+  });
+  boundary.forum.addThread({
+    archived: true,
+    createdAt: windowStart - 2_000,
+    archiveTimestamp: new Date(windowStart - 1_000).toISOString(),
+    ownerId: OTHER_USER_ID,
+  });
+  await deliver(boundary, reconcileClaim());
+  const linked = assertResult(boundary, {
+    outcome: 'linked',
+    code: 'reconciled',
+    scan: { activeComplete: true, archivedComplete: true },
+  });
+  assert.equal(linked.discord.threadId, hidden.id);
+  assert.equal(boundary.forum.callsTo('listArchivedPage').length, 2);
+});
+
 // Archived pages at the production size, with ties on the page-boundary archive timestamp.
 const BOUNDARY_ARCHIVED_AT = new Date(NOW - 100_000).toISOString();
 
@@ -1315,6 +1366,30 @@ test('result delivery retries transient failures with an identical body', async 
   assert.equal(bodies.length, 3);
   assert.equal(new Set(bodies).size, 1);
   assert.equal(h.forum.callsTo('createThread').length, 1);
+});
+
+test('result delivery regression: HTTP 429 retries with bounded backoff and an identical body', async () => {
+  const recovered = harness();
+  recovered.hub.results.push(
+    { status: 429 },
+    { status: 429 },
+    { status: 200, body: { state: 'linked', idempotent: true } },
+  );
+  const recoveredCycle = await deliver(recovered, createClaim());
+  assert.equal(recoveredCycle.kind === 'reported' && recoveredCycle.hub, 'ok');
+  const recoveredBodies = recovered.hub.requestsTo('result').map((request) => request.rawBody);
+  assert.equal(recoveredBodies.length, 3);
+  assert.equal(new Set(recoveredBodies).size, 1);
+  assert.deepEqual(recovered.sleeps, [1_000, 2_000]);
+
+  const bounded = harness();
+  bounded.hub.results.push(...Array(20).fill({ status: 429 }));
+  const boundedCycle = await deliver(bounded, createClaim());
+  assert.equal(boundedCycle.kind === 'reported' && boundedCycle.hub, 'failed');
+  const boundedBodies = bounded.hub.requestsTo('result').map((request) => request.rawBody);
+  assert.equal(boundedBodies.length, 6);
+  assert.equal(new Set(boundedBodies).size, 1);
+  assert.deepEqual(bounded.sleeps, [1_000, 2_000, 4_000, 8_000, 16_000]);
 });
 
 test('result lease loss or rejection stops without retrying', async () => {
