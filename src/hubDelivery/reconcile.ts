@@ -78,7 +78,7 @@ export async function runReconcile(
   };
 
   const activeCompleteBefore = await scanActive();
-  const archivedComplete = await scanArchived(context, consider);
+  const archivedComplete = await scanArchived(context, consider, windowStart);
   // Active and archived listings are not one snapshot. Re-scan active threads so a thread
   // unarchived while the archived pages were read cannot disappear between the two sets.
   const activeCompleteAfter = await scanActive();
@@ -135,7 +135,9 @@ export async function runReconcile(
 }
 
 /**
- * Pages public archived threads until `has_more` is false.
+ * Pages public archived threads until `has_more` is false or a validated page crosses strictly
+ * before the create-window start. A thread cannot be archived before it is created, so archive
+ * timestamps before that bound cannot contain another candidate.
  *
  * `before` is an exclusive archive-timestamp cursor, and archive timestamps are not unique, so
  * advancing to the oldest timestamp on a page could skip unseen threads archived in that same
@@ -151,6 +153,7 @@ export async function runReconcile(
 async function scanArchived(
   context: OperationContext,
   consider: (thread: ThreadSnapshot) => void,
+  windowStart: number,
 ): Promise<boolean> {
   let before: string | null = null;
   let boundary: { ms: number; threadIds: string[] } | null = null;
@@ -181,6 +184,8 @@ async function scanArchived(
     // A page made only of threads tied at the previous boundary cannot advance without skipping.
     if (boundary && previousMs >= boundary.ms) return false;
     const oldestMs = previousMs;
+    // Equality is not sufficient: unseen threads may share the boundary timestamp at window start.
+    if (oldestMs < windowStart) return true;
     boundary = {
       ms: oldestMs,
       threadIds: result.threads
