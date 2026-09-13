@@ -826,6 +826,102 @@ test('reconcile finds a marker thread on a later archived page', async () => {
   assert.equal(result.discord.locked, true);
 });
 
+// Archived pages at the production size, with ties on the page-boundary archive timestamp.
+const BOUNDARY_ARCHIVED_AT = new Date(NOW - 100_000).toISOString();
+
+function fillArchivedPageBeforeBoundary(forum: FakeForumPort, rows: number): void {
+  forum.archivedPageSize = 100;
+  for (let i = 0; i < rows; i += 1)
+    forum.addThread({
+      archived: true,
+      archiveTimestamp: new Date(NOW - i * 1000).toISOString(),
+      ownerId: OTHER_USER_ID,
+    });
+}
+
+test('reconcile regression: a sole marker hidden at an archive timestamp boundary is not reported absent', async () => {
+  const h = harness();
+  fillArchivedPageBeforeBoundary(h.forum, 99);
+  h.forum.addThread({
+    archived: true,
+    archiveTimestamp: BOUNDARY_ARCHIVED_AT,
+    ownerId: OTHER_USER_ID,
+  });
+  const hidden = markerThread(h.forum, { archived: true, archiveTimestamp: BOUNDARY_ARCHIVED_AT });
+  await deliver(h, reconcileClaim());
+  const result = assertResult(h, { outcome: 'linked', resolution: 'reconciled' });
+  assert.equal(result.discord.threadId, hidden.id);
+  assert.deepEqual(result.scan, { activeComplete: true, archivedComplete: true });
+  assert.deepEqual(h.forum.callsTo('fetchStarterMessage'), [[hidden.id]]);
+});
+
+test('reconcile regression: a second marker hidden at an archive timestamp boundary prevents a single-match link', async () => {
+  const h = harness();
+  fillArchivedPageBeforeBoundary(h.forum, 99);
+  const visible = markerThread(h.forum, { archived: true, archiveTimestamp: BOUNDARY_ARCHIVED_AT });
+  const hidden = markerThread(h.forum, { archived: true, archiveTimestamp: BOUNDARY_ARCHIVED_AT });
+  await deliver(h, reconcileClaim());
+  const result = assertResult(h, { outcome: 'conflict', code: 'reconcile_multiple_matches' });
+  assert.deepEqual([...result.candidateThreadIds].sort(), [visible.id, hidden.id].sort());
+});
+
+test('reconcile regression: an archive cursor that cannot be shown to re-cover the boundary is incomplete', async () => {
+  for (const second of [false, true]) {
+    const h = harness();
+    h.forum.archivedCursorPrecisionMs = 1000;
+    fillArchivedPageBeforeBoundary(h.forum, 99);
+    if (second) markerThread(h.forum, { archived: true, archiveTimestamp: BOUNDARY_ARCHIVED_AT });
+    else
+      h.forum.addThread({
+        archived: true,
+        archiveTimestamp: BOUNDARY_ARCHIVED_AT,
+        ownerId: OTHER_USER_ID,
+      });
+    markerThread(h.forum, { archived: true, archiveTimestamp: BOUNDARY_ARCHIVED_AT });
+    await deliver(h, reconcileClaim());
+    assertResult(h, {
+      outcome: 'unknown',
+      code: 'reconcile_incomplete',
+      scan: { activeComplete: true, archivedComplete: false },
+    });
+  }
+});
+
+test('reconcile regression: a timestamp tie larger than one archived page is incomplete', async () => {
+  const h = harness();
+  h.forum.archivedPageSize = 2;
+  for (let i = 0; i < 3; i += 1)
+    h.forum.addThread({
+      archived: true,
+      archiveTimestamp: BOUNDARY_ARCHIVED_AT,
+      ownerId: OTHER_USER_ID,
+    });
+  await deliver(h, reconcileClaim());
+  assertResult(h, {
+    outcome: 'unknown',
+    code: 'reconcile_incomplete',
+    scan: { activeComplete: true, archivedComplete: false },
+  });
+});
+
+test('reconcile still proves absence when a boundary tie is re-covered by the next page', async () => {
+  const h = harness();
+  h.forum.archivedPageSize = 2;
+  for (const archiveTimestamp of [
+    '2026-09-12T22:30:00.000Z',
+    BOUNDARY_ARCHIVED_AT,
+    BOUNDARY_ARCHIVED_AT,
+    '2026-09-12T22:10:00.000Z',
+  ])
+    h.forum.addThread({ archived: true, archiveTimestamp, ownerId: OTHER_USER_ID });
+  await deliver(h, reconcileClaim());
+  assertResult(h, {
+    outcome: 'absent',
+    code: 'reconcile_absent',
+    scan: { activeComplete: true, archivedComplete: true },
+  });
+});
+
 const reconcileConditions: {
   name: string;
   arrange: (forum: FakeForumPort) => void;
@@ -966,6 +1062,33 @@ const reconcileConditions: {
     name: 'marker thread in another forum is ignored',
     arrange: (f) => {
       markerThread(f, { parentId: '222222222222222222' });
+    },
+    outcome: 'absent',
+    code: 'reconcile_absent',
+  },
+  {
+    name: 'marker thread with a non-public thread type (12)',
+    arrange: (f) => {
+      markerThread(f, { type: 12 });
+    },
+    outcome: 'conflict',
+    code: 'reconcile_unverifiable',
+    candidates: 1,
+  },
+  {
+    name: 'wrong-type marker thread alongside an otherwise valid match',
+    arrange: (f) => {
+      markerThread(f);
+      markerThread(f, { type: 10, archived: true });
+    },
+    outcome: 'conflict',
+    code: 'reconcile_unverifiable',
+    candidates: 2,
+  },
+  {
+    name: 'wrong-type bot thread without the reference is ignored',
+    arrange: (f) => {
+      markerThread(f, { type: 12, content: 'unrelated' });
     },
     outcome: 'absent',
     code: 'reconcile_absent',
