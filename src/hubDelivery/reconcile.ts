@@ -11,6 +11,7 @@ import type { ForumSnapshot, ThreadSnapshot } from './forumPort';
 import {
   countMarkerLines,
   failureOf,
+  isValidPost,
   linkedResult,
   mapReadFailure,
   outcome,
@@ -39,6 +40,8 @@ export async function runReconcile(
   if (!targetMatches(claim)) return report(outcome('terminal', 'target_mismatch', false));
   if (computeSnapshotSha256(claim.post) !== claim.snapshotSha256)
     return report(outcome('terminal', 'snapshot_mismatch', false));
+  if (!isValidPost(claim.post, claim.deliveryRef))
+    return report(outcome('terminal', 'content_invalid', false));
 
   let forum: ForumSnapshot;
   try {
