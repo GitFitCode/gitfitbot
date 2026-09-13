@@ -906,8 +906,9 @@ test('reconcile regression: a timestamp tie larger than one archived page is inc
 
 test('reconcile still proves absence when a boundary tie is re-covered by the next page', async () => {
   const h = harness();
-  h.forum.archivedPageSize = 2;
+  h.forum.archivedPageSize = 3;
   for (const archiveTimestamp of [
+    '2026-09-12T22:40:00.000Z',
     '2026-09-12T22:30:00.000Z',
     BOUNDARY_ARCHIVED_AT,
     BOUNDARY_ARCHIVED_AT,
@@ -920,6 +921,7 @@ test('reconcile still proves absence when a boundary tie is re-covered by the ne
     code: 'reconcile_absent',
     scan: { activeComplete: true, archivedComplete: true },
   });
+  assert.equal(h.forum.callsTo('listArchivedPage').length, 2, 'the tie split across two pages');
 });
 
 const reconcileConditions: {
