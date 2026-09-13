@@ -15,7 +15,7 @@
     "prepare": "husky",
     "start": "node -r newrelic ./dist/src/index.js",
     "test": "pnpm test:project-init && pnpm test:hub-delivery",
-    "test:hub-delivery": "node --test --require ts-node/register tests/hub-delivery.test.ts",
+    "test:hub-delivery": "node --test --require ts-node/register tests/hub-delivery.test.ts tests/hub-delivery-shutdown.test.ts",
     "test:project-init": "node --test --require ts-node/register tests/project-init.test.ts",
     "typecheck": "tsc --pretty --noEmit --incremental false"
   },
