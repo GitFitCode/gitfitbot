@@ -19,6 +19,11 @@ const BACKOFF_BASE_MS = 30_000;
 const BACKOFF_CAP_MS = 300_000;
 const LOG_PREFIX = '[HUB DELIVERY]';
 
+/** Longest a shutdown waits for an in-flight cycle. The cycle itself is never aborted. */
+export const PROJECT_DELIVERY_DRAIN_TIMEOUT_MS = 45_000;
+
+export type DrainResult = 'stopped' | 'timed_out';
+
 export type CycleResult =
   | { kind: 'busy' }
   | { kind: 'idle' }
@@ -65,6 +70,7 @@ export class ProjectDeliveryWorker {
   private consecutiveFailures = 0;
   private loop: Promise<void> | null = null;
   private controller: AbortController | null = null;
+  private stopping: Promise<DrainResult> | null = null;
 
   constructor(private readonly options: ProjectDeliveryWorkerOptions) {
     this.now = options.now ?? Date.now;
@@ -73,21 +79,40 @@ export class ProjectDeliveryWorker {
     this.log = options.log ?? ((line) => console.log(line));
   }
 
-  /** Starts the poll loop once; repeated calls are no-ops. */
+  /** Starts the poll loop once; repeated calls and calls after `stop` are no-ops. */
   start(): void {
-    if (this.loop) return;
+    if (this.loop || this.stopping) return;
     const controller = new AbortController();
     this.controller = controller;
     this.loop = this.run(controller.signal);
   }
 
-  /** Interrupts the idle sleep and resolves after the in-flight cycle (if any) finishes. */
-  async stop(): Promise<void> {
+  /**
+   * Interrupts the idle sleep (or a pending claim) and waits at most `timeoutMs` for the
+   * in-flight cycle. A cycle still running at the bound keeps its checkpoint fencing: whatever
+   * it may have created is left to the Hub's lease expiry and reconcile. Repeated calls share
+   * the first call's drain.
+   */
+  stop(timeoutMs = PROJECT_DELIVERY_DRAIN_TIMEOUT_MS): Promise<DrainResult> {
+    this.stopping ??= this.drain(timeoutMs);
+    return this.stopping;
+  }
+
+  private async drain(timeoutMs: number): Promise<DrainResult> {
     const loop = this.loop;
     this.controller?.abort();
     this.controller = null;
     this.loop = null;
-    await loop;
+    if (!loop) return 'stopped';
+    let timer: NodeJS.Timeout | undefined;
+    const timedOut = new Promise<DrainResult>((resolve) => {
+      timer = setTimeout(() => resolve('timed_out'), timeoutMs);
+    });
+    try {
+      return await Promise.race([loop.then((): DrainResult => 'stopped'), timedOut]);
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   /** One claim → operation → result cycle. Concurrent calls return `busy`. */

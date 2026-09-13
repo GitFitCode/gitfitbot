@@ -3,6 +3,8 @@ module.exports = {
     {
       name: 'gitfitbot',
       script: './dist/src/index.js',
+      // Must exceed the app's 50 s shutdown bound (45 s delivery drain + 5 s client destroy).
+      kill_timeout: 60000,
       // Start pm2 while the correct Node is active in your shell (nvm use 22).
       // Or force it: pm2 start ecosystem.config.js --interpreter $(which node)
       env: {
