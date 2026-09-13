@@ -77,7 +77,9 @@ async function verifyCreated(
     thread.type !== ChannelType.PublicThread ||
     thread.guildId !== GFC_GUILD_ID ||
     thread.parentId !== GFC_PROJECTS_FORUM_ID ||
-    thread.ownerId !== context.botUserId
+    thread.ownerId !== context.botUserId ||
+    // The snapshot hash binds the visible title too: a renamed thread is not the approved post.
+    thread.name !== claim.post.threadName
   )
     return lost;
 

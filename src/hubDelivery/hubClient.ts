@@ -155,6 +155,9 @@ export class HubClient {
         if (this.now() > deadline) break;
         await this.sleep(this.backoff(attempt - 1));
       }
+      // Checked again right before every send, so neither a long operation nor a backoff can
+      // carry a request past the grace window.
+      if (this.now() > deadline) break;
       const response = await this.send(this.deliveryPath(claim, 'result'), body);
       if (response.kind === 'network' || response.status >= 500) continue;
       if (response.status === 409) return { kind: 'lease_lost' };

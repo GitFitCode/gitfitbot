@@ -129,7 +129,8 @@ const rawThreadSchema = z.object({
   name: z.string(),
   thread_metadata: z.object({
     archived: z.boolean(),
-    locked: z.boolean(),
+    // Discord may omit `locked` (e.g. on unlocked threads); absent means not locked.
+    locked: z.boolean().optional(),
     archive_timestamp: z.string().optional(),
   }),
 });
@@ -160,7 +161,7 @@ function toThread(raw: z.infer<typeof rawThreadSchema>): ThreadSnapshot {
     ownerId: raw.owner_id,
     name: raw.name,
     archived: raw.thread_metadata.archived,
-    locked: raw.thread_metadata.locked,
+    locked: raw.thread_metadata.locked ?? false,
     archiveTimestamp: raw.thread_metadata.archive_timestamp ?? null,
   };
 }
