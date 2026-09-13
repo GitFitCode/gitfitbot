@@ -1,9 +1,10 @@
 /**
- * Reconcile never creates. It looks for bot-owned threads in the pinned forum, created
+ * Reconcile never creates. It looks for bot-owned public threads in the pinned forum, created
  * inside the Hub's create window, whose starter message carries exactly one
  * `Hub reference: <deliveryRef>` line.
  */
 
+import { ChannelType } from 'discord.js';
 import { GFC_GUILD_ID, GFC_PROJECTS_FORUM_ID } from '../utils/constants';
 import { computeSnapshotSha256, type ReconcileClaim } from './contract';
 import type { ForumSnapshot, ThreadSnapshot } from './forumPort';
@@ -80,7 +81,13 @@ export async function runReconcile(
     try {
       const starter = await context.forum.fetchStarterMessage(thread.id);
       const markers = countMarkerLines(starter.content, claim.deliveryRef);
-      if (starter.id === thread.id && starter.authorId === context.botUserId && markers === 1)
+      // A non-public thread type is inconsistent with a forum post: it can never count as a match.
+      if (
+        thread.type === ChannelType.PublicThread &&
+        starter.id === thread.id &&
+        starter.authorId === context.botUserId &&
+        markers === 1
+      )
         matches.push(thread);
       else if (starter.content.includes(claim.deliveryRef)) unverifiable.push(thread.id);
     } catch (error) {
@@ -118,15 +125,25 @@ export async function runReconcile(
 }
 
 /**
- * Pages public archived threads until `has_more` is false. Returns false (incomplete) on any
- * error, a missing `has_more`, a page that is not strictly older than the cursor and sorted
- * newest-first, an empty page that claims more, or the page cap.
+ * Pages public archived threads until `has_more` is false.
+ *
+ * `before` is an exclusive archive-timestamp cursor, and archive timestamps are not unique, so
+ * advancing to the oldest timestamp on a page could skip unseen threads archived in that same
+ * millisecond. Each cursor is therefore one millisecond past the page's oldest timestamp, and
+ * the boundary counts as covered only when the next page returns every boundary thread already
+ * seen and then either a strictly older thread or `has_more: false`.
+ *
+ * Returns false (incomplete) on any error, a missing `has_more`, a page that is not strictly
+ * older than the cursor and sorted newest-first, a page that does not re-return the previous
+ * boundary, a page that cannot advance past its boundary, an empty page that claims more, or
+ * the page cap.
  */
 async function scanArchived(
   context: OperationContext,
   consider: (thread: ThreadSnapshot) => void,
 ): Promise<boolean> {
   let before: string | null = null;
+  let boundary: { ms: number; threadIds: string[] } | null = null;
   for (let page = 0; page < MAX_ARCHIVED_PAGES; page += 1) {
     let result;
     try {
@@ -138,19 +155,29 @@ async function scanArchived(
 
     const cursorMs = before === null ? Number.POSITIVE_INFINITY : Date.parse(before);
     let previousMs = Number.POSITIVE_INFINITY;
-    let oldest: string | null = null;
     for (const thread of result.threads) {
       const archivedMs = thread.archiveTimestamp ? Date.parse(thread.archiveTimestamp) : Number.NaN;
       if (!Number.isFinite(archivedMs) || archivedMs >= cursorMs || archivedMs > previousMs)
         return false;
       previousMs = archivedMs;
-      oldest = thread.archiveTimestamp;
     }
+
+    const returnedIds = new Set(result.threads.map((thread) => thread.id));
+    if (boundary && !boundary.threadIds.every((id) => returnedIds.has(id))) return false;
 
     if (result.hasMore === undefined) return false;
     if (!result.hasMore) return true;
-    if (oldest === null) return false;
-    before = oldest;
+    if (result.threads.length === 0) return false;
+    // A page made only of threads tied at the previous boundary cannot advance without skipping.
+    if (boundary && previousMs >= boundary.ms) return false;
+    const oldestMs = previousMs;
+    boundary = {
+      ms: oldestMs,
+      threadIds: result.threads
+        .filter((thread) => Date.parse(thread.archiveTimestamp ?? '') === oldestMs)
+        .map((thread) => thread.id),
+    };
+    before = new Date(oldestMs + 1).toISOString();
   }
   return false;
 }
