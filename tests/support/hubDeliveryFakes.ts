@@ -92,6 +92,8 @@ export class FakeForumPort implements ForumPort {
   archivedPageSize = 2;
   omitHasMore = false;
   unsortedArchivedPages = false;
+  /** Simulates a server that truncates the `before` cursor to this precision (e.g. 1000 = seconds). */
+  archivedCursorPrecisionMs: number | null = null;
 
   constructor(private readonly options: { events?: string[]; now?: () => number } = {}) {}
 
@@ -174,10 +176,15 @@ export class FakeForumPort implements ForumPort {
     before: string | null,
   ): Promise<{ threads: ThreadSnapshot[]; hasMore: boolean | undefined }> {
     this.record('listArchivedPage', [forumId, before]);
+    const precision = this.archivedCursorPrecisionMs;
+    const cursor =
+      before === null || precision === null
+        ? before
+        : new Date(Math.floor(Date.parse(before) / precision) * precision).toISOString();
     const archived = [...this.threads.values()]
       .map(({ thread }) => thread)
       .filter((thread) => thread.archived && thread.parentId === forumId)
-      .filter((thread) => before === null || (thread.archiveTimestamp ?? '') < before)
+      .filter((thread) => cursor === null || (thread.archiveTimestamp ?? '') < cursor)
       .sort((a, b) => (b.archiveTimestamp ?? '').localeCompare(a.archiveTimestamp ?? ''));
     const page = archived.slice(0, this.archivedPageSize).map((thread) => ({ ...thread }));
     if (this.unsortedArchivedPages) page.reverse();
