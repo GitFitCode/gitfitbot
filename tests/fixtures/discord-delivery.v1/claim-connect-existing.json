@@ -1,0 +1,20 @@
+{
+  "contract": "gfc.discord-delivery.v1",
+  "deliveryId": "dlv_3f6c2a9e-8b1d-4c7a-9e2f-5a1b3c4d5e6f",
+  "deliveryRef": "gfcp-k3m7q2x5v4n6p2r7t3w5y6z2ab",
+  "attempt": 1,
+  "leaseToken": "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc",
+  "leaseExpiresAt": "2026-09-12T23:05:00.000Z",
+  "operation": "connect_existing",
+  "target": {
+    "guildId": "328054349420822530",
+    "forumId": "1032761290919260262"
+  },
+  "post": null,
+  "snapshotSha256": "5d0b716d9516cf4b02df4fc9052d58a5186afbca1720a0625d447132d02d5720",
+  "requestedThreadId": "1300000000000000000",
+  "owner": {
+    "discordUserId": "123456789012345678"
+  },
+  "createWindow": null
+}

@@ -1,0 +1,10 @@
+{
+  "contract": "gfc.discord-delivery.v1",
+  "attempt": 1,
+  "leaseToken": "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc",
+  "snapshotSha256": "f268de214e5195d977a4a203bf9c70c431e731d0346a6d995094ff87ab0013a9",
+  "outcome": "retryable",
+  "code": "discord_rate_limited",
+  "createAttempted": false,
+  "retryAfterMs": 1500
+}
