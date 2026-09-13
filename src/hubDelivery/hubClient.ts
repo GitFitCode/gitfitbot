@@ -159,7 +159,8 @@ export class HubClient {
       // carry a request past the grace window.
       if (this.now() > deadline) break;
       const response = await this.send(this.deliveryPath(claim, 'result'), body);
-      if (response.kind === 'network' || response.status >= 500) continue;
+      if (response.kind === 'network' || response.status === 429 || response.status >= 500)
+        continue;
       if (response.status === 409) return { kind: 'lease_lost' };
       if (response.status !== 200) return { kind: 'rejected', status: response.status };
       const parsed = parseBody(response.body, resultResponseSchema);

@@ -1007,7 +1007,15 @@ test('reconcile still proves absence when a boundary tie is re-covered by the ne
     '2026-09-12T22:10:00.000Z',
   ])
     h.forum.addThread({ archived: true, archiveTimestamp, ownerId: OTHER_USER_ID });
-  await deliver(h, reconcileClaim());
+  await deliver(
+    h,
+    reconcileClaim({
+      createWindow: {
+        start: '2026-09-12T22:00:00.000Z',
+        lastCreateStartedAt: '2026-09-12T22:51:00.000Z',
+      },
+    }),
+  );
   assertResult(h, {
     outcome: 'absent',
     code: 'reconcile_absent',
