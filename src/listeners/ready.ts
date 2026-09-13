@@ -4,6 +4,7 @@
 
 import { ActivityType, Client } from 'discord.js';
 import Commands from '../Commands';
+import { startProjectDeliveryWorker } from '../hubDelivery';
 import { AUTOBOT, CronJobs, GITFITBOT, loadPersistedModel } from '../utils';
 import { recoverStaleVoiceSessions, sweepOldAudioDirs } from '../utils/voiceLifecycle';
 
@@ -26,6 +27,10 @@ export default (client: Client): void => {
       const cronJobs = CronJobs.getInstance(client);
       cronJobs.startGFCSteeringReminderJob();
       cronJobs.startProjectPulseJob();
+
+      // Project Hub → gfc-projects delivery (#102). Outbound-only; stays off unless
+      // GFC_PROJECT_DELIVERY_ENABLED=true with a valid hub origin and service token.
+      startProjectDeliveryWorker(client);
     }
 
     // Set status (i.e. activity) of the "autobot" bot.

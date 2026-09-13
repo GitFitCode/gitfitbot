@@ -4,6 +4,7 @@
 
 import { Client, GatewayIntentBits } from 'discord.js';
 import 'dotenv/config';
+import { stopProjectDeliveryWorker } from './hubDelivery';
 import guildMemberAdd from './listeners/guildMemberAdd';
 import interactionCreate from './listeners/interactionCreate';
 import messageCreate from './listeners/messageCreate';
@@ -63,6 +64,9 @@ function stop(code: NodeJS.Signals) {
   // Stop the steering reminder.
   const cronJobs = CronJobs.getInstance(client);
   cronJobs.stopGFCSteeringReminderJob();
+
+  // Stop the Project Hub delivery worker (no-op when it never started).
+  void stopProjectDeliveryWorker();
 
   // Log out, terminate connection to Discord and destroy the client.
   client.destroy();
