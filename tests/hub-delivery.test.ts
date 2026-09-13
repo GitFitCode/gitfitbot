@@ -837,6 +837,36 @@ test('reconcile finds a marker thread on a later archived page', async () => {
   assert.equal(result.discord.locked, true);
 });
 
+test('reconcile regression: rechecks active threads after archived paging catches an unarchived marker', async () => {
+  class UnarchiveRaceForum extends FakeForumPort {
+    movingThreadId: string | null = null;
+    private moved = false;
+
+    override async listArchivedPage(forumId: string, before: string | null) {
+      if (!this.moved && this.movingThreadId) {
+        const stored = this.threads.get(this.movingThreadId);
+        assert.ok(stored);
+        stored.thread.archived = false;
+        this.moved = true;
+      }
+      return super.listArchivedPage(forumId, before);
+    }
+  }
+
+  const forum = new UnarchiveRaceForum();
+  const moving = forum.addThread({ archived: true, content: CONTENT });
+  forum.movingThreadId = moving.id;
+  const h = harness({ forum });
+
+  await deliver(h, reconcileClaim());
+
+  const result = assertResult(h, { outcome: 'linked', resolution: 'reconciled' });
+  assert.equal(result.discord.threadId, moving.id);
+  assert.equal(h.forum.callsTo('listActiveThreads').length, 2);
+  assert.equal(h.forum.callsTo('createThread').length, 0);
+  assert.equal(h.hub.requestsTo('checkpoint').length, 0);
+});
+
 // Archived pages at the production size, with ties on the page-boundary archive timestamp.
 const BOUNDARY_ARCHIVED_AT = new Date(NOW - 100_000).toISOString();
 
