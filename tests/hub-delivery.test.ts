@@ -29,6 +29,7 @@ import {
   failure,
   FakeForumPort,
   FakeHub,
+  LEASE_EXPIRES_AT,
   NOW,
   OTHER_USER_ID,
   OWNER_ID,
@@ -737,6 +738,16 @@ const createConditions: ConditionRow[] = [
     createAttempted: true,
     creates: 1,
   },
+  {
+    name: 'regression 2xx with a different thread name',
+    arrange: (f) => {
+      f.createMode = 'renamed_thread';
+    },
+    outcome: 'unknown',
+    code: 'discord_response_lost',
+    createAttempted: true,
+    creates: 1,
+  },
 ];
 
 for (const row of createConditions)
@@ -922,6 +933,27 @@ test('reconcile still proves absence when a boundary tie is re-covered by the ne
     scan: { activeComplete: true, archivedComplete: true },
   });
   assert.equal(h.forum.callsTo('listArchivedPage').length, 2, 'the tie split across two pages');
+});
+
+test('reconcile regression: an invalid claimed post is terminal content_invalid before any Discord call', async () => {
+  const posts: [string, Json][] = [
+    ['untrimmed name', { threadName: ' Synthetic Hub Project ', content: CONTENT }],
+    ['oversized name', { threadName: 'x'.repeat(101), content: CONTENT }],
+    ['control character in name', { threadName: 'line\nbreak', content: CONTENT }],
+    ['oversized content', { threadName: 'Long', content: `${'x'.repeat(1990)}\n${MARKER}` }],
+    ['no reference line', { threadName: 'No marker', content: 'no marker here' }],
+    ['two reference lines', { threadName: 'Twice', content: `${MARKER}\n${MARKER}` }],
+    ['reference not a whole line', { threadName: 'Inline', content: `See ${MARKER}` }],
+  ];
+  for (const [name, post] of posts) {
+    const h = harness();
+    // A bot-owned marker thread that would otherwise link, so a skipped check is observable.
+    markerThread(h.forum);
+    await deliver(h, withPost(reconcileClaim(), post));
+    assert.equal(h.forum.calls.length, 0, name);
+    assert.equal(h.hub.requestsTo('checkpoint').length, 0, name);
+    assertResult(h, { outcome: 'terminal', code: 'content_invalid', createAttempted: false });
+  }
 });
 
 const reconcileConditions: {
@@ -1277,6 +1309,65 @@ test('result delivery gives up after bounded attempts', async () => {
   assert.equal(h.hub.requestsTo('result').length, 6);
 });
 
+test('result delivery regression: the lease grace deadline is checked immediately before every send', async () => {
+  const deadline = Date.parse(LEASE_EXPIRES_AT) + 60_000;
+  const claim = claimSchema.parse(createClaim());
+  const result = {
+    outcome: 'unknown',
+    code: 'discord_response_lost',
+    createAttempted: true,
+  } as const;
+  const run = async (startAt: number, scripted: Json[], fetchMs = 0) => {
+    const hub = new FakeHub();
+    hub.results.push(...(scripted as never[]));
+    let clock = startAt;
+    const sleeps: number[] = [];
+    const client = new HubClient({
+      origin: 'https://hub.example.test',
+      token: TOKEN,
+      fetch: async (input, init) => {
+        clock += fetchMs;
+        return hub.fetch(input as string, init);
+      },
+      sleep: async (ms) => {
+        sleeps.push(ms);
+        clock += ms;
+      },
+      now: () => clock,
+      random: () => 0.5,
+    });
+    const response = await client.reportResult(claim, result, LEASE_EXPIRES_AT);
+    return { response, requests: hub.requestsTo('result').length, sleeps };
+  };
+
+  // Past the deadline before the first attempt: nothing is sent.
+  const late = await run(deadline + 1, []);
+  assert.equal(late.response.kind, 'failed');
+  assert.equal(late.requests, 0, 'no first attempt after the deadline');
+
+  // Exactly at the deadline the first attempt is still inside the grace window.
+  const edge = await run(deadline, []);
+  assert.equal(edge.response.kind, 'ok');
+  assert.equal(edge.requests, 1);
+
+  // A backoff that carries the clock past the deadline stops before the retry is sent.
+  const backoffCrosses = await run(deadline - 500, [{ status: 503 }, { status: 503 }]);
+  assert.deepEqual(backoffCrosses.sleeps, [1_000]);
+  assert.equal(backoffCrosses.requests, 1, 'no retry after the post-backoff deadline check');
+  assert.equal(backoffCrosses.response.kind, 'failed');
+
+  // Control: a slow send that finishes past the deadline is not retried either.
+  const slowSend = await run(deadline - 500, [{ status: 503 }], 1_000);
+  assert.equal(slowSend.requests, 1);
+  assert.equal(slowSend.response.kind, 'failed');
+
+  // Inside the window, retries stay bounded at six attempts.
+  const bounded = await run(NOW, Array(20).fill({ networkError: true }));
+  assert.equal(bounded.requests, 6);
+  assert.equal(bounded.sleeps.length, 5);
+  assert.equal(bounded.response.kind, 'failed');
+});
+
 // ---------------------------------------------------------------------------
 // discord.js-backed ForumPort (real @discordjs/rest with a stubbed transport)
 // ---------------------------------------------------------------------------
@@ -1473,4 +1564,63 @@ test('discord.js reads use pinned routes, fetch the starter by thread ID, and ne
     (error: unknown) =>
       error instanceof ForumPortError && error.failure.kind === 'malformed_response',
   );
+});
+
+test('discord.js thread parsing regression: an omitted optional locked flag normalizes to false', async () => {
+  const threadId = '1300000000000000004';
+  const rawThread = (metadata: Json) => ({
+    id: threadId,
+    type: 11,
+    guild_id: GFC_GUILD_ID,
+    parent_id: GFC_PROJECTS_FORUM_ID,
+    owner_id: BOT_USER_ID,
+    name: 'Synthetic Hub Project',
+    thread_metadata: metadata,
+  });
+  const unlocked = { archived: false, archive_timestamp: '2026-09-12T22:00:00.000Z' };
+
+  const reads = new DiscordForumPort(
+    fakeClient({
+      get: async (route: string) =>
+        route === `/channels/${threadId}`
+          ? rawThread(unlocked)
+          : { threads: [rawThread({ ...unlocked, archived: true })], has_more: false },
+    }),
+  );
+  const fetched = await reads.fetchThread(threadId);
+  assert.equal(fetched.locked, false);
+  assert.equal(fetched.archived, false);
+  assert.equal((await reads.listActiveThreads(GFC_GUILD_ID))[0].locked, false);
+  const page = await reads.listArchivedPage(GFC_PROJECTS_FORUM_ID, null);
+  assert.equal(page.threads[0].locked, false);
+  assert.equal(page.threads[0].archived, true);
+
+  const body = buildCreateThreadBody(createClaim().post as never, []);
+  const creates = new DiscordForumPort(fakeClient(), {
+    createRest: (tracker) =>
+      createSingleShotRest(
+        tracker,
+        async () =>
+          new Response(
+            JSON.stringify({
+              ...rawThread(unlocked),
+              message: { id: threadId, content: CONTENT, author: { id: BOT_USER_ID } },
+            }),
+            { status: 201, headers: { 'content-type': 'application/json' } },
+          ),
+      ),
+  });
+  assert.equal((await creates.createThread(GFC_PROJECTS_FORUM_ID, body)).thread.locked, false);
+
+  for (const locked of ['false', null, 0, 1]) {
+    const port = new DiscordForumPort(
+      fakeClient({ get: async () => rawThread({ ...unlocked, locked }) }),
+    );
+    await assert.rejects(
+      port.fetchThread(threadId),
+      (error: unknown) =>
+        error instanceof ForumPortError && error.failure.kind === 'malformed_response',
+      String(locked),
+    );
+  }
 });

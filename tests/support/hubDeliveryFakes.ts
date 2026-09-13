@@ -51,6 +51,7 @@ export type CreateMode =
   | 'malformed'
   | 'wrong_parent'
   | 'altered_content'
+  | 'renamed_thread'
   | 'no_starter_in_response';
 
 interface StoredThread {
@@ -215,6 +216,8 @@ export class FakeForumPort implements ForumPort {
           thread,
           starterMessage: starter && { ...starter, content: `${starter.content} (edited)` },
         };
+      case 'renamed_thread':
+        return { thread: { ...thread, name: `${thread.name} (renamed)` }, starterMessage: starter };
       case 'no_starter_in_response':
         return { thread, starterMessage: null };
       default:
