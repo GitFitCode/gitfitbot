@@ -155,6 +155,13 @@ Call `project_init` with `{}` to get the same URL as Discord and the `requires_b
 
 GitFitBot can pull owner-approved Project Hub deliveries and create, reconcile, or connect exactly one post in the gfc-projects forum. The worker is outbound-only and **off by default**; it starts only when `GFC_PROJECT_DELIVERY_ENABLED=true`, `GFC_PROJECT_HUB_ORIGIN` passes the same origin rules as `/project init`, and `GFC_HUB_DELIVERY_TOKEN` holds the Hub-issued service token. Optional `GFC_PROJECTS_TAG_IDS` lists up to five forum tag IDs. The guild and forum are pinned in code, created posts never ping anyone or show embeds, and the bot keeps no delivery state of its own — the Hub owns it. Enabling the worker, issuing a token, and the first live post are separate human-approved steps.
 
+**Shutdown and restarts.** On SIGINT or SIGTERM the bot stops its cron job, then waits up to **45 s** for an in-flight delivery cycle (claim → checkpoint → create/reconcile/connect → result, including result retries) before destroying the Discord client (bounded to **5 s**) and exiting. Repeated signals share the same shutdown. The in-flight cycle is never aborted: a checkpointed create either reports its result or, if the 45 s bound expires first, is left to the Hub's lease expiry and a later reconcile, which never creates a second post. The application bound is therefore **50 s**, and PM2 must allow more: `ecosystem.config.js` sets `kill_timeout: 60000`. A PM2 process started without the ecosystem file keeps its own budget (PM2's default is 1.6 s), so a deployment must set `--kill-timeout 60000` or restart from the ecosystem file.
+
+- **Rollout:** deploy with delivery still disabled, confirm the process's PM2 `kill_timeout` is at least 60000, and only then enable the worker in a separate approved step.
+- **Idle-restart prerequisite:** while delivery is enabled, restart only when the Hub shows no leased delivery for this bot and the last `[HUB DELIVERY]` log line is not an unfinished cycle.
+- **Verify:** each stop logs `[SHUTDOWN] Project Hub delivery drain=idle|stopped` before `Exiting with code …`, PM2 records a clean exit (no SIGKILL), and the Hub shows the cycle's result.
+- **Rollback / stop conditions:** `drain=timed_out`, `drain=failed`, or a PM2 SIGKILL means the delivery outcome is unknown — set `GFC_PROJECT_DELIVERY_ENABLED` back to off, let the Hub reconcile the delivery, and never delete or re-create a possibly accepted forum post by hand.
+
 ### `/voice` - Otter.ai style: join voice channel for transcription & recording (ingests to Conduit)
 
 **Actions** (required):

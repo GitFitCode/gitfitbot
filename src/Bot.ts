@@ -10,6 +10,7 @@ import interactionCreate from './listeners/interactionCreate';
 import messageCreate from './listeners/messageCreate';
 import ready from './listeners/ready';
 import voiceStateUpdate from './listeners/voiceStateUpdate';
+import { createShutdown } from './shutdown';
 import { CronJobs } from './utils';
 
 /**
@@ -56,22 +57,18 @@ function start() {
 }
 
 /**
- * Stops the bot by destroying the client and logging the exit code.
+ * Stops the bot: stops the steering reminder, waits (bounded) for the Project Hub delivery
+ * worker to drain, then destroys the client and logs the exit code. Repeated calls share one
+ * shutdown, so a second signal cannot destroy the client under an in-flight delivery.
  *
  * @param code - The signal code that triggered the stop.
  */
-function stop(code: NodeJS.Signals) {
-  // Stop the steering reminder.
-  const cronJobs = CronJobs.getInstance(client);
-  cronJobs.stopGFCSteeringReminderJob();
-
-  // Stop the Project Hub delivery worker (no-op when it never started).
-  void stopProjectDeliveryWorker();
-
-  // Log out, terminate connection to Discord and destroy the client.
-  client.destroy();
-
-  console.log(`\nExiting with code ${code}`);
-}
+const stop = createShutdown({
+  stopJobs: () => CronJobs.getInstance(client).stopGFCSteeringReminderJob(),
+  // Resolves `idle` when the worker never started.
+  drainDelivery: () => stopProjectDeliveryWorker(),
+  destroyClient: () => client.destroy(),
+  log: (line) => console.log(line),
+});
 
 export { start, stop };

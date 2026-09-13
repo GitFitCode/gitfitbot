@@ -8,22 +8,31 @@
 
 import type { Client } from 'discord.js';
 import { readDeliveryConfig } from './config';
-import { DiscordForumPort } from './forumPort';
+import { DiscordForumPort, type ForumPort } from './forumPort';
 import { HubClient } from './hubClient';
-import { ProjectDeliveryWorker } from './worker';
+import {
+  PROJECT_DELIVERY_DRAIN_TIMEOUT_MS,
+  ProjectDeliveryWorker,
+  type DrainResult,
+} from './worker';
 
 export interface StartDeliveryOptions {
   env?: Record<string, string | undefined>;
   fetch?: typeof fetch;
   log?: (line: string) => void;
+  /** Replaces the discord.js-backed port; used by the process-level shutdown tests. */
+  forum?: ForumPort;
 }
 
 let activeWorker: ProjectDeliveryWorker | null = null;
+let stopping: Promise<DrainResult | 'idle'> | null = null;
 
 export function startProjectDeliveryWorker(
   client: Client,
   options: StartDeliveryOptions = {},
 ): ProjectDeliveryWorker | null {
+  // Never start (or restart) while a shutdown is draining.
+  if (stopping) return null;
   if (activeWorker) return activeWorker;
   const log = options.log ?? ((line: string) => console.log(line));
 
@@ -40,7 +49,7 @@ export function startProjectDeliveryWorker(
 
   activeWorker = new ProjectDeliveryWorker({
     hub: new HubClient({ origin: config.origin, token: config.token, fetch: options.fetch }),
-    forum: new DiscordForumPort(client),
+    forum: options.forum ?? new DiscordForumPort(client),
     botUserId,
     tags: config.tags,
     log,
@@ -50,8 +59,22 @@ export function startProjectDeliveryWorker(
   return activeWorker;
 }
 
-export async function stopProjectDeliveryWorker(): Promise<void> {
-  const worker = activeWorker;
-  activeWorker = null;
-  await worker?.stop();
+/**
+ * Stops the worker, waiting at most `timeoutMs` for an in-flight cycle. Concurrent calls share
+ * one drain; `idle` means no worker was running.
+ */
+export function stopProjectDeliveryWorker(
+  timeoutMs = PROJECT_DELIVERY_DRAIN_TIMEOUT_MS,
+): Promise<DrainResult | 'idle'> {
+  if (!stopping) {
+    const worker = activeWorker;
+    const drain: Promise<DrainResult | 'idle'> = worker
+      ? worker.stop(timeoutMs)
+      : Promise.resolve('idle');
+    stopping = drain.finally(() => {
+      activeWorker = null;
+      stopping = null;
+    });
+  }
+  return stopping;
 }
