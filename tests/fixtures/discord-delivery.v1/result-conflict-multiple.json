@@ -1,0 +1,14 @@
+{
+  "contract": "gfc.discord-delivery.v1",
+  "attempt": 2,
+  "leaseToken": "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc",
+  "snapshotSha256": "f268de214e5195d977a4a203bf9c70c431e731d0346a6d995094ff87ab0013a9",
+  "outcome": "conflict",
+  "code": "reconcile_multiple_matches",
+  "createAttempted": false,
+  "candidateThreadIds": ["1300000000000000001", "1300000000000000002"],
+  "scan": {
+    "activeComplete": true,
+    "archivedComplete": true
+  }
+}

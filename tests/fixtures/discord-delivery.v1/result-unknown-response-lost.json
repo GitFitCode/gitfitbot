@@ -1,0 +1,9 @@
+{
+  "contract": "gfc.discord-delivery.v1",
+  "attempt": 1,
+  "leaseToken": "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc",
+  "snapshotSha256": "f268de214e5195d977a4a203bf9c70c431e731d0346a6d995094ff87ab0013a9",
+  "outcome": "unknown",
+  "code": "discord_response_lost",
+  "createAttempted": true
+}

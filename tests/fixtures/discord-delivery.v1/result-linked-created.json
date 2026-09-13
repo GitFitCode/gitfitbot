@@ -1,0 +1,20 @@
+{
+  "contract": "gfc.discord-delivery.v1",
+  "attempt": 1,
+  "leaseToken": "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc",
+  "snapshotSha256": "f268de214e5195d977a4a203bf9c70c431e731d0346a6d995094ff87ab0013a9",
+  "outcome": "linked",
+  "code": "created",
+  "createAttempted": true,
+  "discord": {
+    "guildId": "328054349420822530",
+    "forumId": "1032761290919260262",
+    "threadId": "1300000000000000001",
+    "starterMessageId": "1300000000000000001",
+    "threadOwnerId": "987654321098765432",
+    "archived": false,
+    "locked": false,
+    "name": "Synthetic Hub Project"
+  },
+  "resolution": "created"
+}

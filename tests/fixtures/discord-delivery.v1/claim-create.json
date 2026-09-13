@@ -1,0 +1,21 @@
+{
+  "contract": "gfc.discord-delivery.v1",
+  "deliveryId": "dlv_3f6c2a9e-8b1d-4c7a-9e2f-5a1b3c4d5e6f",
+  "deliveryRef": "gfcp-k3m7q2x5v4n6p2r7t3w5y6z2ab",
+  "attempt": 1,
+  "leaseToken": "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc",
+  "leaseExpiresAt": "2026-09-12T23:05:00.000Z",
+  "operation": "create",
+  "target": {
+    "guildId": "328054349420822530",
+    "forumId": "1032761290919260262"
+  },
+  "post": {
+    "threadName": "Synthetic Hub Project",
+    "content": "A synthetic project introduction used only in tests.\n\nLooking for: reviewers\n\nHub reference: gfcp-k3m7q2x5v4n6p2r7t3w5y6z2ab"
+  },
+  "snapshotSha256": "f268de214e5195d977a4a203bf9c70c431e731d0346a6d995094ff87ab0013a9",
+  "requestedThreadId": null,
+  "owner": null,
+  "createWindow": null
+}
