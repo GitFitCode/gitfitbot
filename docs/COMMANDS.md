@@ -151,6 +151,10 @@ Use a protocol-clean launch command: ordinary `pnpm mcp:project-init` writes pnp
 
 Call `project_init` with `{}` to get the same URL as Discord and the `requires_browser_sign_in` state. The returned URL starts browser onboarding only; sign in, review, and save there to complete it. Later work may add reviewed direct MCP identity delegation and owner-reviewed voice drafts; neither is part of this handoff. If a future owner-approved publish step is added, it must create or link one post in the [gfc-projects forum](https://discord.com/channels/328054349420822530/1032761290919260262) and send updates to that post's thread, rather than treating a separate text channel or website-only record as the project destination.
 
+#### Project Hub forum delivery worker (not a command)
+
+GitFitBot can pull owner-approved Project Hub deliveries and create, reconcile, or connect exactly one post in the gfc-projects forum. The worker is outbound-only and **off by default**; it starts only when `GFC_PROJECT_DELIVERY_ENABLED=true`, `GFC_PROJECT_HUB_ORIGIN` passes the same origin rules as `/project init`, and `GFC_HUB_DELIVERY_TOKEN` holds the Hub-issued service token. Optional `GFC_PROJECTS_TAG_IDS` lists up to five forum tag IDs. The guild and forum are pinned in code, created posts never ping anyone or show embeds, and the bot keeps no delivery state of its own — the Hub owns it. Enabling the worker, issuing a token, and the first live post are separate human-approved steps.
+
 ### `/voice` - Otter.ai style: join voice channel for transcription & recording (ingests to Conduit)
 
 **Actions** (required):

@@ -312,6 +312,10 @@ test('worker runs are single-flight and back off on Hub auth/unavailable respons
   const loop = harness();
   loop.hub.claims.push({ status: 401 }, { status: 401 }, { status: 401 }, { status: 204 });
   const delays: number[] = [];
+  let reachedFourthSleep: () => void = () => undefined;
+  const fourthSleep = new Promise<void>((resolve) => {
+    reachedFourthSleep = resolve;
+  });
   const looping = new ProjectDeliveryWorker({
     hub: loop.hubClient,
     forum: loop.forum,
@@ -322,12 +326,13 @@ test('worker runs are single-flight and back off on Hub auth/unavailable respons
     log: () => undefined,
     sleep: async (ms) => {
       delays.push(ms);
-      if (delays.length === 4) void looping.stop();
+      if (delays.length === 4) reachedFourthSleep();
     },
   });
   looping.start();
+  await fourthSleep;
   await looping.stop();
-  assert.deepEqual(delays, [30_000, 60_000, 120_000, 15_000]);
+  assert.deepEqual(delays.slice(0, 4), [30_000, 60_000, 120_000, 15_000]);
   assert.equal(loop.forum.calls.length, 0);
 });
 
@@ -770,7 +775,7 @@ test('accepted-but-lost create reconciles to exactly one thread and never re-cre
     createAttempted: false,
     scan: { activeComplete: true, archivedComplete: true },
   });
-  assert.equal(h.hub.lastResult().discord.threadId, threadId);
+  assert.equal((h.hub.lastResult() as Json).discord.threadId, threadId);
   assert.equal(h.forum.callsTo('createThread').length, 1);
   assert.equal(h.forum.threadCount, 1);
 });

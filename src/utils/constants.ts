@@ -96,6 +96,9 @@ export const COMMAND_VOICE = {
     'Voice channel to join (optional, defaults to CHECKINS or VIRTUAL_OFFICE)',
 };
 
+// The GitFitCode Discord server. Project Hub delivery may only target this guild;
+// Hub claim data can assert the target but never change it.
+export const GFC_GUILD_ID = '328054349420822530';
 // The gfc-projects forum channel in the GitFitCode server; each post/thread is a
 // community project. Used by the weekly Project Pulse cron job.
 export const GFC_PROJECTS_FORUM_ID = '1032761290919260262';
