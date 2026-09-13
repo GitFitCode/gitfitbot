@@ -68,14 +68,21 @@ export async function runReconcile(
       candidates.set(thread.id, thread);
   };
 
-  let activeComplete = true;
-  try {
-    (await context.forum.listActiveThreads(GFC_GUILD_ID)).forEach(consider);
-  } catch {
-    activeComplete = false;
-  }
+  const scanActive = async (): Promise<boolean> => {
+    try {
+      (await context.forum.listActiveThreads(GFC_GUILD_ID)).forEach(consider);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const activeCompleteBefore = await scanActive();
   const archivedComplete = await scanArchived(context, consider);
-  const scan = { activeComplete, archivedComplete };
+  // Active and archived listings are not one snapshot. Re-scan active threads so a thread
+  // unarchived while the archived pages were read cannot disappear between the two sets.
+  const activeCompleteAfter = await scanActive();
+  const scan = { activeComplete: activeCompleteBefore && activeCompleteAfter, archivedComplete };
 
   const matches: ThreadSnapshot[] = [];
   const unverifiable: string[] = [];
@@ -115,7 +122,7 @@ export async function runReconcile(
       outcome('conflict', 'reconcile_unverifiable', false, { candidateThreadIds, scan }),
     );
 
-  const complete = activeComplete && archivedComplete && startersComplete;
+  const complete = scan.activeComplete && archivedComplete && startersComplete;
   if (matches.length === 1 && complete)
     return report(linkedResult(matches[0], 'reconciled', false, { scan }));
   if (
