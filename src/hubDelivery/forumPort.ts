@@ -23,10 +23,6 @@ import {
 } from 'discord.js';
 import { z } from 'zod';
 import { snowflakeSchema, type DeliveryPost } from './contract';
-
-export const DISCORD_CREATE_TIMEOUT_MS = 15_000;
-
-export * from './forumTypes';
 import {
   ForumPortError,
   type ArchivedThreadPage,
@@ -37,6 +33,10 @@ import {
   type StarterMessage,
   type ThreadSnapshot,
 } from './forumTypes';
+
+export const DISCORD_CREATE_TIMEOUT_MS = 15_000;
+
+export * from './forumTypes';
 
 /** Exact Hub-rendered content, no mentions, no embeds, bot-configured tags only. */
 export function buildCreateThreadBody(
@@ -256,7 +256,10 @@ export class DiscordForumPort implements ForumPort {
 
   private async read(route: `/${string}`, query?: URLSearchParams): Promise<unknown> {
     try {
-      return await (this.options.readRest ?? this.client.rest).get(route, query ? { query } : undefined);
+      return await (this.options.readRest ?? this.client.rest).get(
+        route,
+        query ? { query } : undefined,
+      );
     } catch (error) {
       throw toForumPortError(error, true);
     }

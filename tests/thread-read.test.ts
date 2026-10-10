@@ -1,9 +1,14 @@
-import { ReadFailure } from '../src/threadRead/service';
-import { DiscordReadAdapter } from '../src/threadRead/discordAdapter';
-import { hasHistoryPermissions } from '../src/threadRead/permissions';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { ThreadReadService, type ReadPort, type Grant, type MessageEvidence } from '../src/threadRead/service';
+import { DiscordReadAdapter } from '../src/threadRead/discordAdapter';
+import { hasHistoryPermissions } from '../src/threadRead/permissions';
+import {
+  ReadFailure,
+  ThreadReadService,
+  type Grant,
+  type MessageEvidence,
+  type ReadPort,
+} from '../src/threadRead/service';
 const guildId = '328054349420822530';
 const forumId = '1032761290919260262';
 const threadId = '1400000000000000000';
@@ -19,7 +24,7 @@ const thread = (id = threadId, archived = false) => ({
   name: 'Build log',
   archived,
   locked: false,
-  archiveTimestamp: '2026-10-08T10:00:00.000Z'
+  archiveTimestamp: '2026-10-08T10:00:00.000Z',
 });
 const message = (id: string, createdAt = '2026-10-08T10:00:00.123456Z'): MessageEvidence => ({
   id,
@@ -36,9 +41,9 @@ const message = (id: string, createdAt = '2026-10-08T10:00:00.123456Z'): Message
       name: 'notes.txt',
       url: 'https://cdn.discordapp.com/notes.txt',
       size: 12,
-      contentType: 'text/plain'
-    }
-  ]
+      contentType: 'text/plain',
+    },
+  ],
 });
 const history = {
   kind: 'history',
@@ -47,20 +52,43 @@ const history = {
   since: '2026-10-08T00:00:00.000Z',
   until: now,
   maxPages: 2,
-  maxMessages: 100
+  maxMessages: 100,
 };
 function fixture() {
   const calls: string[] = [];
   let grants: readonly Grant[] = [grant];
   const port: ReadPort = {
     fetchForum: async () => ({ id: forumId, guildId, type: 15, flags: 0, availableTags: [] }),
-    fetchThread: async (id) => { calls.push(`thread:${id}`); return thread(id); },
-    listActiveThreads: async () => { calls.push('active'); return [thread()]; },
-    listArchivedPage: async () => { calls.push('archived'); return { threads: [], hasMore: false }; },
-    fetchMessages: async (_id, before, limit) => { calls.push(`messages:${before}:${limit}`); return []; },
+    fetchThread: async (id) => {
+      calls.push(`thread:${id}`);
+      return thread(id);
+    },
+    listActiveThreads: async () => {
+      calls.push('active');
+      return [thread()];
+    },
+    listArchivedPage: async () => {
+      calls.push('archived');
+      return { threads: [], hasMore: false };
+    },
+    fetchMessages: async (_id, before, limit) => {
+      calls.push(`messages:${before}:${limit}`);
+      return [];
+    },
   };
-  const service = new ThreadReadService(port, () => grants, () => Date.parse(now));
-  return { service, port, calls, revoke: () => { grants = []; } };
+  const service = new ThreadReadService(
+    port,
+    () => grants,
+    () => Date.parse(now),
+  );
+  return {
+    service,
+    port,
+    calls,
+    revoke: () => {
+      grants = [];
+    },
+  };
 }
 const lookup = { kind: 'lookup', scope, query: { kind: 'name', text: 'build' }, maxPages: 5 };
 test('exact ID validates configured scope and observed parent before returning a thread', async () => {
@@ -69,13 +97,19 @@ test('exact ID validates configured scope and observed parent before returning a
   assert.equal((await f.service.read('alice', exact)).status, 'complete');
   f.port.fetchThread = async () => ({ ...thread(), parentId: '1400000000000000001' });
   assert.equal((await f.service.read('alice', exact)).status, 'denied');
-  const denied = await f.service.read('alice', { ...exact, scope: { ...scope, guildId: '1400000000000000002' } });
+  const denied = await f.service.read('alice', {
+    ...exact,
+    scope: { ...scope, guildId: '1400000000000000002' },
+  });
   assert.equal(denied.status, 'denied');
   assert.deepEqual(denied.threads, []);
 });
 test('name lookup returns active and archived ambiguous matches without selecting one', async () => {
   const f = fixture();
-  f.port.listArchivedPage = async () => ({ threads: [thread('1400000000000000001', true)], hasMore: false });
+  f.port.listArchivedPage = async () => ({
+    threads: [thread('1400000000000000001', true)],
+    hasMore: false,
+  });
   const result = await f.service.read('alice', lookup);
   assert.equal(result.status, 'complete');
   assert.equal(result.resolution, 'ambiguous');
@@ -89,14 +123,14 @@ test('history retains exact provenance through JSON and two assistant clients', 
   f.port.fetchMessages = async () => [evidence];
   // A tool-calling chat client preserves the whole JSON tool result.
   const chatClient = async (toolArguments: string) => ({
-    toolResult: JSON.stringify(await f.service.read('alice', JSON.parse(toolArguments)))
+    toolResult: JSON.stringify(await f.service.read('alice', JSON.parse(toolArguments))),
   });
   // A source-reconciliation client consumes the same response as typed evidence rows.
   const reconciliationClient = async () => {
     const response = await f.service.read('alice', history);
     return {
       response,
-      references: response.messages.map((m) => ({ id: m.id, author: m.authorId, source: m.url }))
+      references: response.messages.map((m) => ({ id: m.id, author: m.authorId, source: m.url })),
     };
   };
   const chat = await chatClient(JSON.stringify(history));
@@ -104,7 +138,9 @@ test('history retains exact provenance through JSON and two assistant clients', 
   const a = JSON.parse(chat.toolResult);
   assert.deepEqual(a.messages, [evidence]);
   assert.deepEqual(reconciliation.response, a);
-  assert.deepEqual(reconciliation.references, [{ id: evidence.id, author: evidence.authorId, source: evidence.url }]);
+  assert.deepEqual(reconciliation.references, [
+    { id: evidence.id, author: evidence.authorId, source: evidence.url },
+  ]);
   assert.equal(a.coverage.intervalExhausted, true);
 });
 test('history deduplicates and sorts chronologically across bounded pages', async () => {
@@ -113,10 +149,12 @@ test('history deduplicates and sorts chronologically across bounded pages', asyn
   f.port.fetchMessages = async (_id, _before, limit) => {
     n++;
     if (n === 1)
-      return Array.from({ length: limit }, (_, i) => message(String(1400000000000000200n - BigInt(i))));
+      return Array.from({ length: limit }, (_, i) =>
+        message(String(1400000000000000200n - BigInt(i))),
+      );
     return [
       message('1400000000000000101'),
-      message('1400000000000000001', '2026-10-08T09:00:00.000Z')
+      message('1400000000000000001', '2026-10-08T09:00:00.000Z'),
     ];
   };
   const result = await f.service.read('alice', { ...history, maxMessages: 200 });
@@ -127,7 +165,10 @@ test('history deduplicates and sorts chronologically across bounded pages', asyn
 });
 test('continuation is stable, bound to caller and bounds, and rechecks revoked grants', async () => {
   const f = fixture();
-  f.port.fetchMessages = async (_id, before, limit) => before === '1400000000000000101' ? [] : Array.from({ length: limit }, (_, i) => message(String(1400000000000000200n - BigInt(i))));
+  f.port.fetchMessages = async (_id, before, limit) =>
+    before === '1400000000000000101'
+      ? []
+      : Array.from({ length: limit }, (_, i) => message(String(1400000000000000200n - BigInt(i))));
   const first = await f.service.read('alice', history);
   assert.equal(first.status, 'partial');
   assert.equal(first.coverage.reason, 'message_limit');
@@ -136,8 +177,14 @@ test('continuation is stable, bound to caller and bounds, and rechecks revoked g
   assert.equal((await f.service.read('alice', next)).status, 'complete');
   assert.deepEqual(await f.service.read('alice', next), await f.service.read('alice', next));
   assert.equal((await f.service.read('bob', next)).status, 'denied');
-  assert.equal((await f.service.read('alice', { ...next, since: '2026-10-07T00:00:00.000Z' })).status, 'denied');
-  assert.equal((await f.service.read('alice', { ...next, cursor: `${first.coverage.nextCursor}x` })).status, 'denied');
+  assert.equal(
+    (await f.service.read('alice', { ...next, since: '2026-10-07T00:00:00.000Z' })).status,
+    'denied',
+  );
+  assert.equal(
+    (await f.service.read('alice', { ...next, cursor: `${first.coverage.nextCursor}x` })).status,
+    'denied',
+  );
   f.revoke();
   assert.equal((await f.service.read('alice', next)).status, 'denied');
 });
@@ -145,7 +192,9 @@ test('complete empty, unavailable, denied, rate limited, failed and partial are 
   const f = fixture();
   assert.equal((await f.service.read('alice', history)).status, 'complete');
   for (const status of ['unavailable', 'denied', 'rate_limited', 'failed'] as const) {
-    f.port.fetchMessages = async () => { throw new ReadFailure(status, 1000); };
+    f.port.fetchMessages = async () => {
+      throw new ReadFailure(status, 1000);
+    };
     const result = await f.service.read('alice', history);
     assert.equal(result.status, status);
     assert.equal(result.coverage.intervalExhausted, false);
@@ -153,9 +202,10 @@ test('complete empty, unavailable, denied, rate limited, failed and partial are 
   }
   let n = 0;
   f.port.fetchMessages = async (_id, _before, limit) => {
-    if (n++)
-      throw new ReadFailure('rate_limited', 1000);
-    return Array.from({ length: limit }, (_, i) => message(String(1400000000000000200n - BigInt(i))));
+    if (n++) throw new ReadFailure('rate_limited', 1000);
+    return Array.from({ length: limit }, (_, i) =>
+      message(String(1400000000000000200n - BigInt(i))),
+    );
   };
   const partial = await f.service.read('alice', { ...history, maxMessages: 200 });
   assert.equal(partial.status, 'partial');
@@ -166,7 +216,10 @@ test('archive page cap continues with boundary overlap and never treats a failed
   const f = fixture();
   f.port.listActiveThreads = async () => [];
   const archived = thread(threadId, true);
-  f.port.listArchivedPage = async (_id, before) => ({ threads: [archived], hasMore: before === null });
+  f.port.listArchivedPage = async (_id, before) => ({
+    threads: [archived],
+    hasMore: before === null,
+  });
   const request = { ...lookup, maxPages: 2 };
   const first = await f.service.read('alice', request);
   assert.equal(first.status, 'partial');
@@ -174,17 +227,27 @@ test('archive page cap continues with boundary overlap and never treats a failed
   const last = await f.service.read('alice', { ...request, cursor: first.coverage.nextCursor });
   assert.equal(last.status, 'complete');
   assert.equal(last.threads.length, 1);
-  f.port.listArchivedPage = async () => { throw new ReadFailure('failed'); };
+  f.port.listArchivedPage = async () => {
+    throw new ReadFailure('failed');
+  };
   const failed = await f.service.read('alice', lookup);
   assert.equal(failed.status, 'partial');
   assert.equal(failed.resolution, 'incomplete');
 });
 test('invalid requests and excessive limits do no collection; thread allowlist fails closed', async () => {
   const f = fixture();
-  assert.equal((await f.service.read('alice', { ...history, maxPages: 10000 })).status, 'invalid_request');
-  assert.equal((await f.service.read('alice', { ...history, token: 'secret' })).status, 'invalid_request');
+  assert.equal(
+    (await f.service.read('alice', { ...history, maxPages: 10000 })).status,
+    'invalid_request',
+  );
+  assert.equal(
+    (await f.service.read('alice', { ...history, token: 'secret' })).status,
+    'invalid_request',
+  );
   assert.deepEqual(f.calls, []);
-  const restricted = new ThreadReadService(f.port, () => [{ ...grant, threads: { kind: 'ids', ids: ['1400000000000000009'] } }]);
+  const restricted = new ThreadReadService(f.port, () => [
+    { ...grant, threads: { kind: 'ids', ids: ['1400000000000000009'] } },
+  ]);
   assert.equal((await restricted.read('alice', history)).status, 'denied');
   assert.equal((await restricted.read('alice', lookup)).threads.length, 0);
 });
@@ -204,16 +267,26 @@ test('raw Discord adapter preserves microsecond timestamps, nicknames and attach
         filename: 'notes.txt',
         url: 'https://cdn.discordapp.com/notes.txt',
         size: 12,
-        content_type: 'text/plain'
-      }
-    ]
+        content_type: 'text/plain',
+      },
+    ],
   };
   const calls: string[] = [];
   const adapter = new DiscordReadAdapter(f.port, {
-    assertReadable: async () => { calls.push('permission'); },
-    getMessages: async (_id, before, limit) => { assert.ok(before); assert.equal(limit, 100); return [raw]; }
+    assertReadable: async () => {
+      calls.push('permission');
+    },
+    getMessages: async (_id, before, limit) => {
+      assert.ok(before);
+      assert.equal(limit, 100);
+      return [raw];
+    },
   });
-  const service = new ThreadReadService(adapter, () => [grant], () => Date.parse(now));
+  const service = new ThreadReadService(
+    adapter,
+    () => [grant],
+    () => Date.parse(now),
+  );
   const response = JSON.parse(JSON.stringify(await service.read('alice', history)));
   assert.equal(response.status, 'complete');
   assert.deepEqual(response.messages[0], {
@@ -221,7 +294,7 @@ test('raw Discord adapter preserves microsecond timestamps, nicknames and attach
     authorDisplayName: 'Ada Lovelace',
     createdAt: raw.timestamp,
     editedAt: raw.edited_timestamp,
-    content: raw.content
+    content: raw.content,
   });
   assert.deepEqual(calls, ['permission']);
 });
@@ -230,12 +303,15 @@ test('permission loss cannot turn an empty Discord response into complete empty 
   let checks = 0;
   const adapter = new DiscordReadAdapter(f.port, {
     assertReadable: async () => {
-      if (++checks === 2)
-        throw new ReadFailure('unavailable');
+      if (++checks === 2) throw new ReadFailure('unavailable');
     },
-    getMessages: async () => []
+    getMessages: async () => [],
   });
-  const service = new ThreadReadService(adapter, () => [grant], () => Date.parse(now));
+  const service = new ThreadReadService(
+    adapter,
+    () => [grant],
+    () => Date.parse(now),
+  );
   const response = await service.read('alice', history);
   assert.equal(response.status, 'unavailable');
   assert.equal(response.coverage.intervalExhausted, false);
@@ -243,10 +319,14 @@ test('permission loss cannot turn an empty Discord response into complete empty 
 test('malformed or cross-thread payloads fail closed without disclosing unrelated content', async () => {
   const f = fixture();
   const adapter = new DiscordReadAdapter(f.port, {
-    assertReadable: async () => { },
-    getMessages: async () => [{ id: threadId, content: 'secret' }]
+    assertReadable: async () => {},
+    getMessages: async () => [{ id: threadId, content: 'secret' }],
   });
-  const service = new ThreadReadService(adapter, () => [grant], () => Date.parse(now));
+  const service = new ThreadReadService(
+    adapter,
+    () => [grant],
+    () => Date.parse(now),
+  );
   const response = await service.read('alice', history);
   assert.equal(response.status, 'failed');
   assert.equal(JSON.stringify(response).includes('secret'), false);
@@ -264,28 +344,39 @@ test('archive ties that cannot advance and missing has_more are partial, never e
 });
 test('history respects the interval, page ceiling and detects a stalled upstream cursor', async () => {
   const f = fixture();
-  f.port.fetchMessages = async (_id, _before, limit) => Array.from({ length: limit }, (_, i) => message(String(1400000000000000200n - BigInt(i))));
+  f.port.fetchMessages = async (_id, _before, limit) =>
+    Array.from({ length: limit }, (_, i) => message(String(1400000000000000200n - BigInt(i))));
   const bounded = await f.service.read('alice', { ...history, maxPages: 1, maxMessages: 200 });
   assert.equal(bounded.coverage.reason, 'page_limit');
   const stalled = await f.service.read('alice', { ...history, maxMessages: 200 });
   assert.equal(stalled.coverage.reason, 'stalled_cursor');
   f.port.fetchMessages = async () => [
     message('1400000000000000002', history.since),
-    message('1400000000000000001', '2026-10-07T23:59:59.999Z')
+    message('1400000000000000001', '2026-10-07T23:59:59.999Z'),
   ];
   const interval = await f.service.read('alice', history);
   assert.equal(interval.status, 'complete');
-  assert.deepEqual(interval.messages.map((m) => m.id), ['1400000000000000002']);
+  assert.deepEqual(
+    interval.messages.map((m) => m.id),
+    ['1400000000000000002'],
+  );
 });
 test('expired continuation requires a fresh bounded request', async () => {
   const f = fixture();
   let clock = Date.parse(now);
-  const service = new ThreadReadService(f.port, () => [grant], () => clock);
+  const service = new ThreadReadService(
+    f.port,
+    () => [grant],
+    () => clock,
+  );
   f.port.fetchMessages = async () => [message('1400000000000000001')];
   const request = { ...history, maxMessages: 1 };
   const first = await service.read('alice', request);
   clock += 16 * 60 * 1000;
-  assert.equal((await service.read('alice', { ...request, cursor: first.coverage.nextCursor })).status, 'denied');
+  assert.equal(
+    (await service.read('alice', { ...request, cursor: first.coverage.nextCursor })).status,
+    'denied',
+  );
 });
 test('forum mismatch blocks history before message collection and continuation rechecks the thread', async () => {
   const f = fixture();
@@ -294,7 +385,7 @@ test('forum mismatch blocks history before message collection and continuation r
     guildId: '1400000000000000002',
     type: 15,
     flags: 0,
-    availableTags: []
+    availableTags: [],
   });
   assert.equal((await f.service.read('alice', history)).status, 'denied');
   assert.deepEqual(f.calls, []);
@@ -303,13 +394,19 @@ test('forum mismatch blocks history before message collection and continuation r
   const request = { ...history, maxMessages: 1 };
   const first = await g.service.read('alice', request);
   g.port.fetchThread = async () => ({ ...thread(), guildId: '1400000000000000002' });
-  assert.equal((await g.service.read('alice', { ...request, cursor: first.coverage.nextCursor })).status, 'denied');
+  assert.equal(
+    (await g.service.read('alice', { ...request, cursor: first.coverage.nextCursor })).status,
+    'denied',
+  );
 });
 test('archive boundary disappearance cannot prove completeness', async () => {
   const f = fixture();
   f.port.listActiveThreads = async () => [];
   let n = 0;
-  f.port.listArchivedPage = async () => n++ === 0 ? { threads: [thread(threadId, true)], hasMore: true } : { threads: [], hasMore: false };
+  f.port.listArchivedPage = async () =>
+    n++ === 0
+      ? { threads: [thread(threadId, true)], hasMore: true }
+      : { threads: [], hasMore: false };
   const response = await f.service.read('alice', lookup);
   assert.equal(response.status, 'partial');
   assert.equal(response.coverage.reason, 'archive_incomplete');
@@ -330,8 +427,8 @@ test('fresh permission snapshots apply everyone, role and member overwrites in D
         type: number;
         allow: string;
         deny: string;
-      }[]
-    }
+      }[],
+    },
   };
   assert.equal(hasHistoryPermissions(input), true);
   input.forum.permission_overwrites.push({ id: guildId, type: 0, allow: '0', deny: '65536' });
@@ -347,7 +444,10 @@ test('fresh permission snapshots apply everyone, role and member overwrites in D
 test('a final active rescan that reaches the match cap remains partial', async () => {
   const f = fixture();
   let scans = 0;
-  f.port.listActiveThreads = async () => ++scans === 1 ? [] : Array.from({ length: 101 }, (_, i) => thread(String(1400000000000000000n + BigInt(i))));
+  f.port.listActiveThreads = async () =>
+    ++scans === 1
+      ? []
+      : Array.from({ length: 101 }, (_, i) => thread(String(1400000000000000000n + BigInt(i))));
   const response = await f.service.read('alice', lookup);
   assert.equal(response.status, 'partial');
   assert.equal(response.coverage.reason, 'match_limit');
@@ -360,8 +460,19 @@ test('lookup continuation cannot change query or forum, or reveal revoked matche
   const first = await f.service.read('alice', request);
   assert.ok(first.coverage.nextCursor);
   const next = { ...request, cursor: first.coverage.nextCursor };
-  assert.equal((await f.service.read('alice', { ...next, query: { kind: 'name', text: 'other' } })).status, 'denied');
-  assert.equal((await f.service.read('alice', { ...next, scope: { ...scope, forumId: '1400000000000000099' } })).status, 'denied');
+  assert.equal(
+    (await f.service.read('alice', { ...next, query: { kind: 'name', text: 'other' } })).status,
+    'denied',
+  );
+  assert.equal(
+    (
+      await f.service.read('alice', {
+        ...next,
+        scope: { ...scope, forumId: '1400000000000000099' },
+      })
+    ).status,
+    'denied',
+  );
   f.revoke();
   const denied = await f.service.read('alice', next);
   assert.equal(denied.status, 'denied');
@@ -372,7 +483,11 @@ test('encrypted continuation does not disclose archive IDs excluded by a thread 
   const f = fixture();
   f.port.listActiveThreads = async () => [];
   f.port.listArchivedPage = async () => ({ threads: [thread(threadId, true)], hasMore: true });
-  const service = new ThreadReadService(f.port, () => [{ ...grant, threads: { kind: 'ids', ids: ['1400000000000000009'] } }], () => Date.parse(now));
+  const service = new ThreadReadService(
+    f.port,
+    () => [{ ...grant, threads: { kind: 'ids', ids: ['1400000000000000009'] } }],
+    () => Date.parse(now),
+  );
   const response = await service.read('alice', { ...lookup, maxPages: 2 });
   assert.equal(response.status, 'partial');
   assert.deepEqual(response.threads, []);
@@ -386,7 +501,11 @@ test('a widened caller grant cannot expand an existing lookup continuation', asy
   const f = fixture();
   const secondId = '1400000000000000001';
   let ids = [threadId];
-  const service = new ThreadReadService(f.port, () => [{ ...grant, threads: { kind: 'ids', ids } }], () => Date.parse(now));
+  const service = new ThreadReadService(
+    f.port,
+    () => [{ ...grant, threads: { kind: 'ids', ids } }],
+    () => Date.parse(now),
+  );
   const request = { ...lookup, maxPages: 1 };
   const first = await service.read('alice', request);
   assert.ok(first.coverage.nextCursor);

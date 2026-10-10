@@ -82,15 +82,15 @@ A complete, empty history result is a success with an exhausted interval:
 
 Each nonempty message includes `id`, `threadId`, `authorId`, `authorDisplayName`, `createdAt`, nullable `editedAt`, verbatim `content`, a canonical Discord `url`, and attachment metadata. Display names prefer the available member nickname, then global name, then username. No attachment is downloaded. Thread evidence includes `id`, `name`, canonical `url`, and observed `archived`/`locked` flags.
 
-| Status | Meaning |
-| --- | --- |
-| `complete` | The requested interval or lookup scan was exhausted. |
-| `partial` | A limit, stalled cursor, incomplete archive, or later failure prevented completion. |
-| `denied` | Caller scope or continuation binding was rejected. No evidence is returned. |
-| `unavailable` | Discord access, required permissions, client state, or content intent is unavailable. |
-| `rate_limited` | The first collection attempt was rate limited. `retryAfterMs` is supplied when known. |
-| `failed` | Upstream, validation, or authority-resolution failure. Raw errors are not exposed. |
-| `invalid_request` | The request failed validation. No collection occurs. |
+| Status            | Meaning                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------- |
+| `complete`        | The requested interval or lookup scan was exhausted.                                  |
+| `partial`         | A limit, stalled cursor, incomplete archive, or later failure prevented completion.   |
+| `denied`          | Caller scope or continuation binding was rejected. No evidence is returned.           |
+| `unavailable`     | Discord access, required permissions, client state, or content intent is unavailable. |
+| `rate_limited`    | The first collection attempt was rate limited. `retryAfterMs` is supplied when known. |
+| `failed`          | Upstream, validation, or authority-resolution failure. Raw errors are not exposed.    |
+| `invalid_request` | The request failed validation. No collection occurs.                                  |
 
 A failure after a successful collection page becomes `partial`, with the failure in `coverage.reason`. For lookup, `resolution` is `exact`, `unique`, `ambiguous`, or `empty` only when complete, otherwise `incomplete`. History uses `null`.
 

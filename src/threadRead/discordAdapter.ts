@@ -7,19 +7,21 @@ const rawMessageSchema = z.object({
   author: z.object({
     id: snowflakeSchema,
     username: z.string(),
-    global_name: z.string().nullable().optional()
+    global_name: z.string().nullable().optional(),
   }),
   member: z.object({ nick: z.string().nullable().optional() }).optional(),
   timestamp: z.string().datetime({ offset: true }),
   edited_timestamp: z.string().datetime({ offset: true }).nullable(),
   content: z.string(),
-  attachments: z.array(z.object({
-    id: snowflakeSchema,
-    filename: z.string(),
-    url: z.string().url(),
-    size: z.number().int().nonnegative(),
-    content_type: z.string().nullable().optional()
-  })),
+  attachments: z.array(
+    z.object({
+      id: snowflakeSchema,
+      filename: z.string(),
+      url: z.string().url(),
+      size: z.number().int().nonnegative(),
+      content_type: z.string().nullable().optional(),
+    }),
+  ),
 });
 export type ForumReads = Omit<ReadPort, 'fetchMessages'>;
 export interface MessageReads {
@@ -29,19 +31,25 @@ export interface MessageReads {
 }
 /** All capabilities are injected read operations. The assistant never receives this adapter. */
 export class DiscordReadAdapter implements ReadPort {
-  constructor(private readonly forums: ForumReads, private readonly messages: MessageReads) { }
+  constructor(
+    private readonly forums: ForumReads,
+    private readonly messages: MessageReads,
+  ) {}
   fetchForum: ReadPort['fetchForum'] = (id) => this.forums.fetchForum(id);
   fetchThread: ReadPort['fetchThread'] = (id) => this.forums.fetchThread(id);
   listActiveThreads: ReadPort['listActiveThreads'] = (id) => this.forums.listActiveThreads(id);
-  listArchivedPage: ReadPort['listArchivedPage'] = (id, before) => this.forums.listArchivedPage(id, before);
+  listArchivedPage: ReadPort['listArchivedPage'] = (id, before) =>
+    this.forums.listArchivedPage(id, before);
   async fetchMessages(threadId: string, before: string, limit: number): Promise<MessageEvidence[]> {
     await this.messages.assertReadable(threadId);
-    const raw = z.array(rawMessageSchema).max(limit).safeParse(await this.messages.getMessages(threadId, before, limit));
+    const raw = z
+      .array(rawMessageSchema)
+      .max(limit)
+      .safeParse(await this.messages.getMessages(threadId, before, limit));
     if (!raw.success || raw.data.some((m) => m.channel_id !== threadId))
       throw new ReadFailure('failed');
     // Discord returns [] when ReadMessageHistory is missing. Recheck before claiming emptiness.
-    if (raw.data.length === 0)
-      await this.messages.assertReadable(threadId);
+    if (raw.data.length === 0) await this.messages.assertReadable(threadId);
     return raw.data.map((m) => ({
       id: m.id,
       threadId: m.channel_id,
@@ -56,7 +64,7 @@ export class DiscordReadAdapter implements ReadPort {
         name: a.filename,
         url: a.url,
         size: a.size,
-        contentType: a.content_type ?? null
+        contentType: a.content_type ?? null,
       })),
     }));
   }
