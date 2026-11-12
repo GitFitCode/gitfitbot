@@ -33,6 +33,7 @@ import {
   saveVoiceSession,
 } from '../utils/localdb';
 import { maybeDeleteSessionAudio } from '../utils/voiceLifecycle';
+import { resolveOutputChannelId } from '../utils/voiceOutputChannel';
 import { ChunkMeta, mapPcmToWallMs, SessionRecorder } from '../utils/voiceRecorder';
 
 interface VoiceSession {
@@ -41,6 +42,8 @@ interface VoiceSession {
   guildId: string;
   channelId: string;
   channelName: string;
+  /** Output channel id chosen for this session (explicit `output` option, or undefined for env fallback). */
+  outputChannelId?: string;
   startedAt: Date;
   speakingEvents: Array<{
     userId: string;
@@ -199,6 +202,7 @@ async function joinAndListen(
   client: Client,
   interaction: CommandInteraction,
   targetChannelId?: string | null,
+  outputChannelId?: string | null,
 ) {
   const guild = interaction.guild!;
   const voiceChannel = await getVoiceChannel(interaction, targetChannelId);
@@ -216,6 +220,21 @@ async function joinAndListen(
       content: `Already listening in a voice channel for this guild. Use /voice stop first.`,
     });
     return;
+  }
+
+  // Validate the explicit output channel up front: the bot must be able to
+  // send text there, otherwise refuse to start the session (no partial state).
+  if (outputChannelId) {
+    const outCh: any = await client.channels.fetch(outputChannelId).catch(() => null);
+    const canSendText = !!outCh && 'send' in outCh && outCh.type !== ChannelType.GuildVoice;
+    if (!canSendText) {
+      await interaction.followUp({
+        content:
+          `❌ Can't use <#${outputChannelId}> as the output channel — I can't send text there ` +
+          `(or I can't see it). Pick a guild text channel, announcement channel, or a public/private thread.`,
+      });
+      return;
+    }
   }
 
   await interaction.followUp({
@@ -300,6 +319,7 @@ async function joinAndListen(
     guildId,
     channelId: voiceChannel.id,
     channelName: voiceChannel.name,
+    outputChannelId: outputChannelId ?? undefined,
     startedAt,
     speakingEvents: [],
     transcripts: [],
@@ -387,8 +407,10 @@ async function joinAndListen(
   // Post the announcement in the configured transcript channel (the one "it's in now").
   // If that ID is already a thread (e.g. 1499605799947735071), use it directly as the live transcript container.
   // Otherwise send announcement + create a dedicated sub-thread for the convo.
-  const announceId = process.env.VOICE_TRANSCRIPT_CHANNEL_ID || process.env.GENERAL_CHAT_CHANNEL_ID;
-  console.log(`[VOICE] Announcement channel ID from env: ${announceId}`);
+  const announceId = resolveOutputChannelId(outputChannelId, process.env);
+  console.log(
+    `[VOICE] Output channel ID: ${announceId ?? 'none'} (explicit: ${outputChannelId ?? 'none'})`,
+  );
   if (announceId && client) {
     try {
       const ch: any = await client.channels.fetch(announceId).catch((e: any) => {
@@ -618,8 +640,7 @@ async function handleUtteranceFile(
   if (session.client) {
     let target: any = session.transcriptThread;
     if (!target) {
-      const chId =
-        process.env.VOICE_TRANSCRIPT_CHANNEL_ID || process.env.GENERAL_CHAT_CHANNEL_ID || '';
+      const chId = resolveOutputChannelId(session.outputChannelId, process.env) || '';
       if (chId) {
         target = await session.client.channels.fetch(chId).catch(() => null);
       }
@@ -627,8 +648,7 @@ async function handleUtteranceFile(
     if (target && 'send' in target) {
       const tgtId =
         (session.transcriptThread && session.transcriptThread.id) ||
-        process.env.VOICE_TRANSCRIPT_CHANNEL_ID ||
-        process.env.GENERAL_CHAT_CHANNEL_ID;
+        resolveOutputChannelId(session.outputChannelId, process.env);
       console.log(`[VOICE] Sending live caption for ${username} to ${tgtId}`);
 
       // Send as a normal message in the transcript thread.
@@ -887,7 +907,7 @@ async function stopAndIngest(interaction: CommandInteraction) {
   // Post summary to the session thread if exists (for the full convo), else to transcript channel
   let summaryTarget: any = session.transcriptThread;
   if (!summaryTarget) {
-    const annId = process.env.VOICE_TRANSCRIPT_CHANNEL_ID || process.env.GENERAL_CHAT_CHANNEL_ID;
+    const annId = resolveOutputChannelId(session.outputChannelId, process.env);
     if (annId && session.client) {
       summaryTarget = await session.client.channels.fetch(annId).catch(() => null);
     }
@@ -979,7 +999,7 @@ async function forceLeave(interaction: CommandInteraction) {
   });
 
   // Also announce
-  const announceId = process.env.VOICE_TRANSCRIPT_CHANNEL_ID || process.env.GENERAL_CHAT_CHANNEL_ID;
+  const announceId = resolveOutputChannelId(session.outputChannelId, process.env);
   if (announceId && session.client) {
     try {
       const ch = await session.client.channels.fetch(announceId).catch(() => null);
@@ -1054,7 +1074,7 @@ async function transcribeSessionRecordings(
   // Post the "processing" notice to the session thread (or fallback channel).
   let target: any = session.transcriptThread;
   if (!target && session.client) {
-    const chId = process.env.VOICE_TRANSCRIPT_CHANNEL_ID || process.env.GENERAL_CHAT_CHANNEL_ID;
+    const chId = resolveOutputChannelId(session.outputChannelId, process.env);
     if (chId) {
       target = await session.client.channels.fetch(chId).catch(() => null);
     }
@@ -1761,8 +1781,10 @@ async function executeRun(interaction: CommandInteraction) {
   // For Channel-type options, .get() returns { value: snowflake (the channel ID) }
   // This is the pattern used elsewhere in the bot (e.g. Events command).
   const channelOptRaw = interaction.options.get(COMMAND_VOICE.OPTION_CHANNEL);
+  const outputOptRaw = interaction.options.get(COMMAND_VOICE.OPTION_OUTPUT);
   const action = (actionOpt?.value as string) || '';
   const channelOpt = channelOptRaw ? String(channelOptRaw.value) : null;
+  const outputOpt = outputOptRaw ? String(outputOptRaw.value) : null;
 
   if (action === COMMAND_VOICE.ACTION_JOIN) {
     if (!canStartRecording(interaction)) {
@@ -1776,7 +1798,7 @@ async function executeRun(interaction: CommandInteraction) {
       });
       return;
     }
-    await joinAndListen(interaction.client, interaction, channelOpt);
+    await joinAndListen(interaction.client, interaction, channelOpt, outputOpt);
   } else if (action === COMMAND_VOICE.ACTION_STOP) {
     await stopAndIngest(interaction);
   } else if (action === COMMAND_VOICE.ACTION_STATUS) {
@@ -1817,6 +1839,18 @@ const Voice: SlashCommand = {
       description: COMMAND_VOICE.OPTION_CHANNEL_DESCRIPTION,
       type: ApplicationCommandOptionType.Channel,
       channel_types: [ChannelType.GuildVoice],
+      required: false,
+    },
+    {
+      name: COMMAND_VOICE.OPTION_OUTPUT,
+      description: COMMAND_VOICE.OPTION_OUTPUT_DESCRIPTION,
+      type: ApplicationCommandOptionType.Channel,
+      channel_types: [
+        ChannelType.GuildText,
+        ChannelType.GuildAnnouncement,
+        ChannelType.GuildPublicThread,
+        ChannelType.GuildPrivateThread,
+      ],
       required: false,
     },
   ],
