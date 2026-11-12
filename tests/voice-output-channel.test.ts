@@ -1,6 +1,7 @@
+import { PermissionFlagsBits } from 'discord.js';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { resolveOutputChannelId } from '../src/utils/voiceOutputChannel';
+import { missingOutputPermissions, resolveOutputChannelId } from '../src/utils/voiceOutputChannel';
 
 const NO_ENV = {};
 const ENV_TRANSCRIPT = { VOICE_TRANSCRIPT_CHANNEL_ID: '111' };
@@ -57,4 +58,65 @@ test('ignores whitespace-only env values', () => {
     }),
     undefined,
   );
+});
+
+// --- missingOutputPermissions (permission probe for the /voice output channel) ---
+
+const BOT = { id: 'bot-user' };
+
+function granted(...bits: bigint[]) {
+  return { has: (p: bigint) => bits.includes(p) };
+}
+
+function textChannel(...bits: bigint[]) {
+  return { isThread: () => false, permissionsFor: () => granted(...bits) };
+}
+
+function threadChannel(...bits: bigint[]) {
+  return { isThread: () => true, permissionsFor: () => granted(...bits) };
+}
+
+test('missingOutputPermissions: [] when the bot has View Channel + Send Messages on a text channel', () => {
+  const channel = textChannel(PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages);
+  assert.deepEqual(missingOutputPermissions(channel, BOT), []);
+});
+
+test('missingOutputPermissions: reports the missing Send Messages on a text channel', () => {
+  const channel = textChannel(PermissionFlagsBits.ViewChannel);
+  assert.deepEqual(missingOutputPermissions(channel, BOT), ['Send Messages']);
+});
+
+test('missingOutputPermissions: reports the missing Send Messages in Threads on a thread', () => {
+  const channel = threadChannel(PermissionFlagsBits.ViewChannel);
+  assert.deepEqual(missingOutputPermissions(channel, BOT), ['Send Messages in Threads']);
+});
+
+test('missingOutputPermissions: a thread does not require Send Messages', () => {
+  // Granted ViewChannel + SendMessagesInThreads, but NOT SendMessages.
+  const channel = threadChannel(
+    PermissionFlagsBits.ViewChannel,
+    PermissionFlagsBits.SendMessagesInThreads,
+  );
+  assert.deepEqual(missingOutputPermissions(channel, BOT), []);
+});
+
+test('missingOutputPermissions: reports the missing View Channel on a text channel', () => {
+  const channel = textChannel(PermissionFlagsBits.SendMessages);
+  assert.deepEqual(missingOutputPermissions(channel, BOT), ['View Channel']);
+});
+
+test('missingOutputPermissions: fails closed when me is null or undefined', () => {
+  const channel = textChannel(PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages);
+  assert.deepEqual(missingOutputPermissions(channel, null), ['View Channel', 'Send Messages']);
+  assert.deepEqual(missingOutputPermissions(channel, undefined), ['View Channel', 'Send Messages']);
+});
+
+test('missingOutputPermissions: fails closed when permissionsFor returns null', () => {
+  const channel = { isThread: () => false, permissionsFor: () => null };
+  assert.deepEqual(missingOutputPermissions(channel, BOT), ['View Channel', 'Send Messages']);
+});
+
+test('missingOutputPermissions: fails closed when the channel has no permissionsFor', () => {
+  const channel = { isThread: () => false };
+  assert.deepEqual(missingOutputPermissions(channel, BOT), ['View Channel', 'Send Messages']);
 });
