@@ -1,7 +1,11 @@
 import { PermissionFlagsBits } from 'discord.js';
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { missingOutputPermissions, resolveOutputChannelId } from '../src/utils/voiceOutputChannel';
+import {
+  interruptionNoteCandidateIds,
+  missingOutputPermissions,
+  resolveOutputChannelId,
+} from '../src/utils/voiceOutputChannel';
 
 const NO_ENV = {};
 const ENV_TRANSCRIPT = { VOICE_TRANSCRIPT_CHANNEL_ID: '111' };
@@ -131,4 +135,58 @@ test('missingOutputPermissions: calls permissionsFor as a method (discord.js cha
     },
   };
   assert.deepEqual(missingOutputPermissions(channel, BOT), []);
+});
+
+// --- interruptionNoteCandidateIds ---
+
+test('interruptionNoteCandidateIds: full order', () => {
+  const record = { threadId: 'thread-123', outputChannelId: 'output-456' };
+  const env = {
+    VOICE_TRANSCRIPT_CHANNEL_ID: 'transcript-789',
+    GENERAL_CHAT_CHANNEL_ID: 'general-000',
+  };
+  assert.deepEqual(interruptionNoteCandidateIds(record, env), [
+    'thread-123',
+    'output-456',
+    'transcript-789',
+    'general-000',
+  ]);
+});
+
+test('interruptionNoteCandidateIds: outputChannelId comes before env values', () => {
+  const record = { outputChannelId: 'output-456' };
+  const env = {
+    VOICE_TRANSCRIPT_CHANNEL_ID: 'transcript-789',
+    GENERAL_CHAT_CHANNEL_ID: 'general-000',
+  };
+  assert.deepEqual(interruptionNoteCandidateIds(record, env), [
+    'output-456',
+    'transcript-789',
+    'general-000',
+  ]);
+});
+
+test('interruptionNoteCandidateIds: blanks dropped', () => {
+  const record = { threadId: ' ', outputChannelId: null };
+  const env = { VOICE_TRANSCRIPT_CHANNEL_ID: '', GENERAL_CHAT_CHANNEL_ID: 'general-000' };
+  assert.deepEqual(interruptionNoteCandidateIds(record, env), ['general-000']);
+});
+
+test('interruptionNoteCandidateIds: duplicates removed (keep first)', () => {
+  const record = { threadId: 'dup-123', outputChannelId: 'dup-123' };
+  const env = { VOICE_TRANSCRIPT_CHANNEL_ID: 'dup-123', GENERAL_CHAT_CHANNEL_ID: 'unique-999' };
+  assert.deepEqual(interruptionNoteCandidateIds(record, env), ['dup-123', 'unique-999']);
+});
+
+test('interruptionNoteCandidateIds: old records without outputChannelId behave as before', () => {
+  const record = { threadId: 'thread-123' };
+  const env = {
+    VOICE_TRANSCRIPT_CHANNEL_ID: 'transcript-789',
+    GENERAL_CHAT_CHANNEL_ID: 'general-000',
+  };
+  assert.deepEqual(interruptionNoteCandidateIds(record, env), [
+    'thread-123',
+    'transcript-789',
+    'general-000',
+  ]);
 });

@@ -127,6 +127,7 @@ export interface VoiceSessionRecord {
   guildId: string;
   channelId: string;
   threadId?: string;
+  outputChannelId?: string;
   startedAt: string; // ISO timestamp of session start
   audioDir: string; // session recording dir (audio/<guildId>-<sessionStartTs>)
 }
@@ -144,12 +145,13 @@ function openVoiceSessionsDatabase() {
  * Persists an active voice session's metadata (upsert, keyed by guild ID) so a
  * bot restart mid-meeting can detect and recover/clean up the session (#83).
  *
- * @param {object} session - Session metadata: guildId, channelId, optional threadId, startedAt (ISO), audioDir.
+ * @param {object} session - Session metadata: guildId, channelId, optional threadId, optional outputChannelId, startedAt (ISO), audioDir.
  */
 export async function saveVoiceSession(session: {
   guildId: string;
   channelId: string;
   threadId?: string;
+  outputChannelId?: string;
   startedAt: string;
   audioDir: string;
 }): Promise<void> {
