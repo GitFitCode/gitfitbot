@@ -120,3 +120,15 @@ test('missingOutputPermissions: fails closed when the channel has no permissions
   const channel = { isThread: () => false };
   assert.deepEqual(missingOutputPermissions(channel, BOT), ['View Channel', 'Send Messages']);
 });
+
+test('missingOutputPermissions: calls permissionsFor as a method (discord.js channels rely on `this`)', () => {
+  const channel = {
+    granted: new Set<bigint>([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages]),
+    isThread: () => false,
+    permissionsFor(this: { granted: Set<bigint> }) {
+      const { granted: bits } = this;
+      return { has: (p: bigint) => bits.has(p) };
+    },
+  };
+  assert.deepEqual(missingOutputPermissions(channel, BOT), []);
+});

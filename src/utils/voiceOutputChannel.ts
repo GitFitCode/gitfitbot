@@ -44,9 +44,11 @@ export function missingOutputPermissions(channel: OutputChannelLike, me: unknown
       name: isThread ? 'Send Messages in Threads' : 'Send Messages',
     },
   ];
-  const permissionsFor = channel != null ? channel.permissionsFor : undefined;
+  // Call as a method: discord.js channels read `this` inside permissionsFor.
   const permissions =
-    me != null && typeof permissionsFor === 'function' ? permissionsFor(me) : null;
+    me != null && channel != null && typeof channel.permissionsFor === 'function'
+      ? channel.permissionsFor(me)
+      : null;
   if (permissions == null) return required.map((r) => r.name);
   return required.filter((r) => !permissions.has(r.bit)).map((r) => r.name);
 }
