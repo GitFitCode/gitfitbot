@@ -22,6 +22,7 @@ import { ChannelType, Client } from 'discord.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import { clearVoiceSession, getStaleVoiceSessions, VoiceSessionRecord } from './localdb';
+import { interruptionNoteCandidateIds } from './voiceOutputChannel';
 
 export type VoiceAudioRetention = { mode: 'delete' } | { mode: 'keep-days'; days: number };
 
@@ -78,11 +79,7 @@ async function postInterruptionNote(client: Client, record: VoiceSessionRecord):
     `Partial audio preserved at \`${record.audioDir}\` (manifest.json lists chunks). ` +
     `Run /voice join to start a new session.`;
 
-  const candidateIds = [
-    record.threadId,
-    process.env.VOICE_TRANSCRIPT_CHANNEL_ID,
-    process.env.GENERAL_CHAT_CHANNEL_ID,
-  ].filter((id): id is string => Boolean(id));
+  const candidateIds = interruptionNoteCandidateIds(record, process.env as any);
 
   for (const id of candidateIds) {
     const ch: any = await client.channels.fetch(id).catch(() => null);

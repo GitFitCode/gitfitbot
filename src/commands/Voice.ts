@@ -407,6 +407,7 @@ async function joinAndListen(
     channelId: voiceChannel.id,
     startedAt: startedAt.toISOString(),
     audioDir: recorder.sessionDir,
+    outputChannelId: session.outputChannelId,
   }).catch((e: any) => {
     console.warn('[VOICE] Failed to persist session record:', e?.message || e);
   });
@@ -501,6 +502,7 @@ async function joinAndListen(
       threadId: session.transcriptThread.id,
       startedAt: startedAt.toISOString(),
       audioDir: recorder.sessionDir,
+      outputChannelId: session.outputChannelId,
     }).catch((e: any) => {
       console.warn('[VOICE] Failed to update session record with thread ID:', e?.message || e);
     });

@@ -83,3 +83,31 @@ export function resolveOutputChannelId(
     nonBlank(env.GENERAL_CHAT_CHANNEL_ID)
   );
 }
+
+/**
+ * Returns, in order: threadId, outputChannelId, env.VOICE_TRANSCRIPT_CHANNEL_ID,
+ * env.GENERAL_CHAT_CHANNEL_ID, with blank/whitespace values dropped and
+ * duplicates removed (keep first occurrence).
+ */
+export function interruptionNoteCandidateIds(
+  record: { threadId?: string | null; outputChannelId?: string | null },
+  env: VoiceOutputEnv,
+): string[] {
+  const candidates = [
+    record.threadId,
+    record.outputChannelId,
+    env.VOICE_TRANSCRIPT_CHANNEL_ID,
+    env.GENERAL_CHAT_CHANNEL_ID,
+  ];
+
+  const result: string[] = [];
+  for (const id of candidates) {
+    const trimmed = id?.trim();
+    if (trimmed) {
+      if (!result.includes(trimmed)) {
+        result.push(trimmed);
+      }
+    }
+  }
+  return result;
+}
