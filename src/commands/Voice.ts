@@ -33,7 +33,7 @@ import {
   saveVoiceSession,
 } from '../utils/localdb';
 import { maybeDeleteSessionAudio } from '../utils/voiceLifecycle';
-import { resolveOutputChannelId } from '../utils/voiceOutputChannel';
+import { missingOutputPermissions, resolveOutputChannelId } from '../utils/voiceOutputChannel';
 import { ChunkMeta, mapPcmToWallMs, SessionRecorder } from '../utils/voiceRecorder';
 
 interface VoiceSession {
@@ -232,6 +232,20 @@ async function joinAndListen(
         content:
           `❌ Can't use <#${outputChannelId}> as the output channel — I can't send text there ` +
           `(or I can't see it). Pick a guild text channel, announcement channel, or a public/private thread.`,
+      });
+      return;
+    }
+
+    // The channel exists and can hold text — now verify the bot actually has
+    // permission to post there, so a session can't start and then silently
+    // fail to deliver transcripts (fail closed).
+    const missing = missingOutputPermissions(outCh, guild.members.me);
+    if (missing.length > 0) {
+      await interaction.followUp({
+        content:
+          `❌ I can't use <#${outputChannelId}> as the output channel — I'm missing ` +
+          `these permissions there: ${missing.join(', ')}. Grant GitFitBot those permissions ` +
+          `in the channel's permission settings and try again.`,
       });
       return;
     }
