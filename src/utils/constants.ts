@@ -94,6 +94,9 @@ export const COMMAND_VOICE = {
   OPTION_CHANNEL: 'channel',
   OPTION_CHANNEL_DESCRIPTION:
     'Voice channel to join (optional, defaults to CHECKINS or VIRTUAL_OFFICE)',
+  OPTION_OUTPUT: 'output',
+  OPTION_OUTPUT_DESCRIPTION:
+    'Channel for the live transcript + end-of-session summary (optional, defaults to the configured transcript channel)',
 };
 
 // The GitFitCode Discord server. Project Hub delivery may only target this guild;

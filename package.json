@@ -14,9 +14,10 @@
     "pre-build": "rm -rf ./dist",
     "prepare": "husky",
     "start": "node -r newrelic ./dist/src/index.js",
-    "test": "pnpm test:project-init && pnpm test:hub-delivery",
+    "test": "pnpm test:project-init && pnpm test:hub-delivery && pnpm test:voice-output",
     "test:hub-delivery": "node --test --require ts-node/register tests/hub-delivery.test.ts tests/hub-delivery-shutdown.test.ts",
     "test:project-init": "node --test --require ts-node/register tests/project-init.test.ts",
+    "test:voice-output": "node --test --require ts-node/register tests/voice-output-channel.test.ts",
     "typecheck": "tsc --pretty --noEmit --incremental false"
   },
   "author": "GitFitCode",
