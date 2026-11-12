@@ -79,7 +79,7 @@ async function postInterruptionNote(client: Client, record: VoiceSessionRecord):
     `Partial audio preserved at \`${record.audioDir}\` (manifest.json lists chunks). ` +
     `Run /voice join to start a new session.`;
 
-  const candidateIds = interruptionNoteCandidateIds(record, process.env as any);
+  const candidateIds = interruptionNoteCandidateIds(record, process.env);
 
   for (const id of candidateIds) {
     const ch: any = await client.channels.fetch(id).catch(() => null);
